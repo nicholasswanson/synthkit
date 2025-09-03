@@ -4,15 +4,16 @@
 
 Synthkit provides deterministic, schema-driven mock data generation with realistic business patterns, role-based access controls, and seamless framework integrations. Inspired by [Stripe's synthetic-dataset](https://github.com/swanson-stripe/synthetic-dataset).
 
-[![Build Status](https://img.shields.io/github/workflow/status/synthkit/synthkit/CI)](https://github.com/synthkit/synthkit/actions)
-[![npm version](https://img.shields.io/npm/v/@synthkit/sdk)](https://www.npmjs.com/package/@synthkit/sdk)
+[![GitHub](https://img.shields.io/github/stars/nicholasswanson/synthkit?style=social)](https://github.com/nicholasswanson/synthkit)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?style=flat&logo=pnpm&logoColor=white)](https://pnpm.io/)
 
 ## ✨ **Features**
 
 - 🎯 **Deterministic Generation** - Same ID = identical data across runs
 - 📋 **Schema-Driven** - JSON Schema definitions ensure type safety
-- 🏢 **Business Categories** - Realistic business contexts (TechStyle, CloudFlow, LocalBites)
+- 🏢 **Business Categories** - 9 realistic business contexts (Modaic, Stratus, Forksy, etc.)
 - 👥 **Role-Based Access** - Admin/Support roles with data masking capabilities
 - 📈 **Stage-Aware** - Early/Growth/Enterprise complexity levels
 - 🔄 **MSW Integration** - Seamless API mocking with Mock Service Worker
@@ -25,9 +26,15 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 ### **Installation**
 
 ```bash
-npm install @synthkit/sdk @synthkit/client
-# or
-pnpm add @synthkit/sdk @synthkit/client
+# Clone and setup the monorepo
+git clone https://github.com/nicholasswanson/synthkit.git
+cd synthkit
+pnpm install
+pnpm build
+
+# Run the Next.js example
+cd examples/next-app
+pnpm dev
 ```
 
 ### **Basic Usage**
@@ -56,22 +63,22 @@ console.log(customer);
 ```typescript
 // Define a complete business scenario
 const scenario = {
-  category: 'techstyle',    // Business type (fashion e-commerce)
-  role: 'admin',           // Access level (full financial data)
-  stage: 'growth',         // Business maturity (scaling)
-  id: 12345               // Deterministic generation ID
+  category: 'modaic',          // Business type (fashion e-commerce)
+  role: 'admin',              // Access level (full financial data)
+  stage: 'growth',            // Business maturity (scaling)
+  id: 12345                   // Deterministic generation ID
 };
 ```
 
 ### **React Integration**
 
 ```tsx
-import { SynthProvider, ScenarioSwitcher } from '@synthkit/client';
+import { SynthProvider, PersonaScenarioSwitcher } from '@synthkit/client';
 
 function App() {
   return (
     <SynthProvider>
-      <ScenarioSwitcher />
+      <PersonaScenarioSwitcher />
       <YourComponents />
     </SynthProvider>
   );
@@ -87,19 +94,19 @@ const { withSynth } = require('@synthkit/client');
 module.exports = withSynth({
   // your Next.js config
 }, {
-  packs: ['packs/techstyle', 'packs/cloudflow'],
-  defaultCategory: 'techstyle'
+  packs: ['packs/modaic', 'packs/stratus'],
+  defaultCategory: 'modaic'
 });
 ```
 
 ## 📦 **Package Structure**
 
-| Package | Description | Size |
-|---------|-------------|------|
-| `@synthkit/sdk` | Core generation engine | ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@synthkit/sdk) |
-| `@synthkit/client` | React components & providers | ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@synthkit/client) |
-| `@synthkit/cli` | Command-line interface | ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@synthkit/cli) |
-| `@synthkit/mcp-synth` | MCP server for external tools | ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@synthkit/mcp-synth) |
+| Package | Description | Status |
+|---------|-------------|--------|
+| `@synthkit/sdk` | Core generation engine | ✅ Implemented |
+| `@synthkit/client` | React components & providers | ✅ Implemented |
+| `@synthkit/cli` | Command-line interface | 🚧 In Progress |
+| `@synthkit/mcp-synth` | MCP server for external tools | ✅ Implemented |
 
 ## 🏢 **Business Categories**
 
@@ -195,7 +202,7 @@ Aligned with [synthetic-dataset](https://github.com/swanson-stripe/synthetic-dat
 ```typescript
 // Early stage fashion startup with admin access
 const earlyFashion = {
-  category: 'techstyle',
+  category: 'modaic',
   role: 'admin', 
   stage: 'early',
   id: 12345
@@ -203,7 +210,7 @@ const earlyFashion = {
 
 // Enterprise SaaS with support role (masked financials)
 const enterpriseSaaS = {
-  category: 'cloudflow',
+  category: 'stratus',
   role: 'support',
   stage: 'enterprise', 
   id: 54321
@@ -211,7 +218,7 @@ const enterpriseSaaS = {
 
 // Growth marketplace with full admin visibility
 const growthMarketplace = {
-  category: 'localbites',
+  category: 'forksy',
   role: 'admin',
   stage: 'growth',
   id: 98765
@@ -225,7 +232,7 @@ const growthMarketplace = {
 synthkit init my-project --template next-js
 
 # Generate mock data
-synthkit generate --category techstyle --role admin --stage growth --count 100
+synthkit generate --category modaic --role admin --stage growth --count 100
 
 # List available categories
 synthkit list categories
@@ -258,8 +265,8 @@ const customRole = {
 import { setupWorker } from 'msw/browser';
 import { createPackHandlers } from '@synthkit/client';
 
-const handlers = createPackHandlers(['techstyle', 'cloudflow'], {
-  category: 'techstyle',
+const handlers = createPackHandlers(['modaic', 'stratus'], {
+  category: 'modaic',
   role: 'support',    // Financial data will be masked
   stage: 'growth',
   id: 12345
@@ -276,7 +283,7 @@ import { synthStore } from '@synthkit/sdk';
 
 // Set complete scenario
 await synthStore.setScenario({
-  category: 'cloudflow',
+  category: 'stratus',
   role: 'admin',
   stage: 'enterprise',
   id: 12345
