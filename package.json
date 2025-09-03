@@ -1,0 +1,64 @@
+{
+  "name": "synthkit",
+  "version": "1.0.0",
+  "description": "A comprehensive mocking and scenario generation toolkit",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*",
+    "packs/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "validate": "node tools/governance/validate-pack.js --all",
+    "validate:pack": "node tools/governance/validate-pack.js",
+    "dev": "pnpm --filter @synthkit/examples-next-app dev",
+    "cli": "node tools/cli/dist/cli.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "vitest": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.4",
+  "keywords": [
+    "mock",
+    "data",
+    "generation",
+    "testing",
+    "scenarios",
+    "personas",
+    "msw",
+    "json-schema",
+    "faker"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synthkit/synthkit"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Synthkit Team",
+    "email": "team@synthkit.dev"
+  },
+  "bugs": {
+    "url": "https://github.com/synthkit/synthkit/issues"
+  },
+  "homepage": "https://synthkit.dev"
+}

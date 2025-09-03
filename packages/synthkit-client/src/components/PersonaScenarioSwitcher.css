@@ -1,0 +1,131 @@
+/* PersonaScenarioSwitcher Styles */
+
+.synthkit-switcher {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.synthkit-switcher__section {
+  margin-bottom: 1.5rem;
+}
+
+.synthkit-switcher__section:last-child {
+  margin-bottom: 0;
+}
+
+.synthkit-switcher__section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.synthkit-switcher__field {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.synthkit-switcher__field label {
+  display: block;
+  min-width: 80px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.synthkit-switcher__field select,
+.synthkit-switcher__field input[type="text"],
+.synthkit-switcher__field input[type="number"] {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background: #ffffff;
+}
+
+.synthkit-switcher__field select:focus,
+.synthkit-switcher__field input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.synthkit-switcher__seed-controls {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.synthkit-switcher__seed-controls input {
+  flex: 1;
+}
+
+.synthkit-switcher button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.synthkit-switcher button:hover:not(:disabled) {
+  background: #f7fafc;
+  border-color: #a0aec0;
+}
+
+.synthkit-switcher button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.synthkit-switcher__actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.synthkit-switcher__reset {
+  background: #feb2b2 !important;
+  border-color: #fc8181 !important;
+  color: #742a2a !important;
+}
+
+.synthkit-switcher__reset:hover {
+  background: #fc8181 !important;
+}
+
+.synthkit-switcher__info {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  color: #718096;
+  font-size: 0.75rem;
+}
+
+/* Compact variant */
+.synthkit-switcher--compact {
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.synthkit-switcher--compact select {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-width: 120px;
+}
+
+.synthkit-switcher--compact button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  min-width: auto;
+}

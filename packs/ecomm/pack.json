@@ -1,0 +1,768 @@
+{
+  "id": "ecomm",
+  "name": "E-commerce Pack",
+  "version": "1.0.0",
+  "description": "Comprehensive e-commerce platform with products, orders, payments, and marketplace features",
+  "schemas": {
+    "product": {
+      "type": "object",
+      "description": "Product catalog item with variants and inventory",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sku": {
+          "type": "string",
+          "faker": "commerce.isbn",
+          "description": "Stock keeping unit"
+        },
+        "name": {
+          "type": "string",
+          "faker": "commerce.productName",
+          "description": "Product name"
+        },
+        "description": {
+          "type": "string",
+          "faker": "commerce.productDescription",
+          "description": "Product description"
+        },
+        "category": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string", "faker": "commerce.department" },
+            "path": { "type": "string" },
+            "level": { "type": "integer", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "brand": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string", "faker": "company.name" },
+            "logo": { "type": "string", "faker": "image.url" }
+          }
+        },
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "basePrice": {
+              "type": "number",
+              "minimum": 0,
+              "faker": "commerce.price"
+            },
+            "salePrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "currency": {
+              "type": "string",
+              "default": "USD"
+            },
+            "costPrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "margin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "inventory": {
+          "type": "object",
+          "properties": {
+            "tracked": { "type": "boolean", "default": true },
+            "quantity": { "type": "integer", "minimum": 0, "faker": "number.int", "max": 1000 },
+            "reserved": { "type": "integer", "minimum": 0, "default": 0 },
+            "available": { "type": "integer", "minimum": 0 },
+            "lowStockThreshold": { "type": "integer", "minimum": 0, "default": 10 },
+            "allowBackorder": { "type": "boolean", "default": false }
+          }
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "sku": { "type": "string" },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "size": { "type": "string", "enum": ["XS", "S", "M", "L", "XL", "XXL"] },
+                  "color": { "type": "string", "faker": "color.human" },
+                  "material": { "type": "string", "faker": "commerce.productMaterial" }
+                }
+              },
+              "pricing": {
+                "type": "object",
+                "properties": {
+                  "basePrice": { "type": "number" },
+                  "salePrice": { "type": "number" }
+                }
+              },
+              "inventory": {
+                "type": "object",
+                "properties": {
+                  "quantity": { "type": "integer" },
+                  "reserved": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "url": { "type": "string", "faker": "image.url" },
+              "alt": { "type": "string" },
+              "primary": { "type": "boolean", "default": false },
+              "sortOrder": { "type": "integer" }
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "weight": { "type": "number", "minimum": 0 },
+            "dimensions": {
+              "type": "object",
+              "properties": {
+                "length": { "type": "number" },
+                "width": { "type": "number" },
+                "height": { "type": "number" },
+                "unit": { "type": "string", "default": "cm" }
+              }
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "seo": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "keywords": { "type": "array", "items": { "type": "string" } },
+            "slug": { "type": "string", "faker": "internet.domainWord" }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active", "archived", "out_of_stock"],
+          "default": "active"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": ["public", "private", "hidden"],
+          "default": "public"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "sku", "name", "pricing", "status", "createdAt"]
+    },
+    "order": {
+      "type": "object",
+      "description": "Customer order with items, shipping, and payment",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "orderNumber": {
+          "type": "string",
+          "faker": "string.alphanumeric",
+          "length": 10,
+          "description": "Human-readable order number"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"],
+          "default": "pending"
+        },
+        "channel": {
+          "type": "string",
+          "enum": ["web", "mobile", "api", "pos", "marketplace"],
+          "default": "web"
+        },
+        "customer": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "faker": "internet.email" },
+            "firstName": { "type": "string", "faker": "person.firstName" },
+            "lastName": { "type": "string", "faker": "person.lastName" },
+            "phone": { "type": "string", "faker": "phone.number" }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "productId": { "type": "string" },
+              "variantId": { "type": "string" },
+              "sku": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "unitPrice": { "type": "number", "minimum": 0 },
+              "totalPrice": { "type": "number", "minimum": 0 },
+              "discountAmount": { "type": "number", "minimum": 0, "default": 0 },
+              "taxAmount": { "type": "number", "minimum": 0, "default": 0 },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "size": { "type": "string" },
+                  "color": { "type": "string" },
+                  "customization": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "subtotal": { "type": "number", "minimum": 0 },
+            "discountAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "taxAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "shippingAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "total": { "type": "number", "minimum": 0 },
+            "currency": { "type": "string", "default": "USD" }
+          }
+        },
+        "shipping": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["standard", "express", "overnight", "pickup", "digital"]
+            },
+            "carrier": {
+              "type": "string",
+              "enum": ["ups", "fedex", "dhl", "usps", "local"]
+            },
+            "trackingNumber": {
+              "type": "string",
+              "faker": "string.alphanumeric",
+              "length": 12
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "firstName": { "type": "string", "faker": "person.firstName" },
+                "lastName": { "type": "string", "faker": "person.lastName" },
+                "company": { "type": "string", "faker": "company.name" },
+                "line1": { "type": "string", "faker": "location.streetAddress" },
+                "line2": { "type": "string" },
+                "city": { "type": "string", "faker": "location.city" },
+                "state": { "type": "string", "faker": "location.state" },
+                "postalCode": { "type": "string", "faker": "location.zipCode" },
+                "country": { "type": "string", "faker": "location.countryCode" },
+                "phone": { "type": "string", "faker": "phone.number" }
+              }
+            },
+            "estimatedDelivery": {
+              "type": "string",
+              "format": "date-time",
+              "faker": "date.future"
+            },
+            "actualDelivery": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["pending", "authorized", "captured", "failed", "refunded", "partially_refunded"]
+            },
+            "method": {
+              "type": "string",
+              "enum": ["credit_card", "debit_card", "paypal", "apple_pay", "google_pay", "bank_transfer", "cash"]
+            },
+            "processor": {
+              "type": "string",
+              "enum": ["stripe", "paypal", "square", "adyen", "braintree"]
+            },
+            "transactionId": {
+              "type": "string",
+              "faker": "string.alphanumeric",
+              "length": 16
+            },
+            "authorizedAmount": { "type": "number", "minimum": 0 },
+            "capturedAmount": { "type": "number", "minimum": 0 },
+            "refundedAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "processingFee": { "type": "number", "minimum": 0 }
+          }
+        },
+        "discounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "code": { "type": "string" },
+              "type": { "type": "string", "enum": ["percentage", "fixed_amount", "free_shipping"] },
+              "value": { "type": "number" },
+              "amount": { "type": "number" }
+            }
+          }
+        },
+        "fulfillment": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["unfulfilled", "partial", "fulfilled", "cancelled"]
+            },
+            "shipments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "trackingNumber": { "type": "string" },
+                  "carrier": { "type": "string" },
+                  "items": { "type": "array", "items": { "type": "string" } },
+                  "shippedAt": { "type": "string", "format": "date-time" },
+                  "deliveredAt": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "author": { "type": "string" },
+              "content": { "type": "string" },
+              "internal": { "type": "boolean", "default": false },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "orderNumber", "customerId", "status", "items", "pricing", "createdAt"]
+    },
+    "customer": {
+      "type": "object",
+      "description": "E-commerce customer with purchase history and preferences",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName"
+        },
+        "phone": {
+          "type": "string",
+          "faker": "phone.number"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date",
+          "faker": "date.birthdate"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "other", "prefer_not_to_say"]
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["billing", "shipping", "both"] },
+              "default": { "type": "boolean", "default": false },
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" },
+              "company": { "type": "string" },
+              "line1": { "type": "string", "faker": "location.streetAddress" },
+              "line2": { "type": "string" },
+              "city": { "type": "string", "faker": "location.city" },
+              "state": { "type": "string", "faker": "location.state" },
+              "postalCode": { "type": "string", "faker": "location.zipCode" },
+              "country": { "type": "string", "faker": "location.countryCode" },
+              "phone": { "type": "string", "faker": "phone.number" }
+            }
+          }
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "currency": { "type": "string", "default": "USD" },
+            "language": { "type": "string", "default": "en" },
+            "newsletter": { "type": "boolean", "default": true },
+            "smsMarketing": { "type": "boolean", "default": false },
+            "categories": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "brands": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "loyalty": {
+          "type": "object",
+          "properties": {
+            "tier": {
+              "type": "string",
+              "enum": ["bronze", "silver", "gold", "platinum"],
+              "default": "bronze"
+            },
+            "points": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "totalSpent": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "joinedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "properties": {
+            "totalOrders": { "type": "integer", "minimum": 0, "default": 0 },
+            "totalSpent": { "type": "number", "minimum": 0, "default": 0 },
+            "averageOrderValue": { "type": "number", "minimum": 0, "default": 0 },
+            "lastOrderAt": { "type": "string", "format": "date-time" },
+            "acquisitionChannel": {
+              "type": "string",
+              "enum": ["organic", "paid_search", "social", "email", "referral", "direct"]
+            },
+            "lifetimeValue": { "type": "number", "minimum": 0, "default": 0 }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "suspended"],
+          "default": "active"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "email", "firstName", "lastName", "status", "createdAt"]
+    },
+    "cart": {
+      "type": "object",
+      "description": "Shopping cart with items and calculations",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Anonymous session identifier"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "productId": { "type": "string" },
+              "variantId": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "unitPrice": { "type": "number", "minimum": 0 },
+              "totalPrice": { "type": "number", "minimum": 0 },
+              "addedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "totals": {
+          "type": "object",
+          "properties": {
+            "itemCount": { "type": "integer", "minimum": 0 },
+            "subtotal": { "type": "number", "minimum": 0 },
+            "discountAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "taxAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "shippingAmount": { "type": "number", "minimum": 0, "default": 0 },
+            "total": { "type": "number", "minimum": 0 }
+          }
+        },
+        "discounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "type": { "type": "string" },
+              "amount": { "type": "number" }
+            }
+          }
+        },
+        "shippingAddress": {
+          "type": "object",
+          "properties": {
+            "line1": { "type": "string" },
+            "line2": { "type": "string" },
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "postalCode": { "type": "string" },
+            "country": { "type": "string" }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "abandoned", "converted"],
+          "default": "active"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.future"
+        }
+      },
+      "required": ["id", "items", "totals", "status", "createdAt"]
+    }
+  },
+  "scenarios": {
+    "boutique": {
+      "id": "boutique",
+      "name": "Boutique Store",
+      "description": "Small fashion retailer with curated products",
+      "config": {
+        "seed": 44444,
+        "dateRange": {
+          "start": "2024-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "products": 200,
+          "customers": 500,
+          "orders": 800,
+          "carts": 150
+        },
+        "relationships": {
+          "conversionRate": 0.15,
+          "averageOrderValue": 85,
+          "returnRate": 0.08,
+          "repeatCustomerRate": 0.35
+        }
+      }
+    },
+    "marketplace": {
+      "id": "marketplace",
+      "name": "Multi-vendor Marketplace",
+      "description": "Large marketplace with multiple sellers",
+      "config": {
+        "seed": 55555,
+        "dateRange": {
+          "start": "2023-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "products": 50000,
+          "customers": 25000,
+          "orders": 100000,
+          "carts": 5000
+        },
+        "relationships": {
+          "conversionRate": 0.08,
+          "averageOrderValue": 65,
+          "returnRate": 0.12,
+          "repeatCustomerRate": 0.45
+        }
+      }
+    },
+    "enterprise": {
+      "id": "enterprise",
+      "name": "Enterprise E-commerce",
+      "description": "Large-scale B2B/B2C platform",
+      "config": {
+        "seed": 66666,
+        "dateRange": {
+          "start": "2022-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "products": 500000,
+          "customers": 100000,
+          "orders": 1000000,
+          "carts": 25000
+        },
+        "relationships": {
+          "conversionRate": 0.12,
+          "averageOrderValue": 120,
+          "returnRate": 0.06,
+          "repeatCustomerRate": 0.60
+        }
+      }
+    }
+  },
+  "personas": {
+    "casual_shopper": {
+      "id": "casual_shopper",
+      "name": "Casual Shopper",
+      "description": "Occasional buyer, price-sensitive",
+      "overrides": {
+        "customer": {
+          "loyalty": {
+            "tier": "bronze",
+            "points": 50
+          },
+          "analytics": {
+            "totalOrders": 2,
+            "averageOrderValue": 45
+          }
+        },
+        "order": {
+          "pricing": {
+            "total": 45
+          }
+        }
+      }
+    },
+    "frequent_buyer": {
+      "id": "frequent_buyer",
+      "name": "Frequent Buyer",
+      "description": "Regular customer with higher spend",
+      "overrides": {
+        "customer": {
+          "loyalty": {
+            "tier": "gold",
+            "points": 2500
+          },
+          "analytics": {
+            "totalOrders": 15,
+            "averageOrderValue": 120
+          }
+        },
+        "order": {
+          "pricing": {
+            "total": 120
+          }
+        }
+      }
+    },
+    "vip_customer": {
+      "id": "vip_customer",
+      "name": "VIP Customer",
+      "description": "High-value customer with premium preferences",
+      "overrides": {
+        "customer": {
+          "loyalty": {
+            "tier": "platinum",
+            "points": 10000
+          },
+          "analytics": {
+            "totalOrders": 50,
+            "averageOrderValue": 300
+          }
+        },
+        "order": {
+          "pricing": {
+            "total": 300
+          },
+          "shipping": {
+            "method": "express"
+          }
+        }
+      }
+    }
+  },
+  "routes": {
+    "/api/products": {
+      "schema": "product",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/orders": {
+      "schema": "order",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/customers": {
+      "schema": "customer",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/carts": {
+      "schema": "cart",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    }
+  }
+}

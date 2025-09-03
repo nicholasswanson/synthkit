@@ -1,0 +1,152 @@
+{
+  "id": "brightfund",
+  "name": "Brightfund Impact Platform",
+  "version": "1.0.0",
+  "description": "Nonprofit organization platform with donors, campaigns, and impact tracking",
+  "schemas": {
+    "donor": {
+      "type": "object",
+      "description": "Nonprofit donor with giving history",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "firstName": { "type": "string", "faker": "person.firstName" },
+        "lastName": { "type": "string", "faker": "person.lastName" },
+        "email": { "type": "string", "format": "email", "faker": "internet.email" },
+        "phone": { "type": "string", "faker": "phone.number" },
+        "donorType": { "type": "string", "enum": ["individual", "corporation", "foundation", "government"], "faker": "helpers.arrayElement" },
+        "totalDonated": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "averageDonation": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "donationCount": { "type": "integer", "minimum": 0, "faker": "number.int", "max": 100 },
+        "firstDonationDate": { "type": "string", "format": "date-time", "faker": "date.past" },
+        "lastDonationDate": { "type": "string", "format": "date-time", "faker": "date.recent" },
+        "preferredCauses": { "type": "array", "items": { "type": "string", "enum": ["education", "health", "environment", "poverty", "animals", "arts", "disaster_relief"] } },
+        "communicationPreferences": { "type": "object", "properties": { "email": { "type": "boolean", "default": true }, "mail": { "type": "boolean", "default": false }, "phone": { "type": "boolean", "default": false } } },
+        "createdAt": { "type": "string", "format": "date-time", "faker": "date.past" }
+      },
+      "required": ["id", "firstName", "lastName", "email", "donorType", "createdAt"]
+    },
+    "campaign": {
+      "type": "object",
+      "description": "Fundraising campaign with goals and metrics",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "faker": "lorem.sentence" },
+        "description": { "type": "string", "faker": "lorem.paragraph" },
+        "cause": { "type": "string", "enum": ["education", "health", "environment", "poverty", "animals", "arts", "disaster_relief"], "faker": "helpers.arrayElement" },
+        "goalAmount": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "raisedAmount": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "donorCount": { "type": "integer", "minimum": 0, "faker": "number.int", "max": 10000 },
+        "averageDonation": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "status": { "type": "string", "enum": ["draft", "active", "paused", "completed", "cancelled"], "default": "active" },
+        "startDate": { "type": "string", "format": "date-time", "faker": "date.past" },
+        "endDate": { "type": "string", "format": "date-time", "faker": "date.future" },
+        "createdAt": { "type": "string", "format": "date-time", "faker": "date.past" }
+      },
+      "required": ["id", "name", "cause", "goalAmount", "status", "startDate", "createdAt"]
+    },
+    "donation": {
+      "type": "object",
+      "description": "Individual donation transaction",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "donorId": { "type": "string", "format": "uuid" },
+        "campaignId": { "type": "string", "format": "uuid" },
+        "amount": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "currency": { "type": "string", "enum": ["USD", "EUR", "GBP"], "default": "USD" },
+        "donationType": { "type": "string", "enum": ["one_time", "monthly", "annual"], "default": "one_time" },
+        "paymentMethod": { "type": "string", "enum": ["credit_card", "bank_transfer", "paypal", "check", "cash"], "faker": "helpers.arrayElement" },
+        "isAnonymous": { "type": "boolean", "default": false },
+        "taxDeductible": { "type": "boolean", "default": true },
+        "processingFee": { "type": "number", "minimum": 0 },
+        "netAmount": { "type": "number", "minimum": 0 },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed", "refunded"], "default": "completed" },
+        "createdAt": { "type": "string", "format": "date-time", "faker": "date.past" }
+      },
+      "required": ["id", "donorId", "amount", "currency", "donationType", "status", "createdAt"]
+    },
+    "program": {
+      "type": "object",
+      "description": "Nonprofit program with impact metrics",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "faker": "lorem.sentence" },
+        "description": { "type": "string", "faker": "lorem.paragraph" },
+        "cause": { "type": "string", "enum": ["education", "health", "environment", "poverty", "animals", "arts", "disaster_relief"], "faker": "helpers.arrayElement" },
+        "budget": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "spent": { "type": "number", "minimum": 0, "faker": "commerce.price" },
+        "beneficiaries": { "type": "integer", "minimum": 0, "faker": "number.int", "max": 100000 },
+        "impactMetrics": { "type": "object", "properties": { "livesImpacted": { "type": "integer", "minimum": 0 }, "servicesProvided": { "type": "integer", "minimum": 0 }, "outcomesAchieved": { "type": "integer", "minimum": 0 } } },
+        "status": { "type": "string", "enum": ["planning", "active", "completed", "suspended"], "default": "active" },
+        "startDate": { "type": "string", "format": "date-time", "faker": "date.past" },
+        "endDate": { "type": "string", "format": "date-time", "faker": "date.future" },
+        "createdAt": { "type": "string", "format": "date-time", "faker": "date.past" }
+      },
+      "required": ["id", "name", "cause", "budget", "status", "startDate", "createdAt"]
+    }
+  },
+  "categories": {
+    "early": {
+      "id": "early",
+      "name": "Local Community Nonprofit",
+      "description": "Small nonprofit serving local community needs",
+      "businessType": "nonprofit",
+      "config": {
+        "id": 10005,
+        "dateRange": { "start": "2024-01-01", "end": "2024-12-31" },
+        "volume": { "donors": 500, "campaigns": 8, "donations": 2000, "programs": 5 },
+        "relationships": { "averageDonation": 125, "donorRetention": 0.65, "campaignSuccess": 0.75, "adminCosts": 0.15 },
+        "complexity": "early"
+      }
+    },
+    "growth": {
+      "id": "growth",
+      "name": "Regional Nonprofit Organization",
+      "description": "Growing nonprofit with multi-state presence",
+      "businessType": "nonprofit",
+      "config": {
+        "id": 20005,
+        "dateRange": { "start": "2023-01-01", "end": "2024-12-31" },
+        "volume": { "donors": 15000, "campaigns": 25, "donations": 75000, "programs": 15 },
+        "relationships": { "averageDonation": 185, "donorRetention": 0.72, "campaignSuccess": 0.82, "adminCosts": 0.12 },
+        "complexity": "growth"
+      }
+    },
+    "enterprise": {
+      "id": "enterprise",
+      "name": "International Nonprofit Network",
+      "description": "Large nonprofit with global impact programs",
+      "businessType": "nonprofit",
+      "config": {
+        "id": 30005,
+        "dateRange": { "start": "2022-01-01", "end": "2024-12-31" },
+        "volume": { "donors": 500000, "campaigns": 100, "donations": 2000000, "programs": 50 },
+        "relationships": { "averageDonation": 275, "donorRetention": 0.78, "campaignSuccess": 0.88, "adminCosts": 0.08 },
+        "complexity": "enterprise"
+      }
+    }
+  },
+  "roles": {
+    "admin": {
+      "id": "admin",
+      "name": "Administrator",
+      "description": "Full access to all donor and financial data",
+      "accessLevel": "admin",
+      "dataVisibility": { "fullAccess": true },
+      "overrides": { "donor": { "donorType": "individual" } }
+    },
+    "support": {
+      "id": "support",
+      "name": "Support Agent",
+      "description": "Donor support with financial data masked",
+      "accessLevel": "support",
+      "dataVisibility": { "fullAccess": false, "maskedFields": ["totalDonated", "averageDonation", "goalAmount", "raisedAmount", "amount", "processingFee", "netAmount", "budget", "spent"], "hiddenFields": [] },
+      "overrides": {}
+    }
+  },
+  "routes": {
+    "/api/donors": { "schema": "donor", "rest": true, "methods": ["GET", "POST", "PUT", "DELETE"] },
+    "/api/campaigns": { "schema": "campaign", "rest": true, "methods": ["GET", "POST", "PUT", "DELETE"] },
+    "/api/donations": { "schema": "donation", "rest": true, "methods": ["GET", "POST", "PUT"] },
+    "/api/programs": { "schema": "program", "rest": true, "methods": ["GET", "POST", "PUT", "DELETE"] }
+  }
+}

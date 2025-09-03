@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Synthkit Configuration",
+  "description": "Configuration schema for synthkit - mock data generation and scenario management",
+  "type": "object",
+  "properties": {
+    "packs": {
+      "description": "List of scenario packs to load",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Path to a pack or npm package name"
+      },
+      "examples": [
+        ["@synthkit/pack-core", "@synthkit/pack-saas"],
+        ["./packs/custom", "./node_modules/@company/pack"]
+      ]
+    },
+    "scenarios": {
+      "description": "Scenario configuration",
+      "type": "object",
+      "properties": {
+        "default": {
+          "description": "Default scenario to activate (format: pack:scenario)",
+          "type": "string",
+          "examples": ["core:default", "saas:trial"]
+        },
+        "active": {
+          "description": "List of initially active scenarios",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["core:default", "saas:enterprise"]]
+        }
+      }
+    },
+    "generators": {
+      "description": "Generator configuration",
+      "type": "object",
+      "properties": {
+        "seed": {
+          "description": "Global seed for deterministic generation",
+          "type": "number",
+          "examples": [12345, 42]
+        },
+        "locale": {
+          "description": "Default locale for generated data",
+          "type": "string",
+          "examples": ["en", "es", "fr", "de", "ja"]
+        },
+        "timeZone": {
+          "description": "Default time zone for date generation",
+          "type": "string",
+          "examples": ["America/New_York", "Europe/London", "Asia/Tokyo"]
+        }
+      }
+    },
+    "msw": {
+      "description": "Mock Service Worker configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enable MSW for API mocking",
+          "type": "boolean",
+          "default": true
+        },
+        "delay": {
+          "description": "Response delay configuration",
+          "oneOf": [
+            {
+              "type": "number",
+              "description": "Fixed delay in milliseconds"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "type": "number",
+                  "description": "Minimum delay in milliseconds"
+                },
+                "max": {
+                  "type": "number",
+                  "description": "Maximum delay in milliseconds"
+                }
+              },
+              "required": ["min", "max"]
+            }
+          ],
+          "examples": [200, { "min": 100, "max": 500 }]
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

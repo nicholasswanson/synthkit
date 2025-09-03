@@ -1,0 +1,24 @@
+{
+  "$schema": "./synth.config.schema.json",
+  "packs": [
+    "./packs/core",
+    "./packs/saas",
+    "./packs/ecomm"
+  ],
+  "scenarios": {
+    "default": "core:default",
+    "active": []
+  },
+  "generators": {
+    "seed": 12345,
+    "locale": "en",
+    "timeZone": "America/New_York"
+  },
+  "msw": {
+    "enabled": true,
+    "delay": {
+      "min": 100,
+      "max": 500
+    }
+  }
+}

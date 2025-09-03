@@ -1,0 +1,32 @@
+{
+  "name": "@synthkit/cli",
+  "version": "0.1.0",
+  "description": "Synthkit command-line interface",
+  "main": "dist/index.js",
+  "bin": {
+    "synthkit": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@synthkit/sdk": "workspace:*",
+    "commander": "^11.1.0",
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.12",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.4.0"
+  },
+  "files": [
+    "dist/**/*",
+    "templates/**/*"
+  ]
+}

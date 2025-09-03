@@ -1,0 +1,138 @@
+{
+  "id": "example-pack",
+  "name": "Example Pack",
+  "description": "Demo pack for Next.js example app",
+  "version": "1.0.0",
+  "schemas": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user", "guest"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "email", "role", "createdAt"]
+    },
+    "invoice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^INV-[0-9]{6}$"
+        },
+        "userId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 10000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "overdue", "cancelled"]
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "price": { "type": "number", "minimum": 0.01 }
+            },
+            "required": ["description", "quantity", "price"]
+          }
+        }
+      },
+      "required": ["id", "userId", "amount", "status", "dueDate", "items"]
+    }
+  },
+  "scenarios": {
+    "development": {
+      "id": "development",
+      "name": "Development",
+      "description": "Development scenario with test data",
+      "config": {
+        "seed": 12345,
+        "volume": {
+          "users": 10,
+          "invoices": 25
+        }
+      }
+    },
+    "demo": {
+      "id": "demo",
+      "name": "Demo",
+      "description": "Demo scenario with realistic data",
+      "config": {
+        "seed": 54321,
+        "volume": {
+          "users": 50,
+          "invoices": 200
+        }
+      }
+    }
+  },
+  "personas": {
+    "alice": {
+      "id": "alice",
+      "name": "Alice (Admin)",
+      "description": "Admin user with full access",
+      "preferences": {
+        "role": "admin"
+      },
+      "overrides": {
+        "user": {
+          "role": "admin"
+        }
+      }
+    },
+    "bob": {
+      "id": "bob",
+      "name": "Bob (Regular User)",
+      "description": "Regular user with limited access",
+      "preferences": {
+        "role": "user"
+      },
+      "overrides": {
+        "user": {
+          "role": "user"
+        }
+      }
+    }
+  },
+  "routes": {
+    "/api/users": {
+      "schema": "user",
+      "rest": true
+    },
+    "/api/invoices": {
+      "schema": "invoice",
+      "rest": true
+    }
+  }
+}

@@ -1,0 +1,471 @@
+{
+  "id": "mindora",
+  "name": "Mindora Learning Platform",
+  "version": "1.0.0",
+  "description": "Educational technology platform with courses, students, and learning analytics",
+  "schemas": {
+    "student": {
+      "type": "object",
+      "description": "Student enrolled in online courses",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName"
+        },
+        "age": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 65,
+          "faker": "number.int"
+        },
+        "educationLevel": {
+          "type": "string",
+          "enum": ["high_school", "undergraduate", "graduate", "professional"],
+          "faker": "helpers.arrayElement"
+        },
+        "learningGoals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["career_change", "skill_upgrade", "certification", "personal_interest", "degree_completion"]
+          }
+        },
+        "coursesEnrolled": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 20
+        },
+        "coursesCompleted": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 15
+        },
+        "totalSpent": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "averageGrade": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "faker": "number.float",
+          "precision": 0.1
+        },
+        "studyHoursPerWeek": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40,
+          "faker": "number.float",
+          "precision": 0.5
+        },
+        "preferredLearningStyle": {
+          "type": "string",
+          "enum": ["visual", "auditory", "kinesthetic", "reading"],
+          "faker": "helpers.arrayElement"
+        },
+        "timezone": {
+          "type": "string",
+          "faker": "location.timeZone"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "email", "firstName", "lastName", "educationLevel", "createdAt"]
+    },
+    "course": {
+      "type": "object",
+      "description": "Online course with curriculum and pricing",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string",
+          "faker": "lorem.sentence"
+        },
+        "description": {
+          "type": "string",
+          "faker": "lorem.paragraph"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["programming", "data_science", "design", "business", "marketing", "language", "mathematics", "science"],
+          "faker": "helpers.arrayElement"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced", "expert"],
+          "faker": "helpers.arrayElement"
+        },
+        "instructorId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["USD", "EUR", "GBP"],
+          "default": "USD"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 520,
+          "description": "Duration in hours"
+        },
+        "enrollmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 100000
+        },
+        "completionRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "faker": "number.float",
+          "precision": 0.01
+        },
+        "rating": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "faker": "number.float",
+          "precision": 0.1
+        },
+        "reviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 10000
+        },
+        "totalRevenue": {
+          "type": "number",
+          "minimum": 0
+        },
+        "isPublished": {
+          "type": "boolean",
+          "default": true
+        },
+        "hasCertificate": {
+          "type": "boolean",
+          "default": false
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "title", "category", "level", "instructorId", "price", "duration", "createdAt"]
+    },
+    "enrollment": {
+      "type": "object",
+      "description": "Student enrollment in a course",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "studentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "courseId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["enrolled", "in_progress", "completed", "dropped", "paused"],
+          "default": "enrolled"
+        },
+        "progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "faker": "number.float",
+          "precision": 0.01
+        },
+        "currentGrade": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "faker": "number.float",
+          "precision": 0.1
+        },
+        "timeSpent": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Time spent in hours"
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "certificateIssued": {
+          "type": "boolean",
+          "default": false
+        },
+        "paymentAmount": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "discountApplied": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "enrolledAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "studentId", "courseId", "status", "progress", "enrolledAt"]
+    },
+    "instructor": {
+      "type": "object",
+      "description": "Course instructor with teaching metrics",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName"
+        },
+        "bio": {
+          "type": "string",
+          "faker": "lorem.paragraph"
+        },
+        "expertise": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["programming", "data_science", "design", "business", "marketing", "language", "mathematics", "science"]
+          }
+        },
+        "yearsExperience": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 40,
+          "faker": "number.int"
+        },
+        "coursesCreated": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 50
+        },
+        "totalStudents": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 500000
+        },
+        "averageRating": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "faker": "number.float",
+          "precision": 0.1
+        },
+        "totalEarnings": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "monthlyEarnings": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "isVerified": {
+          "type": "boolean",
+          "default": false
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "email", "firstName", "lastName", "expertise", "createdAt"]
+    }
+  },
+  "categories": {
+    "early": {
+      "id": "early",
+      "name": "Online Learning Startup",
+      "description": "New educational platform with initial course catalog",
+      "businessType": "education",
+      "config": {
+        "id": 10002,
+        "dateRange": {
+          "start": "2024-03-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "students": 1000,
+          "courses": 50,
+          "enrollments": 2500,
+          "instructors": 25
+        },
+        "relationships": {
+          "averagePrice": 89,
+          "completionRate": 0.65,
+          "enrollmentRate": 0.12,
+          "instructorRevShare": 0.70
+        },
+        "complexity": "early"
+      }
+    },
+    "growth": {
+      "id": "growth",
+      "name": "Scaling EdTech Platform",
+      "description": "Growing educational platform with diverse course offerings",
+      "businessType": "education",
+      "config": {
+        "id": 20002,
+        "dateRange": {
+          "start": "2023-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "students": 50000,
+          "courses": 2500,
+          "enrollments": 150000,
+          "instructors": 800
+        },
+        "relationships": {
+          "averagePrice": 149,
+          "completionRate": 0.72,
+          "enrollmentRate": 0.18,
+          "instructorRevShare": 0.65
+        },
+        "complexity": "growth"
+      }
+    },
+    "enterprise": {
+      "id": "enterprise",
+      "name": "Global Learning Platform",
+      "description": "Large-scale educational platform serving millions",
+      "businessType": "education",
+      "config": {
+        "id": 30002,
+        "dateRange": {
+          "start": "2022-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "students": 2000000,
+          "courses": 100000,
+          "enrollments": 8000000,
+          "instructors": 25000
+        },
+        "relationships": {
+          "averagePrice": 199,
+          "completionRate": 0.78,
+          "enrollmentRate": 0.25,
+          "instructorRevShare": 0.60
+        },
+        "complexity": "enterprise"
+      }
+    }
+  },
+  "roles": {
+    "admin": {
+      "id": "admin",
+      "name": "Administrator",
+      "description": "Full access to all educational and financial data",
+      "accessLevel": "admin",
+      "dataVisibility": {
+        "fullAccess": true
+      },
+      "overrides": {
+        "instructor": {
+          "isVerified": true
+        },
+        "course": {
+          "isPublished": true,
+          "hasCertificate": true
+        }
+      }
+    },
+    "support": {
+      "id": "support",
+      "name": "Support Agent",
+      "description": "Student support with financial data masked",
+      "accessLevel": "support",
+      "dataVisibility": {
+        "fullAccess": false,
+        "maskedFields": ["totalSpent", "price", "totalRevenue", "totalEarnings", "monthlyEarnings", "paymentAmount", "discountApplied"],
+        "hiddenFields": []
+      },
+      "overrides": {}
+    }
+  },
+  "routes": {
+    "/api/students": {
+      "schema": "student",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/courses": {
+      "schema": "course",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/enrollments": {
+      "schema": "enrollment",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/instructors": {
+      "schema": "instructor",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    }
+  }
+}

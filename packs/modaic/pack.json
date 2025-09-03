@@ -1,0 +1,379 @@
+{
+  "id": "modaic",
+  "name": "Modaic E-commerce",
+  "version": "1.0.0",
+  "description": "Fashion retailer e-commerce platform with payments, inventory, and customer management",
+  "schemas": {
+    "customer": {
+      "type": "object",
+      "description": "E-commerce customer with purchase history",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName"
+        },
+        "phone": {
+          "type": "string",
+          "faker": "phone.number"
+        },
+        "totalSpent": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price",
+          "description": "Total lifetime spend"
+        },
+        "orderCount": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 50
+        },
+        "averageOrderValue": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "loyaltyTier": {
+          "type": "string",
+          "enum": ["bronze", "silver", "gold", "platinum"],
+          "default": "bronze"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "email", "firstName", "lastName", "createdAt"]
+    },
+    "product": {
+      "type": "object",
+      "description": "Fashion product with variants and pricing",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sku": {
+          "type": "string",
+          "faker": "commerce.isbn"
+        },
+        "name": {
+          "type": "string",
+          "faker": "commerce.productName"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["tops", "bottoms", "dresses", "outerwear", "accessories", "shoes"],
+          "faker": "helpers.arrayElement"
+        },
+        "brand": {
+          "type": "string",
+          "faker": "company.name"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "salePrice": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inventory": {
+          "type": "integer",
+          "minimum": 0,
+          "faker": "number.int",
+          "max": 1000
+        },
+        "sizes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["XS", "S", "M", "L", "XL", "XXL"]
+          }
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "faker": "color.human"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "sku", "name", "category", "price", "createdAt"]
+    },
+    "payment": {
+      "type": "object",
+      "description": "Payment transaction for fashion purchases",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "orderId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "faker": "commerce.price"
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["USD", "EUR", "GBP", "CAD"],
+          "default": "USD"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["credit_card", "debit_card", "paypal", "apple_pay", "google_pay"],
+          "faker": "helpers.arrayElement"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "failed", "refunded"],
+          "default": "completed"
+        },
+        "processingFee": {
+          "type": "number",
+          "minimum": 0
+        },
+        "netAmount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "customerId", "amount", "currency", "status", "createdAt"]
+    },
+    "order": {
+      "type": "object",
+      "description": "Fashion order with items and fulfillment",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "orderNumber": {
+          "type": "string",
+          "faker": "string.alphanumeric",
+          "length": 10
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "unitPrice": { "type": "number", "minimum": 0 },
+              "size": { "type": "string" },
+              "color": { "type": "string" }
+            }
+          }
+        },
+        "subtotal": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tax": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shipping": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "shipped", "delivered", "cancelled"],
+          "default": "pending"
+        },
+        "shippingAddress": {
+          "type": "object",
+          "properties": {
+            "street": { "type": "string", "faker": "location.streetAddress" },
+            "city": { "type": "string", "faker": "location.city" },
+            "state": { "type": "string", "faker": "location.state" },
+            "zipCode": { "type": "string", "faker": "location.zipCode" },
+            "country": { "type": "string", "faker": "location.country" }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "customerId", "orderNumber", "items", "total", "status", "createdAt"]
+    }
+  },
+  "categories": {
+    "early": {
+      "id": "early",
+      "name": "Early Stage Boutique",
+      "description": "Small fashion boutique starting online presence",
+      "businessType": "ecommerce",
+      "config": {
+        "id": 11111,
+        "dateRange": {
+          "start": "2024-06-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "customers": 500,
+          "products": 150,
+          "orders": 800,
+          "payments": 800
+        },
+        "relationships": {
+          "conversionRate": 0.12,
+          "averageOrderValue": 85,
+          "returnRate": 0.08,
+          "seasonalMultiplier": 1.2
+        },
+        "complexity": "early"
+      }
+    },
+    "growth": {
+      "id": "growth",
+      "name": "Growing Fashion Brand",
+      "description": "Established fashion brand with expanding market presence",
+      "businessType": "ecommerce",
+      "config": {
+        "id": 22222,
+        "dateRange": {
+          "start": "2023-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "customers": 15000,
+          "products": 2500,
+          "orders": 45000,
+          "payments": 45000
+        },
+        "relationships": {
+          "conversionRate": 0.18,
+          "averageOrderValue": 125,
+          "returnRate": 0.06,
+          "seasonalMultiplier": 1.8
+        },
+        "complexity": "growth"
+      }
+    },
+    "enterprise": {
+      "id": "enterprise",
+      "name": "Global Fashion Retailer",
+      "description": "Large-scale fashion retailer with international presence",
+      "businessType": "ecommerce",
+      "config": {
+        "id": 33333,
+        "dateRange": {
+          "start": "2022-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "customers": 500000,
+          "products": 50000,
+          "orders": 2000000,
+          "payments": 2000000
+        },
+        "relationships": {
+          "conversionRate": 0.22,
+          "averageOrderValue": 185,
+          "returnRate": 0.04,
+          "seasonalMultiplier": 2.5
+        },
+        "complexity": "enterprise"
+      }
+    }
+  },
+  "roles": {
+    "admin": {
+      "id": "admin",
+      "name": "Administrator",
+      "description": "Full access to all financial and operational data",
+      "accessLevel": "admin",
+      "dataVisibility": {
+        "fullAccess": true
+      },
+      "overrides": {
+        "customer": {
+          "loyaltyTier": "gold"
+        },
+        "payment": {
+          "paymentMethod": "credit_card"
+        }
+      }
+    },
+    "support": {
+      "id": "support",
+      "name": "Support Agent",
+      "description": "Limited access with financial data masked",
+      "accessLevel": "support",
+      "dataVisibility": {
+        "fullAccess": false,
+        "maskedFields": ["amount", "totalSpent", "averageOrderValue", "price", "salePrice", "processingFee", "netAmount", "subtotal", "tax", "shipping", "total"],
+        "hiddenFields": []
+      },
+      "overrides": {}
+    }
+  },
+  "routes": {
+    "/api/customers": {
+      "schema": "customer",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/products": {
+      "schema": "product",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/payments": {
+      "schema": "payment",
+      "rest": true,
+      "methods": ["GET", "POST"]
+    },
+    "/api/orders": {
+      "schema": "order",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    }
+  }
+}

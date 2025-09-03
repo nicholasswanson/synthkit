@@ -1,0 +1,616 @@
+{
+  "id": "saas",
+  "name": "SaaS Pack",
+  "version": "1.0.0",
+  "description": "Comprehensive SaaS business model with subscriptions, billing, and usage analytics",
+  "schemas": {
+    "subscription": {
+      "type": "object",
+      "description": "Customer subscription with billing and usage tracking",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Subscription identifier"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Customer (user or organization) ID"
+        },
+        "planId": {
+          "type": "string",
+          "description": "Subscription plan identifier"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["trialing", "active", "past_due", "canceled", "unpaid", "paused"],
+          "description": "Current subscription status"
+        },
+        "billingCycle": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "yearly"],
+          "default": "monthly",
+          "description": "Billing frequency"
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"],
+          "default": "USD",
+          "description": "Billing currency"
+        },
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "baseAmount": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Base subscription fee"
+            },
+            "perSeatAmount": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Per-seat pricing"
+            },
+            "usageAmount": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Usage-based charges"
+            },
+            "totalAmount": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total amount for current period"
+            }
+          }
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "seats": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of active seats"
+            },
+            "apiCalls": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "API calls this period"
+            },
+            "storage": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Storage used in GB"
+            },
+            "bandwidth": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Bandwidth used in GB"
+            },
+            "customMetrics": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "maxSeats": {
+              "type": "integer",
+              "description": "Maximum allowed seats"
+            },
+            "maxApiCalls": {
+              "type": "integer",
+              "description": "API call limit per period"
+            },
+            "maxStorage": {
+              "type": "number",
+              "description": "Storage limit in GB"
+            },
+            "maxBandwidth": {
+              "type": "number",
+              "description": "Bandwidth limit in GB"
+            }
+          }
+        },
+        "trial": {
+          "type": "object",
+          "properties": {
+            "isTrialing": {
+              "type": "boolean",
+              "default": false
+            },
+            "trialStart": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "trialEnd": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "trialDays": {
+              "type": "integer",
+              "default": 14
+            }
+          }
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "nextBillingDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Next billing date"
+            },
+            "lastBillingDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Last successful billing"
+            },
+            "paymentMethodId": {
+              "type": "string",
+              "description": "Payment method identifier"
+            },
+            "invoiceSettings": {
+              "type": "object",
+              "properties": {
+                "autoAdvance": { "type": "boolean", "default": true },
+                "collectionMethod": { "type": "string", "enum": ["charge_automatically", "send_invoice"], "default": "charge_automatically" },
+                "daysUntilDue": { "type": "integer", "default": 30 }
+              }
+            }
+          }
+        },
+        "discounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["percentage", "fixed_amount"] },
+              "value": { "type": "number" },
+              "duration": { "type": "string", "enum": ["once", "repeating", "forever"] },
+              "durationInMonths": { "type": "integer" },
+              "validUntil": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": ["web", "mobile", "api", "sales", "migration"]
+            },
+            "salesRep": { "type": "string" },
+            "campaignId": { "type": "string" },
+            "referralCode": { "type": "string" }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "canceledAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Cancellation timestamp"
+        },
+        "cancelReason": {
+          "type": "string",
+          "enum": ["customer_request", "payment_failed", "downgrade", "churn", "other"]
+        }
+      },
+      "required": ["id", "customerId", "planId", "status", "billingCycle", "createdAt"]
+    },
+    "invoice": {
+      "type": "object",
+      "description": "Billing invoice with line items and payment tracking",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "number": {
+          "type": "string",
+          "faker": "finance.accountNumber",
+          "description": "Human-readable invoice number"
+        },
+        "subscriptionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "open", "paid", "void", "uncollectible"],
+          "description": "Invoice status"
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD"
+        },
+        "amounts": {
+          "type": "object",
+          "properties": {
+            "subtotal": { "type": "number", "minimum": 0 },
+            "tax": { "type": "number", "minimum": 0 },
+            "discount": { "type": "number", "minimum": 0 },
+            "total": { "type": "number", "minimum": 0 },
+            "amountPaid": { "type": "number", "minimum": 0 },
+            "amountDue": { "type": "number", "minimum": 0 }
+          }
+        },
+        "lineItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "quantity": { "type": "number", "minimum": 0 },
+              "unitAmount": { "type": "number", "minimum": 0 },
+              "amount": { "type": "number", "minimum": 0 },
+              "type": { "type": "string", "enum": ["subscription", "usage", "one_time", "tax", "discount"] },
+              "period": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "string", "format": "date-time" },
+                  "end": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "dueDate": { "type": "string", "format": "date-time" },
+            "paidAt": { "type": "string", "format": "date-time" },
+            "paymentMethodId": { "type": "string" },
+            "paymentIntentId": { "type": "string" },
+            "attemptCount": { "type": "integer", "minimum": 0, "default": 0 }
+          }
+        },
+        "customer": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "faker": "company.name" },
+            "email": { "type": "string", "faker": "internet.email" },
+            "address": {
+              "type": "object",
+              "properties": {
+                "line1": { "type": "string", "faker": "location.streetAddress" },
+                "line2": { "type": "string" },
+                "city": { "type": "string", "faker": "location.city" },
+                "state": { "type": "string", "faker": "location.state" },
+                "postalCode": { "type": "string", "faker": "location.zipCode" },
+                "country": { "type": "string", "faker": "location.countryCode" }
+              }
+            },
+            "taxId": { "type": "string", "faker": "finance.accountNumber" }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "number", "subscriptionId", "customerId", "status", "currency", "amounts", "createdAt"]
+    },
+    "plan": {
+      "type": "object",
+      "description": "Subscription plan definition",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Plan identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Plan display name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Plan description"
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["free", "starter", "professional", "enterprise"],
+          "description": "Plan tier"
+        },
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string",
+              "enum": ["flat_rate", "per_seat", "usage_based", "hybrid"]
+            },
+            "basePrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "seatPrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "usageRates": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "included": { "type": "boolean" },
+              "limit": { "type": "integer" },
+              "unlimited": { "type": "boolean" }
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "seats": { "type": "integer" },
+            "apiCalls": { "type": "integer" },
+            "storage": { "type": "number" },
+            "bandwidth": { "type": "number" }
+          }
+        },
+        "trial": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "days": { "type": "integer", "default": 14 }
+          }
+        },
+        "active": {
+          "type": "boolean",
+          "default": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        }
+      },
+      "required": ["id", "name", "tier", "pricing", "active", "createdAt"]
+    },
+    "usage_record": {
+      "type": "object",
+      "description": "Usage tracking record for metered billing",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "subscriptionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "customerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "metric": {
+          "type": "string",
+          "enum": ["api_calls", "storage", "bandwidth", "seats", "transactions", "emails", "custom"],
+          "description": "Usage metric type"
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Usage quantity"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["count", "gb", "mb", "hours", "requests", "users"],
+          "description": "Unit of measurement"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "period": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "string", "format": "date-time" },
+            "end": { "type": "string", "format": "date-time" }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "source": { "type": "string" },
+            "userId": { "type": "string" },
+            "feature": { "type": "string" },
+            "region": { "type": "string" }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "subscriptionId", "customerId", "metric", "quantity", "unit", "timestamp", "createdAt"]
+    }
+  },
+  "scenarios": {
+    "startup": {
+      "id": "startup",
+      "name": "Early Stage Startup",
+      "description": "Small SaaS with growing customer base",
+      "config": {
+        "seed": 11111,
+        "dateRange": {
+          "start": "2024-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "subscriptions": 150,
+          "invoices": 400,
+          "plans": 4,
+          "usage_records": 2000
+        },
+        "relationships": {
+          "trialConversionRate": 0.25,
+          "churnRate": 0.08,
+          "upgradeRate": 0.15,
+          "averageSeats": 3,
+          "paymentFailureRate": 0.05
+        }
+      }
+    },
+    "growth": {
+      "id": "growth",
+      "name": "Growth Stage SaaS",
+      "description": "Scaling SaaS with diverse customer segments",
+      "config": {
+        "seed": 22222,
+        "dateRange": {
+          "start": "2023-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "subscriptions": 2500,
+          "invoices": 8000,
+          "plans": 6,
+          "usage_records": 50000
+        },
+        "relationships": {
+          "trialConversionRate": 0.35,
+          "churnRate": 0.05,
+          "upgradeRate": 0.22,
+          "averageSeats": 8,
+          "paymentFailureRate": 0.03
+        }
+      }
+    },
+    "enterprise": {
+      "id": "enterprise",
+      "name": "Enterprise SaaS",
+      "description": "Mature SaaS with enterprise customers",
+      "config": {
+        "seed": 33333,
+        "dateRange": {
+          "start": "2022-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "subscriptions": 15000,
+          "invoices": 60000,
+          "plans": 8,
+          "usage_records": 500000
+        },
+        "relationships": {
+          "trialConversionRate": 0.45,
+          "churnRate": 0.03,
+          "upgradeRate": 0.30,
+          "averageSeats": 25,
+          "paymentFailureRate": 0.01
+        }
+      }
+    }
+  },
+  "personas": {
+    "startup_founder": {
+      "id": "startup_founder",
+      "name": "Startup Founder",
+      "description": "Price-sensitive early adopter",
+      "overrides": {
+        "subscription": {
+          "status": "trialing",
+          "billingCycle": "monthly",
+          "usage": {
+            "seats": 2
+          }
+        },
+        "plan": {
+          "tier": "starter"
+        }
+      }
+    },
+    "smb_manager": {
+      "id": "smb_manager",
+      "name": "SMB Manager",
+      "description": "Small-medium business decision maker",
+      "overrides": {
+        "subscription": {
+          "status": "active",
+          "billingCycle": "monthly",
+          "usage": {
+            "seats": 8
+          }
+        },
+        "plan": {
+          "tier": "professional"
+        }
+      }
+    },
+    "enterprise_admin": {
+      "id": "enterprise_admin",
+      "name": "Enterprise Administrator",
+      "description": "Large organization with complex needs",
+      "overrides": {
+        "subscription": {
+          "status": "active",
+          "billingCycle": "yearly",
+          "usage": {
+            "seats": 100
+          }
+        },
+        "plan": {
+          "tier": "enterprise"
+        }
+      }
+    }
+  },
+  "routes": {
+    "/api/subscriptions": {
+      "schema": "subscription",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/invoices": {
+      "schema": "invoice",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT"]
+    },
+    "/api/plans": {
+      "schema": "plan",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/usage": {
+      "schema": "usage_record",
+      "rest": true,
+      "methods": ["GET", "POST"]
+    }
+  }
+}

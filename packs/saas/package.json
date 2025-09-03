@@ -1,0 +1,15 @@
+{
+  "name": "@synthkit/pack-saas",
+  "version": "0.1.0",
+  "description": "SaaS generators pack for synthkit - users, teams, billing",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "generators.js",
+    "scenarios.js"
+  ],
+  "dependencies": {
+    "@synthkit/sdk": "workspace:*"
+  }
+}

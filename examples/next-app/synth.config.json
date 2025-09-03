@@ -1,0 +1,19 @@
+{
+  "packs": ["packs/example-pack"],
+  "scenarios": {
+    "default": {
+      "pack": "example-pack",
+      "scenario": "development"
+    }
+  },
+  "generators": {
+    "locale": "en-US",
+    "dateFormat": "ISO"
+  },
+  "msw": {
+    "enabled": true,
+    "handlers": {
+      "delay": 100
+    }
+  }
+}

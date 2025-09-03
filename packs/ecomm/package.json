@@ -1,0 +1,15 @@
+{
+  "name": "@synthkit/pack-ecomm",
+  "version": "0.1.0",
+  "description": "E-commerce generators pack for synthkit - products, orders, customers",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "generators.js",
+    "scenarios.js"
+  ],
+  "dependencies": {
+    "@synthkit/sdk": "workspace:*"
+  }
+}

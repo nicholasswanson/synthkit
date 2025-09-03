@@ -1,0 +1,558 @@
+{
+  "id": "core",
+  "name": "Core Pack",
+  "version": "1.0.0",
+  "description": "Essential user authentication and management schemas with realistic patterns",
+  "schemas": {
+    "user": {
+      "type": "object",
+      "description": "User account with authentication and profile data",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email",
+          "description": "User's email address"
+        },
+        "username": {
+          "type": "string",
+          "faker": "internet.userName",
+          "description": "Unique username"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName",
+          "description": "User's first name"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName",
+          "description": "User's last name"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name (computed from first + last)",
+          "computed": "{{firstName}} {{lastName}}"
+        },
+        "avatar": {
+          "type": "string",
+          "faker": "image.avatar",
+          "description": "Profile picture URL"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "moderator", "user", "guest"],
+          "default": "user",
+          "description": "User role and permissions level"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "suspended", "pending"],
+          "default": "active",
+          "description": "Account status"
+        },
+        "emailVerified": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether email has been verified"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "faker": "phone.number",
+          "description": "User's phone number"
+        },
+        "phoneVerified": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether phone has been verified"
+        },
+        "timezone": {
+          "type": "string",
+          "faker": "location.timeZone",
+          "description": "User's timezone"
+        },
+        "locale": {
+          "type": "string",
+          "enum": ["en-US", "en-GB", "fr-FR", "de-DE", "es-ES", "ja-JP", "zh-CN"],
+          "default": "en-US",
+          "description": "User's preferred locale"
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": {
+              "type": "string",
+              "enum": ["light", "dark", "auto"],
+              "default": "auto"
+            },
+            "notifications": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "boolean", "default": true },
+                "push": { "type": "boolean", "default": true },
+                "sms": { "type": "boolean", "default": false }
+              }
+            },
+            "privacy": {
+              "type": "object",
+              "properties": {
+                "profileVisible": { "type": "boolean", "default": true },
+                "activityVisible": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "signupSource": {
+              "type": "string",
+              "enum": ["web", "mobile", "api", "invitation", "social"],
+              "default": "web"
+            },
+            "referralCode": {
+              "type": "string",
+              "faker": "string.alphanumeric",
+              "length": 8
+            },
+            "lastLoginIp": {
+              "type": "string",
+              "faker": "internet.ip"
+            },
+            "userAgent": {
+              "type": "string",
+              "faker": "internet.userAgent"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent",
+          "description": "Account creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent",
+          "description": "Last profile update timestamp"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent",
+          "description": "Last login timestamp"
+        }
+      },
+      "required": ["id", "email", "firstName", "lastName", "role", "status", "createdAt"]
+    },
+    "session": {
+      "type": "object",
+      "description": "User authentication session",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Session identifier"
+        },
+        "userId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Associated user ID"
+        },
+        "token": {
+          "type": "string",
+          "faker": "string.alphanumeric",
+          "length": 64,
+          "description": "Session token"
+        },
+        "refreshToken": {
+          "type": "string",
+          "faker": "string.alphanumeric",
+          "length": 64,
+          "description": "Refresh token"
+        },
+        "deviceId": {
+          "type": "string",
+          "faker": "string.uuid",
+          "description": "Device identifier"
+        },
+        "deviceName": {
+          "type": "string",
+          "faker": "commerce.productName",
+          "description": "Human-readable device name"
+        },
+        "ipAddress": {
+          "type": "string",
+          "faker": "internet.ip",
+          "description": "Client IP address"
+        },
+        "userAgent": {
+          "type": "string",
+          "faker": "internet.userAgent",
+          "description": "Client user agent"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string", "faker": "location.country" },
+            "city": { "type": "string", "faker": "location.city" },
+            "latitude": { "type": "number", "faker": "location.latitude" },
+            "longitude": { "type": "number", "faker": "location.longitude" }
+          }
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.future",
+          "description": "Session expiration time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent",
+          "description": "Session creation time"
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent",
+          "description": "Last access time"
+        }
+      },
+      "required": ["id", "userId", "token", "expiresAt", "createdAt"]
+    },
+    "organization": {
+      "type": "object",
+      "description": "Organization or team entity",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Organization identifier"
+        },
+        "name": {
+          "type": "string",
+          "faker": "company.name",
+          "description": "Organization name"
+        },
+        "slug": {
+          "type": "string",
+          "faker": "internet.domainWord",
+          "description": "URL-friendly organization identifier"
+        },
+        "description": {
+          "type": "string",
+          "faker": "company.catchPhrase",
+          "description": "Organization description"
+        },
+        "logo": {
+          "type": "string",
+          "faker": "image.url",
+          "description": "Organization logo URL"
+        },
+        "website": {
+          "type": "string",
+          "faker": "internet.url",
+          "description": "Organization website"
+        },
+        "industry": {
+          "type": "string",
+          "enum": ["technology", "healthcare", "finance", "education", "retail", "manufacturing", "consulting", "media", "nonprofit", "government"],
+          "description": "Industry category"
+        },
+        "size": {
+          "type": "string",
+          "enum": ["startup", "small", "medium", "large", "enterprise"],
+          "description": "Organization size"
+        },
+        "plan": {
+          "type": "string",
+          "enum": ["free", "basic", "pro", "enterprise"],
+          "default": "free",
+          "description": "Subscription plan"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "allowInvitations": { "type": "boolean", "default": true },
+            "requireEmailVerification": { "type": "boolean", "default": true },
+            "enableSSO": { "type": "boolean", "default": false },
+            "defaultRole": { "type": "string", "default": "user" }
+          }
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "faker": "internet.email" },
+            "address": {
+              "type": "object",
+              "properties": {
+                "street": { "type": "string", "faker": "location.streetAddress" },
+                "city": { "type": "string", "faker": "location.city" },
+                "state": { "type": "string", "faker": "location.state" },
+                "postalCode": { "type": "string", "faker": "location.zipCode" },
+                "country": { "type": "string", "faker": "location.country" }
+              }
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "name", "slug", "plan", "createdAt"]
+    },
+    "membership": {
+      "type": "object",
+      "description": "User membership in an organization",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "User ID"
+        },
+        "organizationId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Organization ID"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["owner", "admin", "member", "guest"],
+          "default": "member",
+          "description": "Role within organization"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "pending", "suspended"],
+          "default": "active",
+          "description": "Membership status"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["read", "write", "delete", "invite", "billing", "settings"]
+          },
+          "description": "Specific permissions granted"
+        },
+        "invitedBy": {
+          "type": "string",
+          "format": "uuid",
+          "description": "User who sent the invitation"
+        },
+        "invitedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        }
+      },
+      "required": ["id", "userId", "organizationId", "role", "status", "joinedAt"]
+    }
+  },
+  "scenarios": {
+    "development": {
+      "id": "development",
+      "name": "Development Environment",
+      "description": "Small dataset for development and testing",
+      "config": {
+        "seed": 12345,
+        "locale": "en-US",
+        "dateRange": {
+          "start": "2024-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "users": 25,
+          "organizations": 5,
+          "sessions": 50,
+          "memberships": 35
+        },
+        "relationships": {
+          "usersPerOrganization": "1-8",
+          "sessionsPerUser": "1-3",
+          "adminRatio": 0.1,
+          "activeSessionRatio": 0.7
+        }
+      }
+    },
+    "demo": {
+      "id": "demo",
+      "name": "Demo Environment",
+      "description": "Medium dataset for demonstrations and presentations",
+      "config": {
+        "seed": 54321,
+        "locale": "en-US",
+        "dateRange": {
+          "start": "2023-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "users": 150,
+          "organizations": 25,
+          "sessions": 300,
+          "memberships": 200
+        },
+        "relationships": {
+          "usersPerOrganization": "3-15",
+          "sessionsPerUser": "1-5",
+          "adminRatio": 0.08,
+          "activeSessionRatio": 0.6
+        }
+      }
+    },
+    "production": {
+      "id": "production",
+      "name": "Production Scale",
+      "description": "Large dataset simulating production environment",
+      "config": {
+        "seed": 98765,
+        "locale": "en-US",
+        "dateRange": {
+          "start": "2022-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "users": 10000,
+          "organizations": 500,
+          "sessions": 25000,
+          "memberships": 15000
+        },
+        "relationships": {
+          "usersPerOrganization": "5-50",
+          "sessionsPerUser": "2-10",
+          "adminRatio": 0.05,
+          "activeSessionRatio": 0.4
+        }
+      }
+    }
+  },
+  "personas": {
+    "admin": {
+      "id": "admin",
+      "name": "System Administrator",
+      "description": "Admin user with elevated privileges",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/New_York"
+      },
+      "overrides": {
+        "user": {
+          "role": "admin",
+          "emailVerified": true,
+          "phoneVerified": true,
+          "preferences": {
+            "notifications": {
+              "email": true,
+              "push": true,
+              "sms": true
+            }
+          }
+        },
+        "membership": {
+          "role": "owner",
+          "permissions": ["read", "write", "delete", "invite", "billing", "settings"]
+        }
+      }
+    },
+    "regular_user": {
+      "id": "regular_user",
+      "name": "Regular User",
+      "description": "Standard user with basic permissions",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/Los_Angeles"
+      },
+      "overrides": {
+        "user": {
+          "role": "user",
+          "emailVerified": true,
+          "phoneVerified": false
+        },
+        "membership": {
+          "role": "member",
+          "permissions": ["read", "write"]
+        }
+      }
+    },
+    "enterprise_user": {
+      "id": "enterprise_user",
+      "name": "Enterprise User",
+      "description": "User in large enterprise organization",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/Chicago"
+      },
+      "overrides": {
+        "user": {
+          "role": "user",
+          "emailVerified": true,
+          "phoneVerified": true,
+          "preferences": {
+            "privacy": {
+              "profileVisible": false,
+              "activityVisible": false
+            }
+          }
+        },
+        "organization": {
+          "size": "enterprise",
+          "plan": "enterprise",
+          "settings": {
+            "enableSSO": true,
+            "requireEmailVerification": true
+          }
+        }
+      }
+    }
+  },
+  "routes": {
+    "/api/users": {
+      "schema": "user",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/sessions": {
+      "schema": "session",
+      "rest": true,
+      "methods": ["GET", "POST", "DELETE"]
+    },
+    "/api/organizations": {
+      "schema": "organization",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "/api/memberships": {
+      "schema": "membership",
+      "rest": true,
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    }
+  }
+}

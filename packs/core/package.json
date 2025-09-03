@@ -1,0 +1,15 @@
+{
+  "name": "@synthkit/pack-core",
+  "version": "0.1.0",
+  "description": "Core generators pack for synthkit",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "generators.js",
+    "scenarios.js"
+  ],
+  "dependencies": {
+    "@synthkit/sdk": "workspace:*"
+  }
+}
