@@ -1,18 +1,21 @@
 {
-  "$schema": "./synth.config.schema.json",
+  "name": "synthkit-project",
+  "framework": "vanilla",
+  "version": "1.0.0",
   "packs": [
     "./packs/core",
     "./packs/saas",
     "./packs/ecomm"
   ],
   "scenarios": {
-    "default": "core:default",
+    "default": "development",
     "active": []
   },
   "generators": {
-    "seed": 12345,
+    "id": 12345,
     "locale": "en",
-    "timeZone": "America/New_York"
+    "timeZone": "America/New_York",
+    "seed": 12345
   },
   "msw": {
     "enabled": true,

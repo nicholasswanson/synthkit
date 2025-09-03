@@ -83,8 +83,8 @@ export interface RouteConfig {
   middleware?: string[];
 }
 
-// Scenarios are now the top-level configuration combining category + role + stage + id
-export interface Scenario {
+// Active scenario configuration combining category + role + stage + id
+export interface ActiveScenario {
   category: string;  // Business context (techstyle, saas, etc.)
   role: string;      // Access role (admin, support)
   stage: 'early' | 'growth' | 'enterprise';  // Business maturity stage
@@ -93,7 +93,7 @@ export interface Scenario {
 
 export interface SynthConfig {
   packs: string[];
-  scenario: Scenario;
+  scenario?: ActiveScenario;
   generators: {
     id?: number;
     locale?: string;

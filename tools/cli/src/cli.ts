@@ -1,8 +1,9 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init';
+import { generateCommand } from './commands/generate';
+import { listCommand } from './commands/list';
+import { packCommand } from './commands/pack';
 import { mockCommand } from './commands/mock';
 import { scenarioCommand } from './commands/scenario';
 import { snapshotCommand } from './commands/snapshot';
@@ -16,6 +17,9 @@ program
 
 // Add commands
 program.addCommand(initCommand);
+program.addCommand(generateCommand);
+program.addCommand(listCommand);
+program.addCommand(packCommand);
 program.addCommand(mockCommand);
 program.addCommand(scenarioCommand);
 program.addCommand(snapshotCommand);
