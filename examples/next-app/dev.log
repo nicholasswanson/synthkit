@@ -1,445 +1,85 @@
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+npm warn Unknown project config "strict-peer-dependencies". This will stop working in the next major version of npm.
 
-> @synthkit/example-next@0.1.0 dev /Users/nicholasswanson/synthkit/examples/next-app
+> @synthkit/example-next@0.1.0 dev
 > next dev
 
   ▲ Next.js 14.2.3
   - Local:        http://localhost:3000
 
  ✓ Starting...
-npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
-npm warn Unknown env config "auto-install-peers". This will stop working in the next major version of npm.
-npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm.
-npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
-npm warn Unknown project config "strict-peer-dependencies". This will stop working in the next major version of npm.
-npm error code ENOWORKSPACES
-npm error This command does not support workspaces.
-npm error A complete log of this run can be found in: /Users/nicholasswanson/.npm/_logs/2025-09-02T23_10_23_181Z-debug-0.log
- ✓ Ready in 1535ms
- ○ Compiling / ...
- ⚠ ../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
-
-../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:228:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:206:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1371655141"
- GET / 500 in 2791ms
- ⚠ ../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
-
-../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:228:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:206:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1371655141"
- GET / 500 in 15ms
- ⚠ ../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
-
-../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
- ⚠ ../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
-
-../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
- ⚠ ../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
-
-../../packages/synthkit-sdk/dist/index.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-../../packages/synthkit-sdk/dist/index.js
-./src/app/providers.tsx
- ✓ Compiled / in 50ms (457 modules)
- ✓ Compiled in 56ms (457 modules)
- ✓ Compiled in 49ms (457 modules)
- ✓ Compiled in 59ms (457 modules)
- ✓ Compiled in 324ms (457 modules)
- ✓ Compiled / in 209ms (443 modules)
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:173:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:151:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1682552745"
- GET / 500 in 276ms
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:173:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:151:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1682552745"
- GET / 500 in 11ms
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:173:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:151:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1682552745"
- GET / 500 in 10ms
- ⨯ Invariant Violation: [MSW] Failed to execute `setupWorker` in a non-browser environment. Consider using `setupServer` for Node.js environment instead.
-    at eval (./src/lib/mock-service-worker.ts:13:72)
-    at (ssr)/./src/lib/mock-service-worker.ts (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:173:1)
-    at __webpack_require__ (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-    at eval (./src/app/providers.tsx:9:82)
-    at (ssr)/./src/app/providers.tsx (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/app/page.js:151:1)
-    at Object.__webpack_require__ [as require] (/Users/nicholasswanson/synthkit/examples/next-app/.next/server/webpack-runtime.js:33:42)
-digest: "1682552745"
- GET / 500 in 14ms
- ✓ Compiled in 150ms (859 modules)
- ✓ Compiled in 64ms (886 modules)
- ✓ Compiled in 65ms (886 modules)
- ✓ Compiled in 52ms (886 modules)
- ⨯ src/app/providers.tsx (123:7) @ store
- ⨯ ReferenceError: store is not defined
-    at Providers (./src/app/providers.tsx:127:9)
-digest: "2742711995"
-[0m [90m 121 |[39m[0m
-[0m [90m 122 |[39m     initialize()[33m;[39m[0m
-[0m[31m[1m>[22m[39m[90m 123 |[39m   }[33m,[39m [store])[33m;[39m[0m
-[0m [90m     |[39m       [31m[1m^[22m[39m[0m
-[0m [90m 124 |[39m[0m
-[0m [90m 125 |[39m   [36mif[39m ([33m![39misReady) {[0m
-[0m [90m 126 |[39m     [36mreturn[39m [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex items-center justify-center min-h-screen"[39m[33m>[39m[0m
- GET / 500 in 48ms
- ✓ Compiled in 131ms (900 modules)
- GET / 200 in 35ms
- ✓ Compiled in 105ms (900 modules)
- ✓ Compiled in 65ms (457 modules)
- GET / 200 in 44ms
- GET / 200 in 10ms
- GET / 200 in 10ms
- GET / 200 in 72ms
- ✓ Compiled /_not-found in 395ms (889 modules)
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 427ms
- GET / 200 in 15ms
- ✓ Compiled in 99ms (903 modules)
- ✓ Compiled in 136ms (903 modules)
- ⨯ ./src/app/providers.tsx
-Error: 
-  [31mx[0m Expected ',', got 'initialize'
-     ,-[[36;1;4m/Users/nicholasswanson/synthkit/examples/next-app/src/app/providers.tsx[0m:139:1]
- [2m139[0m |     }, 10000); // 10 second timeout
- [2m140[0m |     }
- [2m141[0m | 
- [2m142[0m |     initialize();
-     : [31;1m    ^^^^^^^^^^[0m
- [2m143[0m |   }, []);
- [2m144[0m | 
- [2m145[0m |   if (!isReady) {
-     `----
-
-Caused by:
-    Syntax Error
-
-Import trace for requested module:
-./src/app/providers.tsx
-./src/app/layout.tsx
- ⨯ ./src/app/providers.tsx
-Error: 
-  [31mx[0m Expected ',', got 'initialize'
-     ,-[[36;1;4m/Users/nicholasswanson/synthkit/examples/next-app/src/app/providers.tsx[0m:139:1]
- [2m139[0m |     }, 10000); // 10 second timeout
- [2m140[0m |     }
- [2m141[0m | 
- [2m142[0m |     initialize();
-     : [31;1m    ^^^^^^^^^^[0m
- [2m143[0m |   }, []);
- [2m144[0m | 
- [2m145[0m |   if (!isReady) {
-     `----
-
-Caused by:
-    Syntax Error
-
-Import trace for requested module:
-./src/app/providers.tsx
-./src/app/layout.tsx
- GET / 500 in 3ms
- GET /.well-known/appspecific/com.chrome.devtools.json 500 in 7ms
- ○ Compiling /_error ...
- ✓ Compiled /_error in 187ms (1113 modules)
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- GET /_next/static/webpack/65e9079dcc4d65f8.webpack.hot-update.json 404 in 246ms
- GET / 200 in 67ms
- GET / 200 in 11ms
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 15ms
- ✓ Compiled in 186ms (1127 modules)
- GET / 200 in 26ms
- ✓ Compiled in 41ms (642 modules)
- ✓ Compiled in 47ms (642 modules)
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 217ms (1122 modules)
- GET / 200 in 165ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 116ms (1122 modules)
- GET / 200 in 82ms
- ✓ Compiled in 160ms (1122 modules)
- GET / 200 in 17ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 170ms (1089 modules)
-Providers component rendering
- GET / 200 in 26ms
-Providers component rendering
- GET / 200 in 9ms
- ✓ Compiled in 76ms (1089 modules)
-Providers component rendering
- GET / 200 in 40ms
- ✓ Compiled /_not-found in 96ms (1078 modules)
-Providers component rendering
-Providers component rendering
- GET /api/users 404 in 120ms
- GET /api/invoices 404 in 121ms
-Providers component rendering
-Providers component rendering
- GET /api/users 404 in 12ms
- GET /api/invoices 404 in 12ms
-Providers component rendering
- GET / 200 in 26ms
-Providers component rendering
-Providers component rendering
- GET /api/users 404 in 14ms
- GET /api/invoices 404 in 14ms
-Providers component rendering
-Providers component rendering
- GET /api/users 404 in 11ms
- GET /api/invoices 404 in 11ms
-Providers component rendering
- GET /api/users 404 in 15ms
-Providers component rendering
- GET /api/invoices 404 in 14ms
- ✓ Compiled in 228ms (1122 modules)
- ✓ Compiled in 84ms (1122 modules)
- ✓ Compiled in 176ms (1122 modules)
- ✓ Compiled in 196ms (1124 modules)
- GET / 200 in 53ms
- GET / 200 in 8ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 228ms (1122 modules)
- GET / 200 in 97ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 98ms (1122 modules)
- GET / 200 in 72ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 174ms (1122 modules)
- GET / 200 in 93ms
- ✓ Compiled in 92ms (1120 modules)
- GET / 200 in 16ms
- GET / 200 in 9ms
- ✓ Compiled in 89ms (1091 modules)
- GET / 200 in 23ms
- GET / 200 in 9ms
- ✓ Compiled in 367ms (686 modules)
- ⨯ src/app/layout.tsx (21:10) @ Providers
- ⨯ ReferenceError: Providers is not defined
-    at RootLayout (./src/app/layout.tsx:23:99)
-    at stringify (<anonymous>)
-digest: "1275381636"
-[0m [90m 19 |[39m     [33m<[39m[33mhtml[39m lang[33m=[39m[32m"en"[39m[33m>[39m[0m
-[0m [90m 20 |[39m       [33m<[39m[33mbody[39m className[33m=[39m{inter[33m.[39mclassName}[33m>[39m[0m
-[0m[31m[1m>[22m[39m[90m 21 |[39m         [33m<[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m    |[39m          [31m[1m^[22m[39m[0m
-[0m [90m 22 |[39m           {children}[0m
-[0m [90m 23 |[39m         [33m<[39m[33m/[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m 24 |[39m       [33m<[39m[33m/[39m[33mbody[39m[33m>[39m[0m
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ⨯ src/app/layout.tsx (21:10) @ Providers
- ⨯ ReferenceError: Providers is not defined
-    at RootLayout (./src/app/layout.tsx:23:99)
-    at stringify (<anonymous>)
-digest: "130474950"
-[0m [90m 19 |[39m     [33m<[39m[33mhtml[39m lang[33m=[39m[32m"en"[39m[33m>[39m[0m
-[0m [90m 20 |[39m       [33m<[39m[33mbody[39m className[33m=[39m{inter[33m.[39mclassName}[33m>[39m[0m
-[0m[31m[1m>[22m[39m[90m 21 |[39m         [33m<[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m    |[39m          [31m[1m^[22m[39m[0m
-[0m [90m 22 |[39m           {children}[0m
-[0m [90m 23 |[39m         [33m<[39m[33m/[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m 24 |[39m       [33m<[39m[33m/[39m[33mbody[39m[33m>[39m[0m
- ⨯ src/app/layout.tsx (21:10) @ Providers
- ⨯ ReferenceError: Providers is not defined
-    at RootLayout (./src/app/layout.tsx:23:99)
-    at stringify (<anonymous>)
-digest: "130474950"
-[0m [90m 19 |[39m     [33m<[39m[33mhtml[39m lang[33m=[39m[32m"en"[39m[33m>[39m[0m
-[0m [90m 20 |[39m       [33m<[39m[33mbody[39m className[33m=[39m{inter[33m.[39mclassName}[33m>[39m[0m
-[0m[31m[1m>[22m[39m[90m 21 |[39m         [33m<[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m    |[39m          [31m[1m^[22m[39m[0m
-[0m [90m 22 |[39m           {children}[0m
-[0m [90m 23 |[39m         [33m<[39m[33m/[39m[33mProviders[39m[33m>[39m[0m
-[0m [90m 24 |[39m       [33m<[39m[33m/[39m[33mbody[39m[33m>[39m[0m
- GET / 500 in 30ms
- ⚠ Fast Refresh had to perform a full reload due to a runtime error.
- ✓ Compiled in 52ms (686 modules)
- GET / 200 in 6ms
- GET / 200 in 28ms
- ✓ Compiled /_not-found in 83ms (675 modules)
- GET /api/invoices 404 in 119ms
- GET /api/users 404 in 120ms
- GET /api/users 404 in 12ms
- GET /api/invoices 404 in 12ms
- GET / 200 in 13ms
- ✓ Compiled in 52ms (689 modules)
- ✓ Compiled in 62ms (689 modules)
- GET / 200 in 25ms
- GET /api/users 404 in 13ms
- GET /api/invoices 404 in 14ms
- GET /api/users 404 in 11ms
- GET /api/invoices 404 in 9ms
- ✓ Compiled in 875ms (1113 modules)
- ✓ Compiled in 116ms (1113 modules)
- GET / 200 in 34ms
- ✓ Compiled in 106ms (1113 modules)
- ✓ Compiled /_not-found in 173ms (1102 modules)
- GET /api/users 404 in 210ms
- GET /api/invoices 404 in 16ms
- GET /api/users 404 in 15ms
- GET /api/invoices 404 in 13ms
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 16ms
- ✓ Compiled in 248ms (1116 modules)
- ✓ Compiled in 113ms (1116 modules)
- ✓ Compiled in 224ms (1116 modules)
- ✓ Compiled in 107ms (1116 modules)
- ✓ Compiled in 66ms (637 modules)
- ✓ Compiled in 127ms (1116 modules)
- ✓ Compiled in 194ms (1116 modules)
- ✓ Compiled in 203ms (1113 modules)
- ✓ Compiled in 155ms (1113 modules)
- ✓ Compiled in 116ms (1113 modules)
- ✓ Compiled in 145ms (1113 modules)
- GET / 200 in 36ms
- ✓ Compiled in 82ms (1113 modules)
- ✓ Compiled in 235ms (1113 modules)
- ✓ Compiled in 120ms (1113 modules)
- ✓ Compiled in 159ms (1113 modules)
- ✓ Compiled in 100ms (1113 modules)
- ✓ Compiled in 99ms (1113 modules)
- ✓ Compiled in 142ms (1113 modules)
- ✓ Compiled in 95ms (1113 modules)
- ✓ Compiled in 101ms (1113 modules)
- ✓ Compiled in 132ms (1113 modules)
- GET / 200 in 35ms
- ✓ Compiled in 248ms (1113 modules)
- GET / 200 in 32ms
- ✓ Compiled /_not-found in 241ms (1102 modules)
- GET /api/users 404 in 278ms
- GET /api/invoices 404 in 278ms
- GET /api/users 404 in 16ms
- GET /api/invoices 404 in 16ms
- GET /api/users 404 in 15ms
- GET /api/invoices 404 in 16ms
- GET /api/users 404 in 10ms
- GET /api/invoices 404 in 16ms
- GET /api/users 404 in 19ms
- GET /api/invoices 404 in 19ms
- GET /api/users 404 in 15ms
- GET /api/invoices 404 in 13ms
- GET /api/invoices 404 in 12ms
- GET /api/users 404 in 15ms
- GET /api/invoices 404 in 16ms
- GET /api/invoices 404 in 18ms
- GET /api/users 404 in 13ms
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 23ms
- GET / 200 in 27ms
- GET / 200 in 21ms
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 19ms
- ✓ Compiled in 244ms (635 modules)
- ✓ Compiled in 63ms (635 modules)
- ✓ Compiled in 266ms (1113 modules)
- ✓ Compiled in 47ms (635 modules)
- GET / 200 in 23ms
- ✓ Compiled /_not-found in 97ms (1102 modules)
- GET /api/users 404 in 116ms
- GET / 200 in 12ms
- ✓ Compiled in 58ms (637 modules)
- GET / 200 in 21ms
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 32ms
- GET /api/users 404 in 15ms
- GET / 200 in 12ms
- GET / 200 in 11ms
- GET / 200 in 19ms
- ✓ Compiled in 435ms (1113 modules)
- GET / 200 in 23ms
- ✓ Compiled in 231ms (1113 modules)
- GET / 200 in 64ms
- ✓ Compiled in 270ms (1113 modules)
- ✓ Compiled in 140ms (1113 modules)
- ✓ Compiled in 103ms (1113 modules)
- ✓ Compiled in 105ms (1113 modules)
- GET / 200 in 37ms
- GET / 200 in 114ms
- ✓ Compiled in 191ms (1113 modules)
- ✓ Compiled in 233ms (1113 modules)
- ✓ Compiled in 112ms (1113 modules)
- ✓ Compiled in 107ms (1113 modules)
- GET / 200 in 25ms
- ✓ Compiled in 123ms (1113 modules)
- ✓ Compiled in 238ms (1113 modules)
- ✓ Compiled in 106ms (1113 modules)
- ✓ Compiled in 166ms (1113 modules)
- ✓ Compiled in 98ms (1113 modules)
- ✓ Compiled in 101ms (1113 modules)
- ✓ Compiled in 137ms (1113 modules)
- GET / 200 in 25ms
- ✓ Compiled in 174ms (1113 modules)
- ✓ Compiled in 252ms (1113 modules)
- ✓ Compiled in 114ms (1113 modules)
- ✓ Compiled in 145ms (1113 modules)
- ✓ Compiled in 108ms (1113 modules)
- GET / 200 in 26ms
- ✓ Compiled in 224ms (1113 modules)
- GET / 200 in 41ms
+ ✓ Ready in 1442ms
+ ✓ Compiled /api/ai/analyze in 171ms (54 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/analyze 200 in 209ms
+ ✓ Compiled /api/ai/match in 37ms (56 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/match 200 in 51ms
+ ✓ Compiled /api/ai/generate in 17ms (58 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 24ms
+ ○ Compiling /ai ...
+ ✓ Compiled /ai in 1233ms (508 modules)
+ GET /ai 200 in 1289ms
+ ✓ Compiled in 64ms (240 modules)
+ ✓ Compiled in 240ms (499 modules)
+ GET /ai 200 in 203ms
+Anthropic SDK not available, using mock client
+ POST /api/ai/analyze 200 in 22ms
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 24ms
+ ✓ Compiled in 227ms (495 modules)
+ ✓ Compiled in 65ms (495 modules)
+ ✓ Compiled in 61ms (464 modules)
+ ✓ Compiled in 98ms (464 modules)
+ ✓ Compiled in 67ms (464 modules)
+ ✓ Compiled in 67ms (464 modules)
+ ✓ Compiled in 184ms (464 modules)
+ ✓ Compiled in 109ms (464 modules)
+ ✓ Compiled /api/ai/generate in 108ms (257 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 140ms
+ ✓ Compiled in 46ms (240 modules)
+ ✓ Compiled in 103ms (497 modules)
+ ✓ Compiled in 117ms (497 modules)
+ ✓ Compiled in 79ms (497 modules)
+ ✓ Compiled in 94ms (497 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 11ms
+ ✓ Compiled /api/ai/activate in 33ms (259 modules)
+ POST /api/ai/activate 200 in 42ms
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 5ms
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 3ms
+ ✓ Compiled in 160ms (497 modules)
+ ✓ Compiled in 84ms (497 modules)
+ ✓ Compiled in 72ms (497 modules)
+ ✓ Compiled in 97ms (497 modules)
+ ✓ Compiled in 65ms (497 modules)
+ ✓ Compiled in 169ms (497 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 11ms
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 4ms
+ ✓ Compiled in 234ms (497 modules)
+ ✓ Compiled /api/ai/analyze in 109ms (255 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/analyze 200 in 131ms
+ ✓ Compiled /api/ai/generate in 40ms (259 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/generate 200 in 61ms
+ ✓ Compiled /api/ai/match in 74ms (261 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/match 200 in 86ms
+ ✓ Compiled /api/ai/activate in 75ms (256 modules)
+ POST /api/ai/activate 200 in 88ms
+ ✓ Compiled /api/ai/analyze in 67ms (255 modules)
+Anthropic SDK not available, using mock client
+ POST /api/ai/analyze 200 in 81ms
+ ✓ Compiled /_not-found in 167ms (484 modules)
+ GET /api/customers 404 in 208ms
+ GET /api/payments 404 in 205ms
+ GET /api/customers 404 in 15ms
+   Reload env: .env.local
+ ✓ Compiled in 87ms (453 modules)

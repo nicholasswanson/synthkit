@@ -286,7 +286,15 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-8">
       <div className="z-10 max-w-6xl w-full">
-        <h1 className="text-4xl font-bold mb-8">Synthkit Next.js Example</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">Synthkit Next.js Example</h1>
+          <a 
+            href="/ai" 
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
+          >
+            🤖 Try AI Demo
+          </a>
+        </div>
         
         {/* Scenario Configuration */}
         <div className="mb-8">
