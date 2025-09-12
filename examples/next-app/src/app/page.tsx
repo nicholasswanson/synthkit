@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { AnalysisResult } from './components/AIComponents';
 
 interface Customer {
   id: string;
@@ -17,6 +18,31 @@ interface Payment {
   status: string;
   paymentMethod: string;
   createdAt: string;
+}
+
+// AI-related interfaces
+interface AnalysisData {
+  success: boolean;
+  analysis?: {
+    businessContext: {
+      type: string;
+      stage: string;
+      primaryFeatures: string[];
+      targetAudience: string[];
+      monetizationModel: string;
+    };
+    entities: Array<{
+      name: string;
+      type: string;
+      relationships: string[];
+      estimatedVolume: string;
+    }>;
+    userRoles: string[];
+    keyFeatures: string[];
+    confidence: number;
+    reasoning: string[];
+  };
+  processingTime: number;
 }
 
 // Global scenario reference that MSW handlers can access
@@ -141,6 +167,13 @@ export default function Home() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [mswStatus, setMswStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  
+  // AI-related state
+  const [aiDescription, setAiDescription] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisData | null>(null);
+  const [showAiResults, setShowAiResults] = useState(false);
 
   // Initialize MSW and set up handlers
   useEffect(() => {
@@ -250,6 +283,40 @@ export default function Home() {
     handleScenarioChange('id', newId);
   };
 
+  // AI analysis handler
+  const handleAiAnalyze = async () => {
+    if (!aiDescription.trim()) return;
+    
+    setAiLoading(true);
+    setAiError(null);
+    
+    try {
+      const response = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: aiDescription })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Analysis failed');
+      }
+      
+      const data = await response.json();
+      setAnalysisResult(data);
+      setShowAiResults(true);
+      
+      // Update URL to show AI results
+      const url = new URL(window.location.href);
+      url.searchParams.set('ai', 'true');
+      window.history.pushState({}, '', url);
+    } catch (error) {
+      setAiError('Failed to analyze. Please try again.');
+      console.error('AI analysis error:', error);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleSaveSnapshot = () => {
     const snapshot = {
       scenario: { ...scenario },
@@ -275,6 +342,14 @@ export default function Home() {
     }
   }, []);
 
+  // Check for AI parameter on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('ai') === 'true') {
+      setShowAiResults(true);
+    }
+  }, []);
+
   const getMswStatusDisplay = () => {
     switch (mswStatus) {
       case 'loading': return <div className="text-sm px-3 py-1 rounded text-yellow-600 bg-yellow-50">⏳ MSW Loading</div>;
@@ -288,12 +363,6 @@ export default function Home() {
       <div className="z-10 max-w-6xl w-full">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Synthkit Next.js Example</h1>
-          <a 
-            href="/ai" 
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
-          >
-            🤖 Try AI Demo
-          </a>
         </div>
         
         {/* Scenario Configuration */}
@@ -477,6 +546,83 @@ export default function Home() {
           </div>
         </div>
 
+        {/* AI Business Analysis */}
+        <div className="mt-8 space-y-4">
+          <h2 className="text-2xl font-semibold">🤖 AI Business Analysis</h2>
+          <div className="border dark:border-gray-700 rounded-lg p-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Describe your business idea
+                </label>
+                <textarea
+                  value={aiDescription}
+                  onChange={(e) => setAiDescription(e.target.value)}
+                  placeholder="E.g., A fitness app for tracking workouts and meal planning with social features..."
+                  className="w-full h-24 p-3 border dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white"
+                  disabled={aiLoading}
+                />
+              </div>
+              
+              <div className="flex gap-4 flex-wrap">
+                <button
+                  onClick={() => setAiDescription('A fitness app for tracking workouts and meal planning with social features')}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Try: Fitness App
+                </button>
+                <button
+                  onClick={() => setAiDescription('An e-commerce marketplace for handmade crafts and artisanal products')}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Try: Craft Marketplace
+                </button>
+                <button
+                  onClick={() => setAiDescription('A SaaS project management tool for remote teams with time tracking')}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Try: Project Management
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleAiAnalyze}
+                  disabled={aiLoading || !aiDescription.trim()}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {aiLoading ? 'Analyzing...' : 'Analyze Business'}
+                </button>
+                
+                {aiError && (
+                  <p className="text-red-500 text-sm">{aiError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Results */}
+        {showAiResults && analysisResult && (
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold">Analysis Results</h2>
+              <button
+                onClick={() => {
+                  setShowAiResults(false);
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete('ai');
+                  window.history.pushState({}, '', url);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕ Hide Results
+              </button>
+            </div>
+            <AnalysisResult data={analysisResult} />
+          </div>
+        )}
+
         {/* How it works */}
         <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
           <h3 className="font-semibold mb-2">How it works:</h3>
@@ -492,6 +638,30 @@ export default function Home() {
             <p className="text-xs text-gray-500 dark:text-gray-400">
               💡 Try changing the category to "fluxly", "mindora", or "stratus", role to "support", or ID to a different number and click "Apply Scenario"!
             </p>
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <h3 className="font-semibold mb-2">Next Steps</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 className="font-medium mb-1">📖 Documentation</h4>
+              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                <li>• <a href="https://github.com/nicholasswanson/synthkit#-quick-start" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Quick Start Guide</a></li>
+                <li>• <a href="https://github.com/nicholasswanson/synthkit#react-integration" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">React Integration</a></li>
+                <li>• <a href="https://github.com/nicholasswanson/synthkit#nextjs-integration" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Next.js Integration</a></li>
+                <li>• <a href="https://github.com/nicholasswanson/synthkit#-cli-usage" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">CLI Commands</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-1">🚀 Quick Actions</h4>
+              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                <li>• Install: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">npm install @synthkit/sdk</code></li>
+                <li>• Init project: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">synthkit init my-app</code></li>
+                <li>• <a href="https://github.com/nicholasswanson/synthkit" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View on GitHub</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
