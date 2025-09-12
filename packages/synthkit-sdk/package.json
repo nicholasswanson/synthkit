@@ -20,16 +20,33 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
+    "test:ci": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-
-    "json-schema-faker": "^0.5.9",
-    "zod": "^3.23.8",
-    "zustand": "^4.5.2"
+    "@faker-js/faker": "catalog:",
+    "json-schema-faker": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
-    "@types/json-schema": "^7.0.15",
-    "@types/node": "^20.12.7"
-  }
+    "@types/json-schema": "catalog:",
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "keywords": [
+    "synthkit",
+    "sdk",
+    "mock-data",
+    "scenario-generation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicholasswanson/synthkit",
+    "directory": "packages/synthkit-sdk"
+  },
+  "license": "MIT"
 }

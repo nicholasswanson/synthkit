@@ -13,7 +13,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "vitest",
-    "test:ci": "vitest run",
+    "test:ci": "vitest run --coverage",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
@@ -23,22 +23,28 @@
     "validate:single": "node tools/governance/validate-pack.js",
     "pre-commit": "pnpm validate && pnpm build && pnpm typecheck",
     "dev": "pnpm --filter @synthkit/examples-next-app dev",
-    "cli": "node tools/cli/dist/cli.mjs"
+    "cli": "node tools/cli/dist/cli.mjs",
+    "setup": "pnpm install && pnpm build",
+    "update-deps": "node tools/update-deps.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5",
-    "vitest": "^1.4.0"
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=20.11.0 <21.0.0",
+    "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@9.12.3",
   "keywords": [
     "mock",
     "data",
@@ -48,11 +54,13 @@
     "personas",
     "msw",
     "json-schema",
-    "faker"
+    "faker",
+    "ai",
+    "claude"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/synthkit/synthkit"
+    "url": "https://github.com/nicholasswanson/synthkit"
   },
   "license": "MIT",
   "author": {

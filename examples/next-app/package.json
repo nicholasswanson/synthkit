@@ -3,27 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@synthkit/client": "workspace:*",
     "@synthkit/sdk": "workspace:*",
     "@synthkit/ai": "workspace:*",
-    "msw": "^2.11.1",
-    "next": "14.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@anthropic-ai/sdk": "catalog:",
+    "msw": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.0",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.4.5"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9.0.0"
   }
 }

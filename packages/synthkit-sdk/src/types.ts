@@ -3,6 +3,7 @@ import type { JSONSchema7 } from 'json-schema';
 
 // Core types for data generation aligned with synthetic-dataset structure
 export interface GenerationContext {
+  seed?: number;
   id?: number;
   locale?: string;
   timeZone?: string;
@@ -18,29 +19,20 @@ export interface GeneratorOptions<T = any> {
 export interface DataPack {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   version: string;
   schemas: Record<string, JSONSchema7>;
-  categories: Record<string, Category>;
-  roles: Record<string, Role>;
+  scenarios: Record<string, Scenario>;
+  personas: Record<string, Persona>;
   routes?: Record<string, RouteConfig>;
 }
 
-export interface Generator<T = any> {
-  name: string;
-  generate: (options?: GeneratorOptions<T>) => T;
-  generateMany: (count: number, options?: GeneratorOptions<T>) => T[];
-  schema?: z.ZodType<T>;
-}
-
-// Categories represent business contexts (e.g., techstyle, saas, marketplace)
-export interface Category {
+export interface Scenario {
   id: string;
   name: string;
   description?: string;
-  businessType: 'ecommerce' | 'saas' | 'marketplace' | 'fintech' | 'healthcare' | 'education' | 'nonprofit';
   config: {
-    id?: number;
+    seed?: number;
     locale?: string;
     dateRange?: {
       start: string;
@@ -50,70 +42,104 @@ export interface Category {
       users?: number;
       products?: number;
       orders?: number;
-      subscriptions?: number;
-      transactions?: number;
       [key: string]: number | undefined;
     };
     relationships?: Record<string, any>;
-    complexity?: 'early' | 'growth' | 'enterprise';
   };
 }
 
-// Roles define access levels and data visibility (admin, support, etc.)
-export interface Role {
+export interface Persona {
   id: string;
   name: string;
   description?: string;
-  accessLevel: 'admin' | 'support' | 'readonly';
-  dataVisibility: {
-    // Fields that should be hidden for this role
-    hiddenFields?: string[];
-    // Fields that should be replaced with "hidden" value
-    maskedFields?: string[];
-    // Full access to all data
-    fullAccess?: boolean;
+  preferences?: {
+    locale?: string;
+    timezone?: string;
+    currency?: string;
+    [key: string]: any;
   };
   overrides?: Record<string, any>;
 }
 
 export interface RouteConfig {
-  schema: string;
-  rest?: boolean;
-  methods?: string[];
-  middleware?: string[];
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  path: string;
+  schema?: string;
+  count?: number;
+  delay?: number;
 }
 
-// Active scenario configuration combining category + role + stage + id
-export interface ActiveScenario {
-  category: string;  // Business context (techstyle, saas, etc.)
-  role: string;      // Access role (admin, support)
-  stage: 'early' | 'growth' | 'enterprise';  // Business maturity stage
-  id: number;        // Deterministic ID for generation
-}
-
+// Configuration types
 export interface SynthConfig {
+  version: string;
   packs: string[];
-  scenario?: ActiveScenario;
-  generators: {
-    id?: number;
-    locale?: string;
-    timeZone?: string;
-  };
-  msw?: {
-    enabled?: boolean;
-    delay?: number | { min: number; max: number };
-  };
+  scenarios: Record<string, ScenarioConfig>;
+  activeScenario?: string;
+  defaultPersona?: string;
 }
 
-// Legacy type aliases for backward compatibility
-/** @deprecated Use DataPack instead */
-export type ScenarioPack = DataPack;
+export interface ScenarioConfig {
+  category: string;
+  role: string;
+  stage: 'early' | 'growth' | 'enterprise';
+  id: number;
+  locale?: string;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+  volume?: Record<string, number>;
+  relationships?: Record<string, any>;
+}
 
-/** @deprecated Use Category instead */
-export type Scenario = Category;
+// Zod schemas for validation
+export const GenerationContextSchema = z.object({
+  seed: z.number().optional(),
+  id: z.number().optional(),
+  locale: z.string().optional(),
+  timeZone: z.string().optional(),
+  baseDate: z.date().optional(),
+});
 
-/** @deprecated Use Role instead */
-export type Persona = Role;
+export const ScenarioConfigSchema = z.object({
+  category: z.string(),
+  role: z.string(),
+  stage: z.enum(['early', 'growth', 'enterprise']),
+  id: z.number(),
+  locale: z.string().optional(),
+  dateRange: z.object({
+    start: z.string(),
+    end: z.string(),
+  }).optional(),
+  volume: z.record(z.number()).optional(),
+  relationships: z.record(z.any()).optional(),
+});
 
+export const SynthConfigSchema = z.object({
+  version: z.string(),
+  packs: z.array(z.string()),
+  scenarios: z.record(ScenarioConfigSchema),
+  activeScenario: z.string().optional(),
+  defaultPersona: z.string().optional(),
+});
+
+// Legacy types for backward compatibility
 /** @deprecated Use GenerationContext instead */
 export type ScenarioContext = GenerationContext;
+
+/** @deprecated Use ScenarioConfig instead */
+export type LegacyScenario = ScenarioConfig;
+
+// Generator interface
+export interface Generator<T = any> {
+  name: string;
+  generate: (opts?: GeneratorOptions<T>) => T;
+  generateMany: (count: number, opts?: GeneratorOptions<T>) => T[];
+  schema?: any;
+}  name: string;
+  generate: (opts?: GeneratorOptions<T>) => T;
+  schema?: any;
+}
+
+// ScenarioPack alias for backward compatibility
+export type ScenarioPack = DataPack;

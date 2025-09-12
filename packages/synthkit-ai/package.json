@@ -12,23 +12,26 @@
       "require": "./dist/index.cjs"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
-    "test:ci": "vitest run",
-    "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "test:ci": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@synthkit/sdk": "workspace:*",
-    "@anthropic-ai/sdk": "^0.61.0"
+    "@anthropic-ai/sdk": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.5",
-    "vitest": "^1.4.0"
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@synthkit/sdk": "workspace:*"
