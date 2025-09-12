@@ -16,6 +16,7 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 - 🏢 **Business Categories** - 9 realistic business contexts (Modaic, Stratus, Forksy, etc.)
 - 👥 **Role-Based Access** - Admin/Support roles with data masking capabilities
 - 📈 **Stage-Aware** - Early/Growth/Enterprise complexity levels
+- 🤖 **AI-Powered Analysis** - Describe your business and get intelligent scenario recommendations
 - 🔄 **MSW Integration** - Seamless API mocking with Mock Service Worker
 - ⚡ **Framework Agnostic** - Works with React, Next.js, Vue, and more
 - 📦 **Modular Packs** - Extensible library of domain-specific schemas
@@ -36,6 +37,8 @@ pnpm build
 cd examples/next-app
 pnpm dev
 ```
+
+**🎮 Interactive Demo**: The Next.js example now includes integrated AI analysis - describe your business idea directly in the demo to see intelligent scenario recommendations alongside the traditional manual configuration.
 
 ### **Basic Usage**
 
@@ -99,13 +102,43 @@ module.exports = withSynth({
 });
 ```
 
+### **AI-Powered Business Analysis**
+
+```typescript
+import { DescriptionAnalyzer } from '@synthkit/ai';
+
+const analyzer = new DescriptionAnalyzer();
+
+// Analyze a business description
+const analysis = await analyzer.analyzeDescription({
+  description: "A fitness app for tracking workouts and meal planning with social features"
+});
+
+console.log(analysis.businessContext.type); // "fitness"
+console.log(analysis.entities); // [{ name: "User", type: "person" }, ...]
+console.log(analysis.keyFeatures); // ["workout tracking", "meal planning", ...]
+```
+
+**CLI Integration:**
+```bash
+# Analyze business description
+synthkit ai analyze "A SaaS project management tool for remote teams"
+
+# Find matching scenarios
+synthkit ai match "An e-commerce marketplace for handmade crafts"
+
+# Generate custom scenario
+synthkit ai generate "A nonprofit platform for donations" --save-to-file
+```
+
 ## 📦 **Package Structure**
 
 | Package | Description | Status |
 |---------|-------------|--------|
 | `@synthkit/sdk` | Core generation engine | ✅ Implemented |
 | `@synthkit/client` | React components & providers | ✅ Implemented |
-| `@synthkit/cli` | Command-line interface | 🚧 In Progress |
+| `@synthkit/ai` | AI-powered scenario analysis & generation | ✅ Implemented |
+| `@synthkit/cli` | Command-line interface | ✅ Implemented |
 | `@synthkit/mcp-synth` | MCP server for external tools | ✅ Implemented |
 
 ## 🏢 **Business Categories**
@@ -231,11 +264,17 @@ const growthMarketplace = {
 # Initialize new project
 synthkit init my-project --template next-js
 
+# AI-powered scenario building
+synthkit ai analyze "A fitness app for tracking workouts"
+synthkit ai match "An e-commerce marketplace"
+synthkit ai generate "A SaaS project management tool" --save-to-file
+
 # Generate mock data
 synthkit generate --category modaic --role admin --stage growth --count 100
 
-# List available categories
-synthkit list categories
+# Scenario management
+synthkit scenario list
+synthkit scenario activate modaic-growth-admin
 
 # Create snapshots
 synthkit snapshot create "pre-demo-state"
@@ -395,10 +434,11 @@ pnpm cli generate --category my-pack --role admin --stage growth --count 10
 
 ## 📈 **Roadmap**
 
+- [x] **v1.0**: AI-powered scenario analysis and generation ✅
 - [ ] **v1.1**: Visual scenario builder and pack registry
 - [ ] **v1.2**: Advanced relationship modeling
 - [ ] **v1.3**: Real-time collaboration features
-- [ ] **v2.0**: AI-powered schema generation
+- [ ] **v2.0**: Enhanced AI with custom persona generation
 
 ## 📄 **License**
 
