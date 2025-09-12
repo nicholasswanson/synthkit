@@ -69,6 +69,29 @@ export interface RouteConfig {
   delay?: number;
 }
 
+// Role and Category types
+export interface Role {
+  id: string;
+  name: string;
+  accessLevel: 'admin' | 'support' | 'readonly';
+  dataVisibility?: {
+    fullAccess?: boolean;
+    maskedFields?: string[];
+    hiddenFields?: string[];
+  };
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  stages?: {
+    early?: Record<string, number>;
+    growth?: Record<string, number>;
+    enterprise?: Record<string, number>;
+  };
+}
+
 // Configuration types
 export interface SynthConfig {
   version: string;
@@ -135,9 +158,6 @@ export interface Generator<T = any> {
   name: string;
   generate: (opts?: GeneratorOptions<T>) => T;
   generateMany: (count: number, opts?: GeneratorOptions<T>) => T[];
-  schema?: any;
-}  name: string;
-  generate: (opts?: GeneratorOptions<T>) => T;
   schema?: any;
 }
 
