@@ -619,7 +619,7 @@ export default function Home() {
                 ✕ Hide Results
               </button>
             </div>
-            <AnalysisResult data={analysisResult} />
+            <AnalysisResult result={analysisResult} />
           </div>
         )}
 
