@@ -1,10 +1,14 @@
 {
-  "packs": ["packs/example-pack"],
+  "packs": [
+    "packs/example-pack",
+    "other-basicfunctiona"
+  ],
   "scenarios": {
     "default": {
       "pack": "example-pack",
       "scenario": "development"
-    }
+    },
+    "other-basicfunctiona": "early"
   },
   "generators": {
     "locale": "en-US",

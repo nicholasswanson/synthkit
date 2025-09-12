@@ -11,6 +11,7 @@
   "dependencies": {
     "@synthkit/client": "workspace:*",
     "@synthkit/sdk": "workspace:*",
+    "@synthkit/ai": "workspace:*",
     "msw": "^2.11.1",
     "next": "14.2.3",
     "react": "^18.3.1",

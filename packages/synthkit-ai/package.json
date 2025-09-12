@@ -1,0 +1,49 @@
+{
+  "name": "@synthkit/ai",
+  "version": "0.1.0",
+  "description": "AI-powered scenario generation for Synthkit",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@synthkit/sdk": "workspace:*",
+    "@anthropic-ai/sdk": "^0.61.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.4.0"
+  },
+  "peerDependencies": {
+    "@synthkit/sdk": "workspace:*"
+  },
+  "keywords": [
+    "synthkit",
+    "ai",
+    "scenario-generation",
+    "mock-data",
+    "claude"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicholasswanson/synthkit",
+    "directory": "packages/synthkit-ai"
+  },
+  "license": "MIT"
+}

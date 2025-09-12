@@ -7,6 +7,7 @@ import { packCommand } from './commands/pack';
 import { mockCommand } from './commands/mock';
 import { scenarioCommand } from './commands/scenario';
 import { snapshotCommand } from './commands/snapshot';
+import { createAICommand } from './commands/ai';
 
 const program = new Command();
 
@@ -23,6 +24,7 @@ program.addCommand(packCommand);
 program.addCommand(mockCommand);
 program.addCommand(scenarioCommand);
 program.addCommand(snapshotCommand);
+program.addCommand(createAICommand());
 
 // Global error handler
 program.exitOverride((err) => {

@@ -1,0 +1,183 @@
+// Generated TypeScript definitions for Other Pack
+export interface OtherPackPack {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  schemas: {
+    users: any;
+  };
+  scenarios: {
+    early: Scenario;
+  };
+  personas: {
+    user: Persona;
+    admin: Persona;
+    general_users: Persona;
+  };
+}
+
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  config: {
+    seed: number;
+    dateRange: {
+      start: string;
+      end: string;
+    };
+    volume: Record<string, number>;
+    relationships: Record<string, number>;
+  };
+}
+
+export interface Persona {
+  id: string;
+  name: string;
+  description: string;
+  preferences?: Record<string, any>;
+  overrides: Record<string, any>;
+}
+
+export const OTHER_BASICFUNCTIONA_PACK: OtherPackPack = {
+  "id": "other-basicfunctiona",
+  "name": "Other Pack",
+  "description": "Custom pack for basic functionality business",
+  "version": "1.0.0",
+  "schemas": {
+    "users": {
+      "type": "object",
+      "description": "Users entity",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Users identifier"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.past"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "faker": "date.recent"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "faker": "internet.email"
+        },
+        "firstName": {
+          "type": "string",
+          "faker": "person.firstName"
+        },
+        "lastName": {
+          "type": "string",
+          "faker": "person.lastName"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive",
+            "suspended"
+          ],
+          "default": "active"
+        }
+      },
+      "required": [
+        "id",
+        "createdAt",
+        "email",
+        "firstName",
+        "lastName"
+      ]
+    }
+  },
+  "scenarios": {
+    "early": {
+      "id": "early",
+      "name": "Early Other",
+      "description": "Early stage other with basic functionality",
+      "packId": "other-basicfunctiona",
+      "config": {
+        "seed": 811,
+        "dateRange": {
+          "start": "2024-01-01",
+          "end": "2024-12-31"
+        },
+        "volume": {
+          "users": 500
+        },
+        "relationships": {}
+      }
+    }
+  },
+  "personas": {
+    "user": {
+      "id": "user",
+      "name": "User",
+      "description": "User persona for other business",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/New_York",
+        "currency": "USD"
+      },
+      "overrides": {
+        "user": {
+          "role": "user",
+          "permissions": [
+            "read"
+          ]
+        }
+      }
+    },
+    "admin": {
+      "id": "admin",
+      "name": "Admin",
+      "description": "Admin persona for other business",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/New_York",
+        "currency": "USD"
+      },
+      "overrides": {
+        "user": {
+          "role": "admin",
+          "permissions": [
+            "read",
+            "write",
+            "delete",
+            "admin"
+          ]
+        }
+      }
+    },
+    "general_users": {
+      "id": "general_users",
+      "name": "General users",
+      "description": "General users persona representing target audience",
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/New_York",
+        "currency": "USD"
+      },
+      "overrides": {}
+    }
+  },
+  "routes": {
+    "/api/users": {
+      "schema": "users",
+      "rest": true,
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ]
+    }
+  }
+};
