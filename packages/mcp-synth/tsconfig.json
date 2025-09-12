@@ -4,7 +4,10 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "noEmit": false,
-    "incremental": false
+    "incremental": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "strict": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

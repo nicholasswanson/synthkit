@@ -9,7 +9,7 @@ export function useScenario() {
     setLoading((prev) => ({ ...prev, [scenarioId]: true }));
     
     try {
-      await store.activateScenario(scenarioId);
+      await store.activateCategory(scenarioId);
     } catch (error) {
       console.error(`Failed to activate scenario ${scenarioId}:`, error);
       throw error;
@@ -22,7 +22,7 @@ export function useScenario() {
     setLoading((prev) => ({ ...prev, [scenarioId]: true }));
     
     try {
-      await store.deactivateScenario(scenarioId);
+      await store.deactivateCategory(scenarioId);
     } catch (error) {
       console.error(`Failed to deactivate scenario ${scenarioId}:`, error);
       throw error;
@@ -32,7 +32,7 @@ export function useScenario() {
   }, [store]);
 
   const toggleScenario = useCallback(async (scenarioId: string) => {
-    if (store.isScenarioActive(scenarioId)) {
+    if (store.isCategoryActive(scenarioId)) {
       await deactivateScenario(scenarioId);
     } else {
       await activateScenario(scenarioId);
@@ -40,23 +40,23 @@ export function useScenario() {
   }, [store, activateScenario, deactivateScenario]);
 
   const getScenarios = useCallback(() => {
-    const scenarioList = store.listScenarios();
+    const categoryList = store.listCategories();
     
-    return scenarioList.map(({ packId, scenario }) => ({
-      id: scenario.id,
+    return categoryList.map(({ packId, category }) => ({
+      id: category.id,
       packId,
-      scenario,
-      isActive: store.isScenarioActive(scenario.id),
-      isLoading: loading[scenario.id] || false,
+      scenario: category, // Keep as scenario for compatibility
+      isActive: store.isCategoryActive(category.id),
+      isLoading: loading[category.id] || false,
     }));
   }, [store, loading]);
 
   return {
     scenarios: getScenarios(),
-    activeScenarios: Array.from(store.activeScenarios),
+    activeScenarios: Array.from(store.activeCategories),
     activateScenario,
     deactivateScenario,
     toggleScenario,
-    isScenarioActive: store.isScenarioActive,
+    isScenarioActive: store.isCategoryActive.bind(store),
   };
 }

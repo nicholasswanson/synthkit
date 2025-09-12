@@ -1,16 +1,16 @@
-import { synthStore, SchemaGenerator } from '@synthkit/sdk';
-import type { ScenarioPack } from '@synthkit/sdk';
+import { createSynthStore, SchemaGenerator } from '@synthkit/sdk';
+import type { DataPack, SynthStore } from '@synthkit/sdk';
 import path from 'path';
 import fs from 'fs';
 
 export class MCPSynthServer {
-  private store: ReturnType<typeof synthStore>;
+  private store: SynthStore;
   private generator: SchemaGenerator;
   private globalSeed?: number;
-  private packs: ScenarioPack[] = [];
+  private packs: DataPack[] = [];
 
   constructor() {
-    this.store = synthStore;
+    this.store = createSynthStore();
     this.generator = new SchemaGenerator();
     
     // Load packs from default locations
@@ -40,10 +40,10 @@ export class MCPSynthServer {
               const packPath = path.join(packDir, packName, 'pack.json');
               if (fs.existsSync(packPath)) {
                 const packData = JSON.parse(fs.readFileSync(packPath, 'utf-8'));
-                this.packs.push(packData as ScenarioPack);
+                this.packs.push(packData as DataPack);
                 
                 // Register pack with store
-                this.store.registerPack(packData as ScenarioPack);
+                this.store.registerPack(packData as DataPack);
               }
             } catch (error) {
               console.error(`Failed to load pack ${packName}:`, error);
@@ -84,7 +84,7 @@ export class MCPSynthServer {
     const results = [];
     for (let i = 0; i < count; i++) {
       const itemSeed = effectiveSeed + i;
-      let generated = this.generator.generate(schema, itemSeed);
+      let generated = this.generator.generate(schema, { seed: itemSeed });
       
       // Apply overrides if provided
       if (overrides) {
@@ -114,7 +114,7 @@ export class MCPSynthServer {
     }
 
     // Apply scenario configuration to store (using just scenarioId as expected)
-    await this.store.activateScenario(scenarioId);
+    await this.store.activateCategory(scenarioId);
     
     console.error(`Activated scenario: ${scenarioKey}`);
   }
@@ -125,7 +125,7 @@ export class MCPSynthServer {
       throw new Error('Scenario key must be in format "pack:scenario"');
     }
 
-    await this.store.deactivateScenario(scenarioId);
+    await this.store.deactivateCategory(scenarioId);
     console.error(`Deactivated scenario: ${scenarioKey}`);
   }
 
@@ -175,7 +175,7 @@ export class MCPSynthServer {
           name: scenario.name,
           description: scenario.description || '',
           config: scenario.config,
-          active: this.store.isScenarioActive(scenarioId),
+          active: this.store.isCategoryActive(scenarioId),
         });
       }
     }
@@ -185,7 +185,7 @@ export class MCPSynthServer {
 
   setSeed(seed: number): void {
     this.globalSeed = seed;
-    this.store.setSeed(seed);
+    this.store.setGenerationId(seed);
     console.error(`Global seed set to: ${seed}`);
   }
 

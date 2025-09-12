@@ -22,6 +22,7 @@ export function usePersona() {
     // Generate data for each requested generator
     for (const key of generatorKeys) {
       const [packId, generatorName] = key.split(':');
+      if (!packId || !generatorName) continue;
       const pack = store.getPack(packId);
       
       // TODO: Update to use new schema-based generation
@@ -76,6 +77,7 @@ export function usePersona() {
     // Regenerate data for each generator
     for (const key of persona.generators) {
       const [packId, generatorName] = key.split(':');
+      if (!packId || !generatorName) continue;
       const pack = store.getPack(packId);
       
       // TODO: Update to use new schema-based generation

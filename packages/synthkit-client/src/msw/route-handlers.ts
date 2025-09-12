@@ -1,10 +1,10 @@
 import { http, HttpResponse, type HttpHandler } from 'msw';
-import type { ScenarioPack, RouteConfig } from '@synthkit/sdk';
+import type { DataPack, RouteConfig } from '@synthkit/sdk';
 import { SchemaGenerator } from '@synthkit/sdk';
 import type { JSONSchema7 } from 'json-schema';
 
 export interface RouteHandlerOptions {
-  pack: ScenarioPack;
+  pack: DataPack;
   routePath: string;
   routeConfig: RouteConfig;
   seed?: number;
@@ -19,6 +19,11 @@ export function createRouteHandlers(options: RouteHandlerOptions): HttpHandler[]
   const handlers: HttpHandler[] = [];
   
   // Get the schema for this route
+  if (!routeConfig.schema) {
+    console.warn(`No schema defined for route '${routePath}' in pack '${pack.id}'`);
+    return handlers;
+  }
+  
   const schema = pack.schemas[routeConfig.schema];
   if (!schema) {
     console.warn(`Schema '${routeConfig.schema}' not found in pack '${pack.id}'`);
@@ -28,25 +33,15 @@ export function createRouteHandlers(options: RouteHandlerOptions): HttpHandler[]
   // Create generator with context
   const generator = new SchemaGenerator({ seed, locale });
   
-  if (routeConfig.rest) {
-    // Create REST endpoints
-    handlers.push(...createRESTHandlers({
-      basePath: routePath,
-      schema,
-      generator,
-    }));
-  } else {
-    // Create single endpoint
-    const methods = routeConfig.methods || ['GET'];
-    for (const method of methods) {
-      handlers.push(createSingleHandler({
-        path: routePath,
-        method: method as any,
-        schema,
-        generator,
-      }));
-    }
-  }
+  // For now, just create a simple handler for the specified method
+  const method = routeConfig.method || 'GET';
+  
+  handlers.push(createSingleHandler({
+    path: routePath,
+    method: method as any,
+    schema,
+    generator,
+  }));
   
   return handlers;
 }
@@ -173,7 +168,7 @@ function createSingleHandler(options: SingleHandlerOptions): HttpHandler {
  * Create MSW handlers for all routes in a pack
  */
 export function createPackHandlers(
-  pack: ScenarioPack, 
+  pack: DataPack, 
   options?: { seed?: number; locale?: string }
 ): HttpHandler[] {
   const handlers: HttpHandler[] = [];
@@ -186,7 +181,7 @@ export function createPackHandlers(
     handlers.push(...createRouteHandlers({
       pack,
       routePath,
-      routeConfig,
+      routeConfig: routeConfig as RouteConfig,
       seed: options?.seed,
       locale: options?.locale,
     }));

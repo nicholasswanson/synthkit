@@ -73,12 +73,12 @@ export function PersonaScenarioSwitcher({
 
   // Get all scenarios across all packs
   const scenarios = useMemo(() => {
-    return synth.listScenarios();
+    return synth.listCategories ? synth.listCategories() : [];
   }, [synth]);
 
   // Get all personas across all packs
   const personas = useMemo(() => {
-    return synth.listPersonas();
+    return synth.listRoles ? synth.listRoles() : [];
   }, [synth]);
 
   // Get all snapshots
@@ -160,9 +160,9 @@ export function PersonaScenarioSwitcher({
           title="Scenario"
         >
           <option value="none">No Scenario</option>
-          {scenarios.map(({ packId, scenario }) => (
-            <option key={`${packId}:${scenario.id}`} value={scenario.id}>
-              {scenario.name} ({packId})
+          {scenarios.map(({ packId, category }) => (
+            <option key={`${packId}:${category.id}`} value={category.id}>
+              {category.name} ({packId})
             </option>
           ))}
         </select>
@@ -173,9 +173,9 @@ export function PersonaScenarioSwitcher({
           title="Persona"
         >
           <option value="none">No Persona</option>
-          {personas.map(({ packId, persona }) => (
-            <option key={`${packId}:${persona.id}`} value={persona.id}>
-              {persona.name} ({packId})
+          {personas.map(({ packId, role }) => (
+            <option key={`${packId}:${role.id}`} value={role.id}>
+              {role.name} ({packId})
             </option>
           ))}
         </select>
@@ -208,9 +208,9 @@ export function PersonaScenarioSwitcher({
             onChange={(e) => handleScenarioChange(e.target.value)}
           >
             <option value="none">No Scenario</option>
-            {scenarios.map(({ packId, scenario }) => (
-              <option key={`${packId}:${scenario.id}`} value={scenario.id}>
-                {scenario.name} ({packId})
+            {scenarios.map(({ packId, category }) => (
+              <option key={`${packId}:${category.id}`} value={category.id}>
+                {category.name} ({packId})
               </option>
             ))}
           </select>
@@ -224,9 +224,9 @@ export function PersonaScenarioSwitcher({
             onChange={(e) => handlePersonaChange(e.target.value)}
           >
             <option value="none">No Persona</option>
-            {personas.map(({ packId, persona }) => (
-              <option key={`${packId}:${persona.id}`} value={persona.id}>
-                {persona.name} ({packId})
+            {personas.map(({ packId, role }) => (
+              <option key={`${packId}:${role.id}`} value={role.id}>
+                {role.name} ({packId})
               </option>
             ))}
           </select>
