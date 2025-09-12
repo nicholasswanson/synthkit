@@ -41,13 +41,5 @@ export function mergeConfigs(base: SynthConfig, override: Partial<SynthConfig>):
       ...base.scenarios,
       ...override.scenarios,
     },
-    generators: {
-      ...base.generators,
-      ...override.generators,
-    },
-    msw: {
-      ...base.msw,
-      ...override.msw,
-    },
   };
 }

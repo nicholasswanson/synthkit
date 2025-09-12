@@ -11,6 +11,21 @@ if [[ "$NODE_VERSION" == "not found" ]]; then
     exit 1
 fi
 
+# Extract major version number
+NODE_MAJOR=$(echo $NODE_VERSION | cut -d. -f1 | sed 's/v//')
+if [ "$NODE_MAJOR" -lt "20" ]; then
+    echo "❌ Node.js version $NODE_VERSION is too old!"
+    echo "📌 Required: Node.js >= 20.11.0"
+    echo ""
+    echo "Please upgrade Node.js using one of these methods:"
+    echo "  - nvm: nvm install 20.11.0 && nvm use 20.11.0"
+    echo "  - volta: volta install node@20.11.0"
+    echo "  - Download from: https://nodejs.org/"
+    echo ""
+    echo "After upgrading, run this script again."
+    exit 1
+fi
+
 echo "✅ Node.js version: $NODE_VERSION"
 
 # Check pnpm version

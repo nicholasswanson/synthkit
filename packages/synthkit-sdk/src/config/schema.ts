@@ -1,24 +1,23 @@
 import { z } from 'zod';
 
-export const configSchema = z.object({
-  packs: z.array(z.string()).default([]),
-  scenarios: z.object({
-    default: z.string().optional(),
-    active: z.array(z.string()).optional(),
-  }).default({}),
-  generators: z.object({
-    seed: z.number().optional(),
-    locale: z.string().optional(),
-    timeZone: z.string().optional(),
-  }).default({}),
-  msw: z.object({
-    enabled: z.boolean().default(true),
-    delay: z.union([
-      z.number(),
-      z.object({
-        min: z.number(),
-        max: z.number(),
-      }),
-    ]).optional(),
+const scenarioConfigSchema = z.object({
+  category: z.string(),
+  role: z.string(),
+  stage: z.enum(['early', 'growth', 'enterprise']),
+  id: z.number(),
+  locale: z.string().optional(),
+  dateRange: z.object({
+    start: z.string(),
+    end: z.string(),
   }).optional(),
+  volume: z.record(z.number()).optional(),
+  relationships: z.record(z.any()).optional(),
+});
+
+export const configSchema = z.object({
+  version: z.string().default('1.0.0'),
+  packs: z.array(z.string()).default([]),
+  scenarios: z.record(scenarioConfigSchema).default({}),
+  activeScenario: z.string().optional(),
+  defaultPersona: z.string().optional(),
 });
