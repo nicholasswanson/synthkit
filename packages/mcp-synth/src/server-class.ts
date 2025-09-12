@@ -1,16 +1,16 @@
-import { createSynthStore, SchemaGenerator } from '@synthkit/sdk';
+import { synthStore, SchemaGenerator } from '@synthkit/sdk';
 import type { DataPack, SynthStore } from '@synthkit/sdk';
 import path from 'path';
 import fs from 'fs';
 
 export class MCPSynthServer {
-  private store: SynthStore;
+  private store: any; // TODO: Fix proper typing for Zustand store
   private generator: SchemaGenerator;
   private globalSeed?: number;
   private packs: DataPack[] = [];
 
   constructor() {
-    this.store = createSynthStore();
+    this.store = synthStore as any;
     this.generator = new SchemaGenerator();
     
     // Load packs from default locations
@@ -83,8 +83,9 @@ export class MCPSynthServer {
 
     const results = [];
     for (let i = 0; i < count; i++) {
-      const itemSeed = effectiveSeed + i;
-      let generated = this.generator.generate(schema, { seed: itemSeed });
+      // Create a new generator with specific seed for each item
+      const itemGenerator = new SchemaGenerator({ seed: effectiveSeed + i });
+      let generated = itemGenerator.generate({ schema });
       
       // Apply overrides if provided
       if (overrides) {

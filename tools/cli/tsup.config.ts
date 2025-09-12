@@ -18,7 +18,7 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     format: ['esm'],
-    dts: true,
+    dts: false, // Temporarily disable DTS build due to prompts type issues
     sourcemap: true,
     external: ['inquirer'],
     minify: process.env.NODE_ENV === 'production'
