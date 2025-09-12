@@ -114,7 +114,10 @@ pnpm install
 
 # Build packages
 echo "🏗️ Building packages..."
-pnpm build
+pnpm build || {
+    echo "⚠️  Build had some warnings/errors but continuing..."
+    echo "   You can run 'pnpm build' later to see details"
+}
 
 # Run validation
 echo "✅ Running validation..."

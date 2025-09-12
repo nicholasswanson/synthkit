@@ -42,8 +42,8 @@ export function SynthProvider({
     const handlers: HttpHandler[] = [];
     
     // Get current seed and locale from store
-    const seed = storeState.currentSeed;
-    const locale = storeState.config.generators?.locale;
+    const seed = storeState.currentGenerationId;
+    const locale = 'en-US'; // Default locale
     
     // Generate handlers for each pack
     for (const pack of loadedPacks) {
@@ -79,7 +79,7 @@ export function SynthProvider({
           }
           
           // Setup MSW if enabled
-          if (enableMSW && config?.msw?.enabled !== false) {
+          if (enableMSW) {
             const handlers = generateHandlers(loadedPacks);
             await setupMSW(handlers);
             setMswEnabled(true);

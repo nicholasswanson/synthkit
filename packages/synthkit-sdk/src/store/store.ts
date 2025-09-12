@@ -1,322 +1,301 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type { SynthStore, SynthState, Stage, Snapshot } from './types';
-import type { ScenarioPack, SynthConfig, Scenario, Persona } from '../types';
+import type { DataPack, SynthConfig, Category, Role } from '../types';
 
 const STORAGE_KEY = 'synthkit-store';
 
 const initialState: SynthState = {
   config: {
+    version: '1.0.0',
     packs: [],
     scenarios: {},
-    generators: {},
   },
   packs: new Map(),
-  activeScenarios: new Set(),
-  activeScenario: undefined,
-  activePersona: undefined,
-  activeStage: 'development',
+  activeCategories: new Set(),
+  activeCategory: undefined,
+  activeRole: undefined,
+  activeStage: 'early' as Stage,
   generatedData: new Map(),
   snapshots: new Map(),
-  currentSeed: 12345,
+  currentGenerationId: 12345,
 };
 
 export const createSynthStore = () => create<SynthStore>()(
   devtools(
-    (set, get) => ({
-      ...initialState,
+    persist(
+      (set, get) => ({
+        ...initialState,
 
-      // Config actions
-      setConfig: (config) => set({ config }),
-      
-      updateConfig: (updates) => set((state) => ({
-        config: { ...state.config, ...updates },
-      })),
-
-      // Pack actions
-      registerPack: (pack) => set((state) => {
-        const packs = new Map(state.packs);
-        packs.set(pack.id, pack);
-        return { packs };
-      }),
-
-      unregisterPack: (packId) => set((state) => {
-        const packs = new Map(state.packs);
-        packs.delete(packId);
-        return { packs };
-      }),
-
-      getPack: (packId) => get().packs.get(packId),
-
-      // Scenario actions
-      activateScenario: async (scenarioId) => {
-        const state = get();
+        // Config actions
+        setConfig: (config: SynthConfig) => set({ config }),
         
-        // Find scenario in packs
-        let scenario: Scenario | undefined;
-        let foundPackId: string | undefined;
-        
-        for (const pack of state.packs.values()) {
-          if (pack.scenarios[scenarioId]) {
-            scenario = pack.scenarios[scenarioId];
-            foundPackId = pack.id;
-            break;
-          }
-        }
+        updateConfig: (updates: Partial<SynthConfig>) => 
+          set((state) => ({
+            config: { ...state.config, ...updates }
+          })),
 
-        if (!scenario) {
-          throw new Error(`Scenario '${scenarioId}' not found`);
-        }
+        // Pack actions
+        registerPack: (pack: DataPack) => 
+          set((state) => {
+            const packs = new Map(state.packs);
+            packs.set(pack.id, pack);
+            return { packs };
+          }),
 
-        // Update state with scenario config
-        set((state) => {
-          const activeScenarios = new Set(state.activeScenarios);
-          activeScenarios.add(scenarioId);
-          
-          // Apply scenario config to store
-          const updates: Partial<SynthState> = { 
-            activeScenarios,
-            activeScenario: scenarioId,
-          };
-          
-          // Apply seed if specified
-          if (scenario.config.seed !== undefined) {
-            updates.currentSeed = scenario.config.seed;
-          }
-          
-          // Apply locale if specified
-          if (scenario.config.locale !== undefined) {
-            updates.config = {
-              ...state.config,
-              generators: {
-                ...state.config.generators,
-                locale: scenario.config.locale
-              }
+        unregisterPack: (packId: string) =>
+          set((state) => {
+            const packs = new Map(state.packs);
+            packs.delete(packId);
+            const activeCategories = new Set(state.activeCategories);
+            activeCategories.delete(packId);
+            return { packs, activeCategories };
+          }),
+
+        getPack: (packId: string) => get().packs.get(packId),
+
+        // Category actions
+        activateCategory: async (categoryId: string) => {
+          set((state) => {
+            const activeCategories = new Set(state.activeCategories);
+            activeCategories.add(categoryId);
+            return { 
+              activeCategories,
+              activeCategory: categoryId 
             };
-          }
-          
-          return updates;
-        });
-      },
-
-      deactivateScenario: async (scenarioId) => {
-        set((state) => {
-          const activeScenarios = new Set(state.activeScenarios);
-          activeScenarios.delete(scenarioId);
-          return { 
-            activeScenarios,
-            activeScenario: state.activeScenario === scenarioId ? undefined : state.activeScenario
-          };
-        });
-      },
-
-      isScenarioActive: (scenarioId) => get().activeScenarios.has(scenarioId),
-      
-      getCurrentScenario: () => {
-        const state = get();
-        if (!state.activeScenario) return undefined;
-        
-        for (const pack of state.packs.values()) {
-          if (pack.scenarios[state.activeScenario]) {
-            return pack.scenarios[state.activeScenario];
-          }
-        }
-        return undefined;
-      },
-      
-      listScenarios: () => {
-        const state = get();
-        const scenarios: Array<{ packId: string; scenario: Scenario }> = [];
-        
-        for (const pack of state.packs.values()) {
-          for (const scenario of Object.values(pack.scenarios)) {
-            scenarios.push({ packId: pack.id, scenario });
-          }
-        }
-        
-        return scenarios;
-      },
-
-      // Persona actions
-      activatePersona: (personaId) => {
-        const state = get();
-        
-        // Find persona in packs
-        let persona: Persona | undefined;
-        for (const pack of state.packs.values()) {
-          if (pack.personas[personaId]) {
-            persona = pack.personas[personaId];
-            break;
-          }
-        }
-        
-        if (!persona) {
-          throw new Error(`Persona '${personaId}' not found`);
-        }
-        
-        set({ activePersona: personaId });
-      },
-      
-      deactivatePersona: () => set({ activePersona: undefined }),
-      
-      getCurrentPersona: () => {
-        const state = get();
-        if (!state.activePersona) return undefined;
-        
-        for (const pack of state.packs.values()) {
-          if (pack.personas[state.activePersona]) {
-            return pack.personas[state.activePersona];
-          }
-        }
-        return undefined;
-      },
-      
-      listPersonas: () => {
-        const state = get();
-        const personas: Array<{ packId: string; persona: Persona }> = [];
-        
-        for (const pack of state.packs.values()) {
-          for (const persona of Object.values(pack.personas)) {
-            personas.push({ packId: pack.id, persona });
-          }
-        }
-        
-        return personas;
-      },
-      
-      // Stage actions
-      setStage: (stage) => set({ activeStage: stage }),
-      getStage: () => get().activeStage,
-      
-      // Seed actions
-      setSeed: (seed) => set({ currentSeed: seed }),
-      getSeed: () => get().currentSeed,
-      randomizeSeed: () => set({ currentSeed: Math.floor(Math.random() * 1000000) }),
-      
-      // Data actions
-      setGeneratedData: (key, data) => set((state) => {
-        const generatedData = new Map(state.generatedData);
-        generatedData.set(key, data);
-        return { generatedData };
-      }),
-
-      getGeneratedData: (key) => get().generatedData.get(key),
-
-      clearGeneratedData: () => set({ generatedData: new Map() }),
-      
-      // Snapshot actions
-      createSnapshot: (name) => {
-        const state = get();
-        const snapshotId = `snapshot-${Date.now()}`;
-        const snapshot: Snapshot = {
-          id: snapshotId,
-          name,
-          timestamp: new Date(),
-          state: {
-            activeScenario: state.activeScenario,
-            activePersona: state.activePersona,
-            activeStage: state.activeStage,
-            generatedData: Object.fromEntries(state.generatedData),
-            seed: state.currentSeed,
-          },
-        };
-        
-        set((state) => {
-          const snapshots = new Map(state.snapshots);
-          snapshots.set(snapshotId, snapshot);
-          return { snapshots };
-        });
-        
-        return snapshotId;
-      },
-      
-      restoreSnapshot: (snapshotId) => {
-        const state = get();
-        const snapshot = state.snapshots.get(snapshotId);
-        
-        if (!snapshot) {
-          throw new Error(`Snapshot '${snapshotId}' not found`);
-        }
-        
-        set({
-          activeScenario: snapshot.state.activeScenario,
-          activePersona: snapshot.state.activePersona,
-          activeStage: snapshot.state.activeStage,
-          generatedData: new Map(Object.entries(snapshot.state.generatedData)),
-          currentSeed: snapshot.state.seed,
-        });
-      },
-      
-      deleteSnapshot: (snapshotId) => set((state) => {
-        const snapshots = new Map(state.snapshots);
-        snapshots.delete(snapshotId);
-        return { snapshots };
-      }),
-      
-      listSnapshots: () => {
-        const state = get();
-        return Array.from(state.snapshots.values()).sort(
-          (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-        );
-      },
-      
-      // Persistence actions
-      saveToLocalStorage: () => {
-        const state = get();
-        const serialized = {
-          activeScenario: state.activeScenario,
-          activePersona: state.activePersona,
-          activeStage: state.activeStage,
-          currentSeed: state.currentSeed,
-          generatedData: Object.fromEntries(state.generatedData),
-          snapshots: Object.fromEntries(
-            Array.from(state.snapshots.entries()).map(([id, snapshot]) => [
-              id,
-              {
-                ...snapshot,
-                timestamp: snapshot.timestamp.toISOString(),
-              },
-            ])
-          ),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
-      },
-      
-      loadFromLocalStorage: () => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return;
-        
-        try {
-          const parsed = JSON.parse(stored);
-          set({
-            activeScenario: parsed.activeScenario,
-            activePersona: parsed.activePersona,
-            activeStage: parsed.activeStage || 'development',
-            currentSeed: parsed.currentSeed || 12345,
-            generatedData: new Map(Object.entries(parsed.generatedData || {})),
-            snapshots: new Map(
-              Object.entries(parsed.snapshots || {}).map(([id, snapshot]: [string, any]) => [
-                id,
-                {
-                  ...snapshot,
-                  timestamp: new Date(snapshot.timestamp),
-                },
-              ])
-            ),
           });
-        } catch (error) {
-          console.error('Failed to load from localStorage:', error);
-        }
-      },
+        },
 
-      // Utility actions
-      reset: () => set(initialState),
-    }),
-    {
-      name: 'synthkit-store',
-    }
+        deactivateCategory: async (categoryId: string) => {
+          set((state) => {
+            const activeCategories = new Set(state.activeCategories);
+            activeCategories.delete(categoryId);
+            return { 
+              activeCategories,
+              activeCategory: state.activeCategory === categoryId ? undefined : state.activeCategory
+            };
+          });
+        },
+
+        isCategoryActive: (categoryId: string) => 
+          get().activeCategories.has(categoryId),
+
+        getCurrentCategory: () => {
+          const state = get();
+          if (!state.activeCategory) return undefined;
+          
+          // Find category in packs
+          for (const [, pack] of state.packs) {
+            if (pack.id === state.activeCategory) {
+              return {
+                id: pack.id,
+                name: pack.name,
+                description: pack.description
+              } as Category;
+            }
+          }
+          return undefined;
+        },
+
+        listCategories: () => {
+          const categories: Array<{ packId: string; category: Category }> = [];
+          for (const [packId, pack] of get().packs) {
+            categories.push({
+              packId,
+              category: {
+                id: pack.id,
+                name: pack.name,
+                description: pack.description
+              } as Category
+            });
+          }
+          return categories;
+        },
+
+        // Role actions
+        activateRole: (roleId: string) => set({ activeRole: roleId }),
+        
+        deactivateRole: () => set({ activeRole: undefined }),
+        
+        getCurrentRole: () => {
+          const state = get();
+          if (!state.activeRole) return undefined;
+          
+          // Return a basic role structure
+          return {
+            id: state.activeRole,
+            name: state.activeRole === 'admin' ? 'Administrator' : 'Support Agent',
+            accessLevel: state.activeRole as 'admin' | 'support' | 'readonly'
+          } as Role;
+        },
+        
+        listRoles: () => {
+          // Return standard roles available in the system
+          const roles: Array<{ packId: string; role: Role }> = [
+            {
+              packId: 'system',
+              role: {
+                id: 'admin',
+                name: 'Administrator',
+                accessLevel: 'admin'
+              }
+            },
+            {
+              packId: 'system',
+              role: {
+                id: 'support',
+                name: 'Support Agent',
+                accessLevel: 'support'
+              }
+            }
+          ];
+          return roles;
+        },
+
+        // Stage actions
+        setStage: (stage: Stage) => set({ activeStage: stage }),
+        
+        getCurrentStage: () => get().activeStage,
+        
+        getStage: () => get().activeStage,
+
+        // Generation actions
+        setGenerationId: (id: number) => set({ currentGenerationId: id }),
+        
+        incrementGenerationId: () => 
+          set((state) => ({ currentGenerationId: state.currentGenerationId + 1 })),
+        
+        getCurrentGenerationId: () => get().currentGenerationId,
+        
+        getGenerationId: () => get().currentGenerationId,
+        
+        randomizeGenerationId: () => 
+          set({ currentGenerationId: Math.floor(Math.random() * 100000) }),
+
+        // Data actions
+        setGeneratedData: (key: string, data: any) =>
+          set((state) => {
+            const generatedData = new Map(state.generatedData);
+            generatedData.set(key, data);
+            return { generatedData };
+          }),
+
+        getGeneratedData: (key: string) => get().generatedData.get(key),
+        
+        clearGeneratedData: () => set({ generatedData: new Map() }),
+
+        // Scenario actions
+        setScenario: async (scenario: any) => {
+          const { category, role, stage, id } = scenario;
+          set({
+            activeCategory: category,
+            activeRole: role,
+            activeStage: stage || 'early',
+            currentGenerationId: id || 12345
+          });
+        },
+        
+        getScenario: () => {
+          const state = get();
+          return {
+            id: `scenario-${state.activeCategory}-${state.activeRole}-${state.activeStage}`,
+            name: `${state.activeCategory || 'modaic'} - ${state.activeRole || 'admin'} - ${state.activeStage}`,
+            description: 'Active scenario configuration',
+            config: {
+              seed: state.currentGenerationId,
+              locale: 'en-US',
+              volume: {}
+            }
+          };
+        },
+
+        // Persistence actions
+        saveToLocalStorage: () => {
+          const state = get();
+          const data = {
+            config: state.config,
+            activeCategory: state.activeCategory,
+            activeRole: state.activeRole,
+            activeStage: state.activeStage,
+            currentGenerationId: state.currentGenerationId,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        },
+        
+        loadFromLocalStorage: () => {
+          const data = localStorage.getItem(STORAGE_KEY);
+          if (data) {
+            try {
+              const parsed = JSON.parse(data);
+              set(parsed);
+            } catch (e) {
+              console.error('Failed to load from localStorage:', e);
+            }
+          }
+        },
+
+        // Snapshot actions
+        createSnapshot: (name: string) => {
+          const state = get();
+          const snapshot: Snapshot = {
+            id: `snapshot-${Date.now()}`,
+            name,
+            timestamp: new Date(),
+            state: {
+              activeCategory: state.activeCategory,
+              activeRole: state.activeRole,
+              activeStage: state.activeStage,
+              generatedData: Object.fromEntries(state.generatedData),
+              generationId: state.currentGenerationId,
+            },
+          };
+          
+          set((state) => {
+            const snapshots = new Map(state.snapshots);
+            snapshots.set(snapshot.id, snapshot);
+            return { snapshots };
+          });
+          
+          return snapshot.id;
+        },
+
+        restoreSnapshot: (snapshotId: string) => {
+          const snapshot = get().snapshots.get(snapshotId);
+          if (!snapshot) return;
+
+          set({
+            activeCategory: snapshot.state.activeCategory,
+            activeRole: snapshot.state.activeRole,
+            activeStage: snapshot.state.activeStage,
+            generatedData: new Map(Object.entries(snapshot.state.generatedData)),
+            currentGenerationId: snapshot.state.generationId,
+          });
+        },
+
+        deleteSnapshot: (snapshotId: string) =>
+          set((state) => {
+            const snapshots = new Map(state.snapshots);
+            snapshots.delete(snapshotId);
+            return { snapshots };
+          }),
+
+        listSnapshots: () => Array.from(get().snapshots.values()),
+
+        // Reset action
+        reset: () => set(initialState),
+      }),
+      {
+        name: STORAGE_KEY,
+        partialize: (state) => ({
+          config: state.config,
+          activeCategory: state.activeCategory,
+          activeRole: state.activeRole,
+          activeStage: state.activeStage,
+          currentGenerationId: state.currentGenerationId,
+        }),
+      }
+    )
   )
 );
 
-// Default store instance
 export const synthStore = createSynthStore();
