@@ -1,65 +1,119 @@
-# Synthkit Next.js Example
+# Synthkit Next.js Demo
 
-This example demonstrates how to integrate Synthkit with a Next.js application.
-
-## Features
-
-- 🎭 **PersonaScenarioSwitcher** - Full UI for managing scenarios, personas, stages, and seeds
-- 🔄 **Live Data Updates** - Data refreshes automatically when configuration changes
-- 📡 **MSW Integration** - Mock Service Worker intercepts API calls
-- 💾 **State Persistence** - Configuration persists across page reloads
-- 🎨 **Responsive Design** - Works on desktop and mobile
-
-## Getting Started
+## Quick Start
 
 ```bash
-# From the root directory
-pnpm install
-pnpm build
-
-# Run the example
+# From repository root
+./scripts/setup-dev.sh
 cd examples/next-app
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Prerequisites
 
-## How It Works
+- Node.js 20.11.0+ (see `.nvmrc` in root)
+- pnpm 9.0.0+
+- Anthropic API key (for AI features)
 
-1. **SynthProvider** wraps the app in `layout.tsx`, loading the configuration from `synth.config.json`
-2. **MSW** is automatically initialized when the provider loads
-3. **PersonaScenarioSwitcher** provides UI controls for:
-   - Switching between scenarios (development, demo)
-   - Selecting personas (Alice/Admin, Bob/User)
-   - Changing stages (development, testing, production)
-   - Setting custom seeds or randomizing
-   - Creating and restoring snapshots
-4. **DataFetcher** components make API calls to `/api/users` and `/api/invoices`
-5. The mock data is generated based on the schemas defined in `packs/example-pack/pack.json`
+## Environment Setup
+
+Create `.env.local`:
+```bash
+ANTHROPIC_API_KEY=your_api_key_here
+```
+
+## Development
+
+```bash
+# Install dependencies (from root)
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Type checking
+pnpm typecheck
+```
+
+## Features
+
+- 🎮 Interactive scenario configuration
+- 🤖 AI-powered business analysis
+- 📊 Real-time mock data generation
+- 🔄 MSW integration for API mocking
+
+## Troubleshooting
+
+### "next: command not found"
+```bash
+# Dependencies not installed
+cd ../.. # Go to root
+pnpm install
+cd examples/next-app
+pnpm dev
+```
+
+### Port already in use
+The demo runs on port 3001 by default. To change:
+```bash
+pnpm dev -- --port 3002
+```
+
+### API Key Issues
+Ensure your `.env.local` file contains a valid Anthropic API key:
+```bash
+ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
+```
 
 ## Project Structure
 
 ```
-examples/next-app/
-├── src/
-│   ├── app/              # Next.js app directory
-│   │   ├── layout.tsx    # Root layout with SynthProvider
-│   │   ├── page.tsx      # Home page with demo UI
-│   │   └── globals.css   # Global styles
-│   └── components/       # React components
-│       └── DataFetcher.tsx
-├── packs/                # Synthkit packs
-│   └── example-pack/
-│       └── pack.json     # Schema definitions
-├── public/               # Static files
-│   └── mockServiceWorker.js
-└── synth.config.json     # Synthkit configuration
+src/
+├── app/
+│   ├── api/              # API routes
+│   │   └── ai/          # AI endpoints
+│   ├── components/       # React components
+│   ├── page.tsx         # Main demo page
+│   └── layout.tsx       # App layout
+├── components/          # Legacy components
+└── lib/                # Utilities and MSW setup
 ```
 
-## Key Files
+## Available Scripts
 
-- `src/app/layout.tsx` - Sets up the SynthProvider
-- `src/app/page.tsx` - Main demo page with UI components
-- `src/components/DataFetcher.tsx` - Reusable data fetching component
-- `packs/example-pack/pack.json` - Schema and route definitions
-- `synth.config.json` - Synthkit configuration
+- `pnpm dev` - Start development server (port 3001)
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm typecheck` - Run TypeScript checks
+
+## Using the Demo
+
+1. **Manual Configuration**: Use the dropdowns to select business category, role, and stage
+2. **AI Analysis**: Enter a business description and click "Analyze Business"
+3. **Data Generation**: Click refresh buttons to see mock data based on your scenario
+4. **Scenario Persistence**: Settings are saved to localStorage
+
+## Integration Example
+
+```typescript
+// Using Synthkit in your own Next.js app
+import { SynthProvider } from '@synthkit/client';
+import { setupMSW } from '@synthkit/client/msw';
+
+// In your app layout
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <SynthProvider>
+          {children}
+        </SynthProvider>
+      </body>
+    </html>
+  );
+}
+```

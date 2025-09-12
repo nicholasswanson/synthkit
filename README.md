@@ -24,18 +24,39 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 
 ## 🚀 **Quick Start**
 
+### **Prerequisites**
+
+- **Node.js**: 20.11.0 or higher (see `.nvmrc`)
+- **pnpm**: 9.0.0 or higher (will be auto-installed if missing)
+
 ### **Installation**
 
 ```bash
-# Clone and setup the monorepo
+# Clone the repository
 git clone https://github.com/nicholasswanson/synthkit.git
 cd synthkit
-pnpm install
-pnpm build
 
-# Run the Next.js example
+# Option 1: Automated setup (recommended)
+./scripts/setup-dev.sh
+
+# Option 2: Manual setup
+pnpm install   # Installs all dependencies
+pnpm build     # Builds all packages
+
+# Run the Next.js demo
 cd examples/next-app
-pnpm dev
+pnpm dev       # Opens at http://localhost:3001
+```
+
+### **Using Specific Node Version**
+
+```bash
+# If using nvm
+nvm install    # Reads .nvmrc and installs correct version
+nvm use        # Switches to project's Node version
+
+# If using volta
+volta install node@20.11.0
 ```
 
 **🎮 Interactive Demo**: The Next.js example now includes integrated AI analysis - describe your business idea directly in the demo to see intelligent scenario recommendations alongside the traditional manual configuration.
@@ -390,6 +411,48 @@ describe('Customer Generation', () => {
 │ Business Logic  │    │   Data Output   │    │  API Responses  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+## 🔧 **Dependency Management**
+
+Synthkit uses a modern monorepo setup with centralized dependency management:
+
+### **Catalog System**
+All common dependencies are managed through pnpm's catalog feature in `pnpm-workspace.yaml`:
+
+```yaml
+catalog:
+  # Core dependencies
+  "@faker-js/faker": "^10.0.0"
+  "typescript": "^5.6.3"
+  "vitest": "^2.1.5"
+  # ... and more
+```
+
+Packages reference catalog versions:
+```json
+{
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
+```
+
+### **Updating Dependencies**
+```bash
+# Update a catalog dependency version
+# 1. Edit version in pnpm-workspace.yaml
+# 2. Run:
+pnpm install
+
+# Update all packages to use catalog
+node tools/update-deps.js
+```
+
+### **Version Requirements**
+- **Node.js**: Locked to 20.11.0 via `.nvmrc`
+- **pnpm**: Minimum 9.0.0 for catalog support
+- **Package Manager**: Enforced via `packageManager` field
 
 ## 🤝 **Contributing**
 
