@@ -5,4 +5,15 @@ export * from './store';
 export * from './config';
 
 // Type exports
-export type * from './types';
+export * from './types';
+
+// Ensure specific exports are available
+export type { 
+  SynthConfig, 
+  ScenarioPack, 
+  DataPack,
+  Category,
+  Role,
+  Scenario,
+  Persona
+} from './types';
