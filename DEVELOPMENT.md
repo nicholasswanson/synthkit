@@ -13,11 +13,17 @@
 # Clone and run setup script
 git clone https://github.com/nicholasswanson/synthkit.git
 cd synthkit
-./scripts/setup-dev.sh
+
+# Fully automated (installs Node 20+ if needed)
+./scripts/setup-dev-auto.sh
+# OR
+pnpm setup
 ```
 
 This script will:
 - ✅ Check Node.js version
+- ✅ Install Node.js 20.11.0 if needed (via nvm/fnm/volta)
+- ✅ Install nvm if no version manager found
 - ✅ Install/update pnpm if needed
 - ✅ Install all dependencies
 - ✅ Build all packages

@@ -36,10 +36,14 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 git clone https://github.com/nicholasswanson/synthkit.git
 cd synthkit
 
-# Option 1: Automated setup (recommended)
+# Option 1: Fully automated setup (recommended)
+# Automatically installs Node 20+ if needed
+./scripts/setup-dev-auto.sh
+
+# Option 2: Basic setup (requires Node 20+ pre-installed)
 ./scripts/setup-dev.sh
 
-# Option 2: Manual setup
+# Option 3: Manual setup
 pnpm install   # Installs all dependencies
 pnpm build     # Builds all packages
 

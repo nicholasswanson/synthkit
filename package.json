@@ -24,7 +24,8 @@
     "pre-commit": "pnpm validate && pnpm build && pnpm typecheck",
     "dev": "pnpm --filter @synthkit/examples-next-app dev",
     "cli": "node tools/cli/dist/cli.mjs",
-    "setup": "pnpm install && pnpm build",
+    "setup": "./scripts/setup-dev-auto.sh",
+    "setup:basic": "./scripts/setup-dev.sh",
     "update-deps": "node tools/update-deps.js"
   },
   "dependencies": {
