@@ -4,10 +4,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Simple demo store for the Next.js example
 interface DemoStore {
-  activeScenario?: string;
-  activePersona?: string;
+  activeCategory?: string;
+  activeRole?: string;
   activeStage: 'development' | 'testing' | 'production';
-  currentSeed: number;
+  currentGenerationId: number;
   packs: any[];
 }
 
@@ -68,53 +68,53 @@ export function useSynth() {
     { packId: 'example-pack', persona: { id: 'bob', name: 'Bob (User)' } }
   ];
   
-  const snapshots = []; // Empty for now
+  const snapshots: any[] = []; // Empty for now
   
   return {
     // State
     isReady,
     mswEnabled: true,
     packs: store.packs,
-    activeScenarios: store.activeScenario ? [store.activeScenario] : [],
-    activeScenario: store.activeScenario,
-    activePersona: store.activePersona,
+    activeCategories: store.activeCategory ? [store.activeCategory] : [],
+    activeCategory: store.activeCategory,
+    activeRole: store.activeRole,
     activeStage: store.activeStage,
-    currentSeed: store.currentSeed,
+    currentGenerationId: store.currentGenerationId,
     
     // List functions
-    listScenarios: () => scenarios,
-    listPersonas: () => personas,
+    listCategories: () => scenarios,
+    listRoles: () => personas,
     listSnapshots: () => snapshots,
     
     // Actions that update local state and refresh
-    activateScenario: (scenarioId: string) => {
+    activateCategory: (categoryId: string) => {
       // Update local storage for persistence across reloads
-      localStorage.setItem('synthkit-scenario', scenarioId);
+      localStorage.setItem('synthkit-category', categoryId);
       refreshHandlers();
     },
-    deactivateScenario: () => {
-      localStorage.removeItem('synthkit-scenario');
+    deactivateCategory: () => {
+      localStorage.removeItem('synthkit-category');
       refreshHandlers();
     },
-    activatePersona: (personaId: string) => {
-      localStorage.setItem('synthkit-persona', personaId);
+    activateRole: (roleId: string) => {
+      localStorage.setItem('synthkit-role', roleId);
       refreshHandlers();
     },
-    deactivatePersona: () => {
-      localStorage.removeItem('synthkit-persona');
+    deactivateRole: () => {
+      localStorage.removeItem('synthkit-role');
       refreshHandlers();
     },
     setStage: (stage: 'development' | 'testing' | 'production') => {
       localStorage.setItem('synthkit-stage', stage);
       refreshHandlers();
     },
-    setSeed: (seed: number) => {
-      localStorage.setItem('synthkit-seed', seed.toString());
+    setGenerationId: (id: number) => {
+      localStorage.setItem('synthkit-generation-id', id.toString());
       refreshHandlers();
     },
-    randomizeSeed: () => {
-      const newSeed = Math.floor(Math.random() * 100000);
-      localStorage.setItem('synthkit-seed', newSeed.toString());
+    randomizeGenerationId: () => {
+      const newId = Math.floor(Math.random() * 100000);
+      localStorage.setItem('synthkit-generation-id', newId.toString());
       refreshHandlers();
     },
     
@@ -128,10 +128,10 @@ export function useSynth() {
     
     // Reset
     reset: () => {
-      localStorage.removeItem('synthkit-scenario');
-      localStorage.removeItem('synthkit-persona');
+      localStorage.removeItem('synthkit-category');
+      localStorage.removeItem('synthkit-role');
       localStorage.removeItem('synthkit-stage');
-      localStorage.removeItem('synthkit-seed');
+      localStorage.removeItem('synthkit-generation-id');
       refreshHandlers();
     },
     

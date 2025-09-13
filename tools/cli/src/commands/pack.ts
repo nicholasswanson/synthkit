@@ -49,7 +49,7 @@ export const packCommand = new Command('pack')
                 return;
               }
             } catch (error) {
-              console.error(chalk.red('Failed to discover packs:'), error.message);
+              console.error(chalk.red('Failed to discover packs:'), error instanceof Error ? error.message : String(error));
               process.exit(1);
             }
           }
@@ -717,7 +717,7 @@ ${packConfig.description}
 
 ## Schemas
 
-${Object.keys(packConfig.schemas).map(schema => `- **${schema}**: ${packConfig.schemas[schema].description || 'No description'}`).join('\n')}
+${Object.keys(packConfig.schemas).map(schema => `- **${schema}**: ${(packConfig.schemas as any)[schema].description || 'No description'}`).join('\n')}
 
 ## Usage
 
@@ -734,11 +734,11 @@ synthkit pack validate ${packDir}
 
 ## Scenarios
 
-${Object.keys(packConfig.scenarios).map(scenario => `- **${scenario}**: ${packConfig.scenarios[scenario].description}`).join('\n')}
+${Object.keys(packConfig.scenarios).map(scenario => `- **${scenario}**: ${(packConfig.scenarios as any)[scenario].description}`).join('\n')}
 
 ## Roles
 
-${Object.keys(packConfig.personas).map(persona => `- **${persona}**: ${packConfig.personas[persona].description}`).join('\n')}
+${Object.keys(packConfig.personas).map(persona => `- **${persona}**: ${(packConfig.personas as any)[persona].description}`).join('\n')}
 `;
 
   await fs.writeFile(path.join(packDir, 'README.md'), readme);

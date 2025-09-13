@@ -42,7 +42,7 @@ export function createAICommand(): Command {
 
         const analyzer = new DescriptionAnalyzer();
         const startTime = Date.now();
-        const result = await analyzer.analyze(businessDescription);
+        const result = await analyzer.analyze(businessDescription || '');
         const totalTime = Date.now() - startTime;
 
         if (options.json) {
@@ -56,6 +56,10 @@ export function createAICommand(): Command {
         console.log();
 
         const { analysis } = result;
+        if (!analysis) {
+          console.error(chalk.red('Error: Failed to analyze business description'));
+          process.exit(1);
+        }
 
         // Business Context
         console.log(chalk.bold.cyan('📊 Business Context'));
@@ -68,21 +72,21 @@ export function createAICommand(): Command {
 
         // Key Features
         console.log(chalk.bold.cyan('🔧 Key Features'));
-        analysis.keyFeatures.forEach(feature => {
+        analysis.keyFeatures.forEach((feature: any) => {
           console.log(`  • ${feature}`);
         });
         console.log();
 
         // User Roles
         console.log(chalk.bold.cyan('👥 User Roles'));
-        analysis.userRoles.forEach(role => {
+        analysis.userRoles.forEach((role: any) => {
           console.log(`  • ${role}`);
         });
         console.log();
 
         // Entities
         console.log(chalk.bold.cyan('🗃️  Data Entities'));
-        analysis.entities.forEach(entity => {
+        analysis.entities.forEach((entity: any) => {
           console.log(`  • ${chalk.bold(entity.name)} (${entity.type})`);
           if (entity.relationships.length > 0) {
             console.log(`    ${chalk.gray('→ Related to:')} ${entity.relationships.join(', ')}`);
@@ -96,7 +100,7 @@ export function createAICommand(): Command {
         console.log(`  ${chalk.yellow('Confidence:')} ${(analysis.confidence * 100).toFixed(0)}%`);
         if (options.verbose && analysis.reasoning.length > 0) {
           console.log(`  ${chalk.yellow('Reasoning:')}`);
-          analysis.reasoning.forEach(reason => {
+          analysis.reasoning.forEach((reason: any) => {
             console.log(`    • ${reason}`);
           });
         }
@@ -173,7 +177,7 @@ export function createAICommand(): Command {
 
         // First analyze the description
         const analyzer = new DescriptionAnalyzer();
-        const analysis = await analyzer.analyze(businessDescription);
+        const analysis = await analyzer.analyze(businessDescription || '');
 
         if (!analysis.success) {
           console.error(chalk.red('❌ Failed to analyze description'));
@@ -182,7 +186,7 @@ export function createAICommand(): Command {
 
         // Then find matches
         const matcher = new ScenarioMatcher();
-        const matchResult = await matcher.findMatches(analysis.analysis);
+        const matchResult = await matcher.findMatches(analysis?.analysis!);
 
         if (options.json) {
           console.log(JSON.stringify(matchResult, null, 2));
@@ -294,7 +298,7 @@ export function createAICommand(): Command {
 
         // First analyze the description
         const analyzer = new DescriptionAnalyzer();
-        const analysis = await analyzer.analyze(businessDescription);
+        const analysis = await analyzer.analyze(businessDescription || '');
 
         if (!analysis.success) {
           console.error(chalk.red('❌ Failed to analyze description'));
@@ -303,7 +307,7 @@ export function createAICommand(): Command {
 
         // Generate the scenario
         const generator = new ScenarioGenerator();
-        const generationResult = await generator.generateScenario(analysis.analysis);
+        const generationResult = await generator.generateScenario(analysis?.analysis!);
 
         if (options.json) {
           console.log(JSON.stringify(generationResult, null, 2));

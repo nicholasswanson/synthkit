@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const scenarioConfigSchema = z.object({
+export const scenarioConfigSchema = z.object({
   category: z.string(),
   role: z.string(),
   stage: z.enum(['early', 'growth', 'enterprise']),
@@ -18,6 +18,8 @@ export const configSchema = z.object({
   version: z.string().default('1.0.0'),
   packs: z.array(z.string()).default([]),
   scenarios: z.record(scenarioConfigSchema).default({}),
-  activeScenario: z.string().optional(),
-  defaultPersona: z.string().optional(),
 });
+
+// Type exports derived from schemas
+export type ScenarioConfig = z.infer<typeof scenarioConfigSchema>;
+export type SynthConfig = z.infer<typeof configSchema>;

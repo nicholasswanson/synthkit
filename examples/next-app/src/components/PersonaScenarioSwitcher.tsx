@@ -18,25 +18,25 @@ export function PersonaScenarioSwitcher({
   const [snapshotName, setSnapshotName] = useState('');
 
   // Get all scenarios and personas
-  const scenarios = synth.listScenarios();
-  const personas = synth.listPersonas();
+  const scenarios = synth.listCategories();
+  const personas = synth.listRoles();
   const snapshots = synth.listSnapshots();
 
   const handleScenarioChange = async (scenarioId: string) => {
     if (scenarioId === 'none') {
-      if (synth.activeScenario) {
-        synth.deactivateScenario(synth.activeScenario);
+      if (synth.activeCategory) {
+        synth.deactivateCategory();
       }
     } else {
-      await synth.activateScenario(scenarioId);
+      await synth.activateCategory(scenarioId);
     }
   };
 
   const handlePersonaChange = (personaId: string) => {
     if (personaId === 'none') {
-      synth.deactivatePersona();
+      synth.deactivateRole();
     } else {
-      synth.activatePersona(personaId);
+      synth.activateRole(personaId);
     }
   };
 
@@ -47,12 +47,12 @@ export function PersonaScenarioSwitcher({
   const handleSeedChange = (seed: string) => {
     const seedNum = parseInt(seed, 10);
     if (!isNaN(seedNum)) {
-      synth.setSeed(seedNum);
+      synth.setGenerationId(seedNum);
     }
   };
 
   const handleRandomizeSeed = () => {
-    synth.randomizeSeed();
+    synth.randomizeGenerationId();
   };
 
   const handleReset = () => {
@@ -77,7 +77,7 @@ export function PersonaScenarioSwitcher({
     return (
       <div className={`flex gap-3 items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg ${className}`}>
         <select
-          value={synth.activeScenario || 'none'}
+          value={synth.activeCategory || 'none'}
           onChange={(e) => handleScenarioChange(e.target.value)}
           className="px-2 py-1 text-sm border rounded"
           title="Scenario"
@@ -91,7 +91,7 @@ export function PersonaScenarioSwitcher({
         </select>
 
         <select
-          value={synth.activePersona || 'none'}
+          value={synth.activeRole || 'none'}
           onChange={(e) => handlePersonaChange(e.target.value)}
           className="px-2 py-1 text-sm border rounded"
           title="Persona"
@@ -118,7 +118,7 @@ export function PersonaScenarioSwitcher({
         <div className="flex items-center gap-1">
           <input
             type="number"
-            value={synth.currentSeed}
+            value={synth.currentGenerationId}
             onChange={(e) => handleSeedChange(e.target.value)}
             className="w-20 px-2 py-1 text-sm border rounded"
             title="Seed"
@@ -155,7 +155,7 @@ export function PersonaScenarioSwitcher({
             </label>
             <select
               id="scenario-select"
-              value={synth.activeScenario || 'none'}
+              value={synth.activeCategory || 'none'}
               onChange={(e) => handleScenarioChange(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
             >
@@ -174,7 +174,7 @@ export function PersonaScenarioSwitcher({
             </label>
             <select
               id="persona-select"
-              value={synth.activePersona || 'none'}
+              value={synth.activeRole || 'none'}
               onChange={(e) => handlePersonaChange(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
             >
@@ -213,7 +213,7 @@ export function PersonaScenarioSwitcher({
               <input
                 id="seed-input"
                 type="number"
-                value={synth.currentSeed}
+                value={synth.currentGenerationId}
                 onChange={(e) => handleSeedChange(e.target.value)}
                 className="flex-1 px-3 py-2 border rounded-md"
               />

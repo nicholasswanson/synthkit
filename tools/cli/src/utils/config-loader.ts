@@ -41,7 +41,7 @@ export class ConfigLoader {
       this.configPath = configPath;
       return this.config;
     } catch (error) {
-      throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
+      throw new Error(`Failed to load config from ${configPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -128,20 +128,7 @@ export class ConfigLoader {
       framework: config.framework || 'vanilla',
       version: config.version || '1.0.0',
       packs: config.packs || [],
-      scenarios: config.scenarios || {
-        default: 'development'
-      },
-      generators: {
-        id: config.generators?.id || 12345,
-        locale: config.generators?.locale || 'en-US',
-        timeZone: config.generators?.timeZone || 'UTC',
-        ...config.generators
-      },
-      msw: {
-        enabled: config.msw?.enabled ?? true,
-        delay: config.msw?.delay || 100,
-        ...config.msw
-      }
+      scenarios: config.scenarios || {},
     };
 
     // Validate required fields

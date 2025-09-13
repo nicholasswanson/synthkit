@@ -43,7 +43,7 @@ export class PackLoader {
         const packInfo = await this.loadPack(packPath, projectRoot);
         this.loadedPacks.set(packInfo.id, packInfo);
       } catch (error) {
-        console.warn(`Warning: Failed to load pack "${packPath}": ${error.message}`);
+        console.warn(`Warning: Failed to load pack "${packPath}": ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -79,7 +79,7 @@ export class PackLoader {
         pack
       };
     } catch (error) {
-      throw new Error(`Invalid pack.json in ${fullPath}: ${error.message}`);
+      throw new Error(`Invalid pack.json in ${fullPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -99,7 +99,7 @@ export class PackLoader {
     for (const searchPath of paths) {
       try {
         const fullSearchPath = path.resolve(projectRoot, searchPath);
-        const packDirs = await glob(fullSearchPath, { onlyDirectories: true });
+        const packDirs = await glob(fullSearchPath);
 
         for (const packDir of packDirs) {
           try {
@@ -218,7 +218,7 @@ export class PackLoader {
 
       return { valid: errors.length === 0, errors };
     } catch (error) {
-      errors.push(`Failed to load pack: ${error.message}`);
+      errors.push(`Failed to load pack: ${error instanceof Error ? error.message : String(error)}`);
       return { valid: false, errors };
     }
   }

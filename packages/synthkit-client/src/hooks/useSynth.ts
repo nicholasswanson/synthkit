@@ -58,16 +58,5 @@ export function useSynth() {
     // Utility actions
     reset: store.reset,
     refreshHandlers,
-    
-    // Legacy aliases for backward compatibility
-    activeScenario: store.activeCategory,
-    activePersona: store.activeRole,
-    currentSeed: store.currentGenerationId,
-    activateScenario: store.activateCategory,
-    deactivateScenario: store.deactivateCategory,
-    activatePersona: store.activateRole,
-    deactivatePersona: store.deactivateRole,
-    setSeed: store.setGenerationId,
-    randomizeSeed: store.randomizeGenerationId,
   };
 }

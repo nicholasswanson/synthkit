@@ -1,4 +1,6 @@
-import type { DataPack, Category, SynthConfig, Role, Scenario } from '../types';
+import type { DataPack, Category, Role, Scenario } from '../types';
+import type { SynthConfig } from '../config';
+import type { StoreApi, UseBoundStore } from 'zustand';
 
 export type Stage = 'early' | 'growth' | 'enterprise';
 

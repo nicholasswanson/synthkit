@@ -7,23 +7,30 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "catalog:",
+    "@synthkit/ai": "workspace:*",
     "@synthkit/client": "workspace:*",
     "@synthkit/sdk": "workspace:*",
-    "@synthkit/ai": "workspace:*",
-    "@anthropic-ai/sdk": "catalog:",
     "msw": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^5.0.2",
     "autoprefixer": "catalog:",
+    "jsdom": "^26.1.0",
     "postcss": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"

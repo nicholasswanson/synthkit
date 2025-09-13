@@ -89,17 +89,17 @@ export function PersonaScenarioSwitcher({
   // Handlers
   const handleScenarioChange = useCallback(async (scenarioId: string) => {
     if (scenarioId === 'none') {
-      synth.deactivateScenario(synth.activeScenario || '');
+      synth.deactivateCategory(synth.activeCategory || '');
     } else {
-      await synth.activateScenario(scenarioId);
+      await synth.activateCategory(scenarioId);
     }
   }, [synth]);
 
   const handlePersonaChange = useCallback((personaId: string) => {
     if (personaId === 'none') {
-      synth.deactivatePersona();
+      synth.deactivateRole();
     } else {
-      synth.activatePersona(personaId);
+      synth.activateRole(personaId);
     }
   }, [synth]);
 
@@ -110,12 +110,12 @@ export function PersonaScenarioSwitcher({
   const handleSeedChange = useCallback((seed: string) => {
     const seedNum = parseInt(seed, 10);
     if (!isNaN(seedNum)) {
-      synth.setSeed(seedNum);
+      synth.setGenerationId(seedNum);
     }
   }, [synth]);
 
   const handleRandomizeSeed = useCallback(() => {
-    synth.randomizeSeed();
+    synth.randomizeGenerationId();
   }, [synth]);
 
   const handleReset = useCallback(() => {
@@ -155,7 +155,7 @@ export function PersonaScenarioSwitcher({
     return (
       <div className={`synthkit-switcher synthkit-switcher--compact ${className}`}>
         <select
-          value={synth.activeScenario || 'none'}
+          value={synth.activeCategory || 'none'}
           onChange={(e) => handleScenarioChange(e.target.value)}
           title="Scenario"
         >
@@ -168,7 +168,7 @@ export function PersonaScenarioSwitcher({
         </select>
 
         <select
-          value={synth.activePersona || 'none'}
+          value={synth.activeRole || 'none'}
           onChange={(e) => handlePersonaChange(e.target.value)}
           title="Persona"
         >
@@ -204,7 +204,7 @@ export function PersonaScenarioSwitcher({
           <label htmlFor="scenario-select">Scenario:</label>
           <select
             id="scenario-select"
-            value={synth.activeScenario || 'none'}
+            value={synth.activeCategory || 'none'}
             onChange={(e) => handleScenarioChange(e.target.value)}
           >
             <option value="none">No Scenario</option>
@@ -220,7 +220,7 @@ export function PersonaScenarioSwitcher({
           <label htmlFor="persona-select">Persona:</label>
           <select
             id="persona-select"
-            value={synth.activePersona || 'none'}
+            value={synth.activeRole || 'none'}
             onChange={(e) => handlePersonaChange(e.target.value)}
           >
             <option value="none">No Persona</option>
@@ -252,7 +252,7 @@ export function PersonaScenarioSwitcher({
               <input
                 id="seed-input"
                 type="number"
-                value={synth.currentSeed}
+                value={synth.currentGenerationId}
                 onChange={(e) => handleSeedChange(e.target.value)}
               />
               <button onClick={handleRandomizeSeed} title="Randomize">

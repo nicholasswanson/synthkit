@@ -33,7 +33,7 @@ catalog:
   # React & Next.js
   "react": "^18.3.1"
   "react-dom": "^18.3.1"
-  "next": "^14.2.3"
+  "next": "^14.2.32"
   
   # CSS & Styling
   "tailwindcss": "^3.4.17"

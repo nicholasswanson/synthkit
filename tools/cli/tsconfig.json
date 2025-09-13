@@ -5,9 +5,8 @@
     "outDir": "./dist",
     "noEmit": false,
     "incremental": false,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "strict": false
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

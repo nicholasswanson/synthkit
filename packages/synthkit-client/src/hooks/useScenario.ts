@@ -53,7 +53,7 @@ export function useScenario() {
 
   return {
     scenarios: getScenarios(),
-    activeScenarios: Array.from(store.activeCategories),
+    activeCategories: Array.from(store.activeCategories),
     activateScenario,
     deactivateScenario,
     toggleScenario,

@@ -34,7 +34,7 @@ export const initCommand = new Command('init')
       }
 
       // Gather project information
-      const answers = await inquirer.prompt([
+      const questions = [
         {
           type: 'input',
           name: 'projectName',
@@ -86,7 +86,15 @@ export const initCommand = new Command('init')
           message: 'Initialize git repository?',
           default: !options.noGit
         }
-      ]);
+      ];
+      
+      const answers = await inquirer.prompt(questions as any) as {
+        projectName: string;
+        template: string;
+        packs: string[];
+        installDeps: boolean;
+        initGit: boolean;
+      };
 
       // Determine target directory
       const targetDir = options.dir 

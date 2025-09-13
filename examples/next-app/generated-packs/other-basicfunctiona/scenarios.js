@@ -3,7 +3,6 @@ export const scenarios = {
     "id": "early",
     "name": "Early Other",
     "description": "Early stage other with basic functionality",
-    "packId": "other-basicfunctiona",
     "config": {
       "seed": 10521,
       "dateRange": {

@@ -1,46 +1,7 @@
 // Generated TypeScript definitions for Other Pack
-export interface OtherPackPack {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  schemas: {
-    users: any;
-  };
-  scenarios: {
-    early: Scenario;
-  };
-  personas: {
-    user: Persona;
-    admin: Persona;
-    general_users: Persona;
-  };
-}
+import type { DataPack, Scenario, Persona } from '@synthkit/sdk';
 
-export interface Scenario {
-  id: string;
-  name: string;
-  description: string;
-  config: {
-    seed: number;
-    dateRange: {
-      start: string;
-      end: string;
-    };
-    volume: Record<string, number>;
-    relationships: Record<string, number>;
-  };
-}
-
-export interface Persona {
-  id: string;
-  name: string;
-  description: string;
-  preferences?: Record<string, any>;
-  overrides: Record<string, any>;
-}
-
-export const OTHER_BASICFUNCTIONA_PACK: OtherPackPack = {
+export const OTHER_BASICFUNCTIONA_PACK: DataPack = {
   "id": "other-basicfunctiona",
   "name": "Other Pack",
   "description": "Custom pack for basic functionality business",
@@ -58,25 +19,20 @@ export const OTHER_BASICFUNCTIONA_PACK: OtherPackPack = {
         "createdAt": {
           "type": "string",
           "format": "date-time",
-          "faker": "date.past"
         },
         "updatedAt": {
           "type": "string",
           "format": "date-time",
-          "faker": "date.recent"
         },
         "email": {
           "type": "string",
           "format": "email",
-          "faker": "internet.email"
         },
         "firstName": {
           "type": "string",
-          "faker": "person.firstName"
         },
         "lastName": {
           "type": "string",
-          "faker": "person.lastName"
         },
         "status": {
           "type": "string",
@@ -102,7 +58,6 @@ export const OTHER_BASICFUNCTIONA_PACK: OtherPackPack = {
       "id": "early",
       "name": "Early Other",
       "description": "Early stage other with basic functionality",
-      "packId": "other-basicfunctiona",
       "config": {
         "seed": 811,
         "dateRange": {
@@ -170,14 +125,9 @@ export const OTHER_BASICFUNCTIONA_PACK: OtherPackPack = {
   },
   "routes": {
     "/api/users": {
-      "schema": "users",
-      "rest": true,
-      "methods": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE"
-      ]
+      "method": "GET",
+      "path": "/api/users",
+      "schema": "users"
     }
   }
 };

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { JSONSchema7 } from 'json-schema';
+import type { ScenarioConfig, SynthConfig } from './config/schema';
 
 // Core types for data generation aligned with synthetic-dataset structure
 export interface GenerationContext {
@@ -92,28 +93,7 @@ export interface Category {
   };
 }
 
-// Configuration types
-export interface SynthConfig {
-  version: string;
-  packs: string[];
-  scenarios: Record<string, ScenarioConfig>;
-  activeScenario?: string;
-  defaultPersona?: string;
-}
 
-export interface ScenarioConfig {
-  category: string;
-  role: string;
-  stage: 'early' | 'growth' | 'enterprise';
-  id: number;
-  locale?: string;
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  volume?: Record<string, number>;
-  relationships?: Record<string, any>;
-}
 
 // Zod schemas for validation
 export const GenerationContextSchema = z.object({
@@ -124,27 +104,6 @@ export const GenerationContextSchema = z.object({
   baseDate: z.date().optional(),
 });
 
-export const ScenarioConfigSchema = z.object({
-  category: z.string(),
-  role: z.string(),
-  stage: z.enum(['early', 'growth', 'enterprise']),
-  id: z.number(),
-  locale: z.string().optional(),
-  dateRange: z.object({
-    start: z.string(),
-    end: z.string(),
-  }).optional(),
-  volume: z.record(z.number()).optional(),
-  relationships: z.record(z.any()).optional(),
-});
-
-export const SynthConfigSchema = z.object({
-  version: z.string(),
-  packs: z.array(z.string()),
-  scenarios: z.record(ScenarioConfigSchema),
-  activeScenario: z.string().optional(),
-  defaultPersona: z.string().optional(),
-});
 
 // Legacy types for backward compatibility
 /** @deprecated Use GenerationContext instead */

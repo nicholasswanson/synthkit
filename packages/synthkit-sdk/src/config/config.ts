@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { z } from 'zod';
 import { configSchema } from './schema';
-import type { SynthConfig } from '../types';
+import type { SynthConfig } from './schema';
 
 export async function loadConfig(configPath?: string): Promise<SynthConfig> {
   const paths = configPath 

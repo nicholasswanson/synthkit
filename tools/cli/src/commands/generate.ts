@@ -113,7 +113,7 @@ export const generateCommand = new Command('generate')
       }
 
     } catch (error) {
-      console.error(chalk.red('Error:'), error.message);
+      console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
   });
@@ -254,7 +254,7 @@ async function generateSchemaDataBasic(
 
       data.push(record);
     } catch (error) {
-      console.warn(chalk.yellow(`Warning: Failed to generate record ${i} for ${plan.schemaName}: ${error.message}`));
+      console.warn(chalk.yellow(`Warning: Failed to generate record ${i} for ${plan.schemaName}: ${error instanceof Error ? error.message : String(error)}`));
     }
   }
 

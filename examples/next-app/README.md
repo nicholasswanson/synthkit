@@ -17,10 +17,24 @@ pnpm dev
 
 ## Environment Setup
 
-Create `.env.local`:
+Copy the example environment file:
 ```bash
-ANTHROPIC_API_KEY=your_api_key_here
+cp .env.example .env.local
 ```
+
+Then edit `.env.local` and add your Anthropic API key:
+```bash
+ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
+```
+
+### Environment Variables
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `ANTHROPIC_API_KEY` | Yes (for AI features) | Your Anthropic API key for AI-powered features | - |
+| `NEXT_PUBLIC_API_URL` | No | Override the API URL | `http://localhost:3001` |
+| `NEXT_PUBLIC_DEBUG` | No | Enable debug logging | `false` |
+| `NEXT_PUBLIC_MSW_ENABLED` | No | Enable/disable MSW | `true` |
 
 ## Development
 

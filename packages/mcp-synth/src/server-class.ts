@@ -1,16 +1,18 @@
-import { synthStore, SchemaGenerator } from '@synthkit/sdk';
+import { synthStore, SchemaGenerator, createSynthStore } from '@synthkit/sdk';
 import type { DataPack, SynthStore } from '@synthkit/sdk';
 import path from 'path';
 import fs from 'fs';
 
 export class MCPSynthServer {
-  private store: any; // TODO: Fix proper typing for Zustand store
+  // TODO: Properly type this once Zustand middleware type inference is fixed
+  // Should be: ReturnType<typeof createSynthStore> but middleware breaks inference
+  private store: any;
   private generator: SchemaGenerator;
   private globalSeed?: number;
   private packs: DataPack[] = [];
 
   constructor() {
-    this.store = synthStore as any;
+    this.store = synthStore;
     this.generator = new SchemaGenerator();
     
     // Load packs from default locations

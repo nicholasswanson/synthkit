@@ -1,15 +1,30 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { startMSW, updateHandlers } from '@/lib/mock-service-worker';
-import { http, HttpResponse } from 'msw';
 import { SynthContextProvider } from '@/lib/synth-context';
+import { logger } from '@/lib/logger';
 
 // Import the pack directly for the demo
 import examplePack from '../../packs/example-pack/pack.json';
 
+// Lazy load MSW only in development
+const loadMSW = async () => {
+  if (process.env.NODE_ENV !== 'development') {
+    logger.info('MSW disabled in production');
+    return { start: async () => {}, updateHandlers: () => {} };
+  }
+
+  const { startMSW, updateHandlers } = await import('@/lib/mock-service-worker');
+  return { start: startMSW, updateHandlers };
+};
+
 // Create MSW handlers from pack routes with simple mock data
-function createHandlersFromPack(pack: any, seed: number) {
+async function createHandlersFromPack(pack: any, seed: number) {
+  if (process.env.NODE_ENV !== 'development') {
+    return [];
+  }
+
+  const { http, HttpResponse } = await import('msw');
   const handlers: any[] = [];
 
   // Simple mock data generators
@@ -55,7 +70,7 @@ function createHandlersFromPack(pack: any, seed: number) {
           handlers.push(
             http.post(path, async ({ request }) => {
               const body = await request.json();
-              return HttpResponse.json({ ...generateUser(), ...body }, { status: 201 });
+              return HttpResponse.json({ ...generateUser(), ...(body as any) }, { status: 201 });
             })
           );
         }
@@ -64,7 +79,7 @@ function createHandlersFromPack(pack: any, seed: number) {
           // Invoices endpoints
           handlers.push(
             http.get(path, () => {
-              const invoices = Array.from({ length: 10 }, () => generateInvoice());
+              const invoices = Array.from({ length: 15 }, () => generateInvoice());
               return HttpResponse.json(invoices);
             })
           );
@@ -78,7 +93,7 @@ function createHandlersFromPack(pack: any, seed: number) {
           handlers.push(
             http.post(path, async ({ request }) => {
               const body = await request.json();
-              return HttpResponse.json({ ...generateInvoice(), ...body }, { status: 201 });
+              return HttpResponse.json({ ...generateInvoice(), ...(body as any) }, { status: 201 });
             })
           );
         }
@@ -86,7 +101,7 @@ function createHandlersFromPack(pack: any, seed: number) {
         // Generic DELETE for all endpoints
         handlers.push(
           http.delete(`${path}/:id`, () => {
-            return new HttpResponse(null, { status: 204 });
+            return HttpResponse.json({ success: true }, { status: 200 });
           })
         );
       }
@@ -97,35 +112,42 @@ function createHandlersFromPack(pack: any, seed: number) {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mswReady, setMswReady] = useState(false);
 
   useEffect(() => {
-    async function initialize() {
-      try {
-        console.log('🚀 Starting Synthkit initialization...');
-        
-        // Skip MSW for now to test basic functionality
-        console.log('⚠️ Skipping MSW initialization for debugging');
-        
-        setIsReady(true);
-        console.log('✅ Basic initialization complete!');
-      } catch (error) {
-        console.error('❌ Failed to initialize Synthkit:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error');
-        setIsReady(true);
+    const initMSW = async () => {
+      if (process.env.NODE_ENV !== 'development') {
+        setMswReady(true);
+        return;
       }
-    }
 
-    initialize();
+      try {
+        const { start, updateHandlers } = await loadMSW();
+        await start();
+        
+        // Initial handlers setup
+        const handlers = await createHandlersFromPack(examplePack, 12345);
+        updateHandlers(handlers);
+        
+        setMswReady(true);
+        logger.info('MSW initialized successfully');
+      } catch (error) {
+        logger.error('Failed to initialize MSW', error);
+        // Continue without MSW in case of error
+        setMswReady(true);
+      }
+    };
+
+    initMSW();
   }, []);
 
-  if (!isReady) {
+  // Don't render children until MSW is ready (or skipped in production)
+  if (!mswReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-xl mb-2">🚀 Loading Synthkit...</div>
-          <div className="text-sm text-gray-500">Initializing mock service worker</div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <p className="mt-2 text-sm text-gray-600">Initializing...</p>
         </div>
       </div>
     );
@@ -133,24 +155,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Create a simple store for the demo
   const demoStore = {
-    activeScenario: typeof window !== 'undefined' ? localStorage.getItem('synthkit-scenario') || undefined : undefined,
-    activePersona: typeof window !== 'undefined' ? localStorage.getItem('synthkit-persona') || undefined : undefined,
+    activeCategory: typeof window !== 'undefined' ? localStorage.getItem('synthkit-category') || undefined : undefined,
+    activeRole: typeof window !== 'undefined' ? localStorage.getItem('synthkit-role') || undefined : undefined,
     activeStage: (typeof window !== 'undefined' ? localStorage.getItem('synthkit-stage') : 'development') as 'development' | 'testing' | 'production',
-    currentSeed: typeof window !== 'undefined' ? parseInt(localStorage.getItem('synthkit-seed') || '12345', 10) : 12345,
+    currentGenerationId: typeof window !== 'undefined' ? parseInt(localStorage.getItem('synthkit-generation-id') || '12345', 10) : 12345,
     packs: [examplePack]
   };
 
   return (
-    <div>
-      {error && (
-        <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 max-w-md">
-          <strong>Synthkit Error:</strong> {error}
-        </div>
-      )}
-      <div className="fixed top-4 left-4 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm z-50">
-        ✅ MSW Active
-      </div>
+    <SynthContextProvider initialStore={demoStore}>
       {children}
-    </div>
+    </SynthContextProvider>
   );
 }

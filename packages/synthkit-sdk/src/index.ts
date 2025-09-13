@@ -9,7 +9,6 @@ export * from './types';
 
 // Ensure specific exports are available
 export type { 
-  SynthConfig, 
   ScenarioPack, 
   DataPack,
   Category,
@@ -17,3 +16,4 @@ export type {
   Scenario,
   Persona
 } from './types';
+export type { SynthConfig, ScenarioConfig } from './config';

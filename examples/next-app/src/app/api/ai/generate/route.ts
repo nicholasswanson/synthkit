@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     // Generate the scenario
     const generator = new ScenarioGenerator();
-    const generationResult = await generator.generateScenario(analysis.analysis);
+    const generationResult = await generator.generateScenario(analysis?.analysis!);
 
     // Save to file if requested
     let savedFiles: string[] = [];

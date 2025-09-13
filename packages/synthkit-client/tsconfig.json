@@ -6,7 +6,8 @@
     "noEmit": false,
     "incremental": false,
     "jsx": "react-jsx",
-    "noImplicitAny": false
+    "strict": true,
+    "noImplicitAny": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]

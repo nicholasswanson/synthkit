@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Then find matches
     const matcher = new ScenarioMatcher();
-    const matchResult = await matcher.findMatches(analysis.analysis);
+    const matchResult = await matcher.findMatches(analysis?.analysis!);
 
     return NextResponse.json({
       analysis,

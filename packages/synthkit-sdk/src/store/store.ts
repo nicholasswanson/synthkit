@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type { SynthStore, SynthState, Stage, Snapshot } from './types';
-import type { DataPack, SynthConfig, Category, Role } from '../types';
+import type { DataPack, Category, Role } from '../types';
+import type { SynthConfig } from '../config';
 
 const STORAGE_KEY = 'synthkit-store';
 

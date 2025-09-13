@@ -60,7 +60,6 @@
       "id": "early",
       "name": "Early Other",
       "description": "Early stage other with basic functionality",
-      "packId": "other-basicfunctiona",
       "config": {
         "seed": 95166,
         "dateRange": {

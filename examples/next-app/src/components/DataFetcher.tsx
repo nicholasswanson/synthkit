@@ -17,7 +17,7 @@ export function DataFetcher({ title, endpoint, itemsKey }: DataFetcherProps) {
 
   useEffect(() => {
     fetchData();
-  }, [synth.currentSeed, synth.activeScenario, synth.activePersona]);
+  }, [synth.currentGenerationId, synth.activeCategory, synth.activeRole]);
 
   const fetchData = async () => {
     if (!synth.isReady || !synth.mswEnabled) {

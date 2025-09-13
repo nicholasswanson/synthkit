@@ -45,7 +45,7 @@ export const listCommand = new Command('list')
           console.log(chalk.gray('Use "synthkit generate --category <id>" to generate data'));
 
         } catch (error) {
-          console.error(chalk.red('Error:'), error.message);
+          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
           process.exit(1);
         }
       })
@@ -112,7 +112,7 @@ export const listCommand = new Command('list')
           }
 
         } catch (error) {
-          console.error(chalk.red('Error:'), error.message);
+          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
           process.exit(1);
         }
       })
@@ -183,7 +183,7 @@ export const listCommand = new Command('list')
           console.log(chalk.gray(`Use "synthkit generate --category ${packId} --schema <name>" to generate specific schema`));
 
         } catch (error) {
-          console.error(chalk.red('Error:'), error.message);
+          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
           process.exit(1);
         }
       })
@@ -193,7 +193,7 @@ export const listCommand = new Command('list')
       .description('List available roles/personas')
       .argument('[pack]', 'Pack ID to list roles from (optional)')
       .option('-v, --verbose', 'Show detailed role information')
-      .action(async (packId?: string, options) => {
+      .action(async (packId: string | undefined, options: any) => {
         try {
           const config = await loadConfig();
           const packLoader = getPackLoader();
@@ -231,7 +231,7 @@ export const listCommand = new Command('list')
                 if (role.description) {
                   console.log(chalk.gray(`   Description: ${role.description}`));
                 }
-                if (role.maskedFields && role.maskedFields.length > 0) {
+                if ('maskedFields' in role && Array.isArray(role.maskedFields) && role.maskedFields.length > 0) {
                   console.log(chalk.gray(`   Masked Fields: ${role.maskedFields.join(', ')}`));
                 }
               }
@@ -285,7 +285,7 @@ export const listCommand = new Command('list')
           }
 
         } catch (error) {
-          console.error(chalk.red('Error:'), error.message);
+          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
           process.exit(1);
         }
       })
