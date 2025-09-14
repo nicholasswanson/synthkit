@@ -17,6 +17,8 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 - 👥 **Role-Based Access** - Admin/Support roles with data masking capabilities
 - 📈 **Stage-Aware** - Early/Growth/Enterprise complexity levels
 - 🤖 **AI-Powered Analysis** - Describe your business and get intelligent scenario recommendations
+- 📤 **Dataset Sharing** - Generate shareable URLs with AI tool integration code
+- 🔗 **AI Tool Integration** - Optimized for Cursor, Claude, ChatGPT, v0, and vanilla JS
 - 🔄 **MSW Integration** - Seamless API mocking with Mock Service Worker
 - ⚡ **Framework Agnostic** - Works with React, Next.js, Vue, and more
 - 📦 **Modular Packs** - Extensible library of domain-specific schemas
@@ -297,6 +299,11 @@ synthkit ai generate "A SaaS project management tool" --save-to-file
 # Generate mock data
 synthkit generate --category modaic --role admin --stage growth --count 100
 
+# Dataset sharing and integration
+synthkit dataset url --category modaic --stage growth --copy
+synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json"
+synthkit dataset integrate "<url>" --tool cursor --rules
+
 # Scenario management
 synthkit scenario list
 synthkit scenario activate modaic-growth-admin
@@ -305,6 +312,163 @@ synthkit scenario activate modaic-growth-admin
 synthkit snapshot create "pre-demo-state"
 synthkit snapshot restore "pre-demo-state"
 ```
+
+## 📤 **Dataset Sharing & Integration**
+
+Synthkit provides a complete ecosystem for sharing realistic datasets with AI development tools. Generate datasets in the demo app or CLI, then seamlessly integrate them into your development workflow.
+
+### **🎯 Quick Workflow**
+
+```bash
+# 1. Generate a shareable dataset URL
+synthkit dataset url --category modaic --stage growth --copy
+# ✅ Dataset URL generated: https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json
+# 📋 URL copied to clipboard
+
+# 2. Preview the dataset
+synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" --preview 5
+# 📊 Shows: 5,561 customers, 12,790 payments, business metrics
+
+# 3. Generate AI tool integration
+synthkit dataset integrate "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" --tool cursor --rules
+# ✅ .cursorrules saved to current directory
+# 💡 Restart Cursor for optimized AI assistance
+```
+
+### **🌐 Demo App Integration**
+
+The [Next.js demo app](https://nicholasswanson.github.io/synthkit) provides a visual interface for dataset configuration:
+
+1. **Configure Scenario**: Select business category, stage, and role
+2. **AI Analysis**: Describe your business idea for intelligent recommendations  
+3. **Generate Data**: Create realistic datasets with proper relationships
+4. **Share Dataset**: Get shareable URLs with one-click integration code
+
+```typescript
+// Generated datasets include realistic business metrics
+{
+  "customers": [...],           // 5,561 realistic customer records
+  "payments": [...],           // 12,790 payment transactions  
+  "businessMetrics": {
+    "customerLifetimeValue": 350.75,
+    "averageOrderValue": 199.99,
+    "monthlyRecurringRevenue": 4358.11,
+    "dailyActiveUsers": 2847,
+    "conversionRate": 7.25
+  }
+}
+```
+
+### **🤖 AI Tool Integrations**
+
+Synthkit generates optimized integration code for popular AI development tools:
+
+#### **Cursor Integration**
+```bash
+synthkit dataset integrate "<url>" --tool cursor --rules
+```
+- Generates complete React hooks with TypeScript interfaces
+- Creates `.cursorrules` file for context-aware AI assistance
+- Includes business domain knowledge for better suggestions
+
+#### **Claude Integration**  
+```bash
+synthkit dataset integrate "<url>" --tool claude --output claude-prompt.txt
+```
+- Comprehensive prompts with business context
+- Detailed integration requirements and best practices
+- Domain-specific guidance (e.g., fashion e-commerce patterns)
+
+#### **ChatGPT Integration**
+```bash
+synthkit dataset integrate "<url>" --tool chatgpt --output chatgpt-prompt.txt  
+```
+- Concise, practical prompts for quick solutions
+- Ready-to-paste integration requests
+
+#### **v0 Integration**
+```bash
+synthkit dataset integrate "<url>" --tool v0 --output component-prompt.txt
+```
+- Component-focused prompts with styling requirements
+- Modern dashboard templates with proper data display
+
+#### **Vanilla JavaScript**
+```bash
+synthkit dataset integrate "<url>" --tool fetch --output data-manager.js
+```
+- Complete DatasetManager class with caching
+- Utility methods for common operations
+- Framework-agnostic implementation
+
+### **📊 Business Context Awareness**
+
+All integrations include business domain intelligence:
+
+| Category | Business Type | Domain | AI Assistance Focus |
+|----------|---------------|---------|-------------------|
+| modaic | Fashion E-commerce | retail | Product catalogs, customer segments |
+| stratus | B2B SaaS Platform | software | Subscriptions, usage analytics |
+| forksy | Food Delivery | marketplace | Orders, driver logistics |
+| fluxly | Creator Economy | social | Content, creator earnings |
+| mindora | Online Learning | education | Courses, student progress |
+| pulseon | Fitness Platform | health | Workouts, member tracking |
+| procura | Healthcare Supply | healthcare | Compliance, supply chain |
+| brightfund | Impact Investment | finance | Donations, impact metrics |
+| keynest | Real Estate | real-estate | Properties, lease management |
+
+### **🔗 API Endpoints**
+
+All dataset functionality is available via RESTful APIs:
+
+```bash
+# Create dataset
+POST /api/dataset/create
+{
+  "type": "scenario",
+  "data": { "customers": [...], "payments": [...] },
+  "metadata": { "scenario": {...} }
+}
+
+# Fetch dataset
+GET /api/dataset/[id]
+
+# Get dataset info
+GET /api/dataset/[id]/info
+
+# Generate integration code
+GET /api/dataset/[id]/integrate?tool=cursor&format=rules
+```
+
+### **📈 Realistic Data Volumes**
+
+Datasets include realistic record counts based on business stage:
+
+| Stage | Customer Range | Payment Multiplier | Business Metrics |
+|-------|----------------|-------------------|------------------|
+| **Early** | 47-523 | 1.2x customers | Startup-appropriate |
+| **Growth** | 1.2K-9.9K | 2.3x customers | Scaling business |
+| **Enterprise** | 12K-988K | 4.7x customers | Large-scale operations |
+
+All values use realistic, non-rounded numbers (e.g., 5,561 customers, $350.75 CLV) and proper formatting:
+- **Currency**: Displayed in cents ($123.45)
+- **Percentages**: To hundredths (7.25%)
+- **Relationships**: Realistic ratios between entities
+
+### **🔄 Deterministic Generation**
+
+Same parameters always generate identical datasets:
+```bash
+# These will always produce the same data
+synthkit dataset url --category modaic --stage growth --id 12345
+synthkit dataset url --category modaic --stage growth --id 12345
+```
+
+Perfect for:
+- **Team Collaboration**: Share exact datasets across team members
+- **Documentation**: Include stable dataset URLs in README files
+- **Testing**: Consistent test data across environments
+- **Demos**: Reliable data for presentations and tutorials
 
 ## 🔧 **Advanced Configuration**
 
@@ -485,6 +649,7 @@ pnpm cli generate --category my-pack --role admin --stage growth --count 10
 ## 📚 **Documentation**
 
 - [**Getting Started Guide**](docs/getting-started.md)
+- [**Dataset CLI Commands**](DATASET_CLI.md) - Complete CLI reference for dataset sharing
 - [**Pack Development**](docs/pack-development.md)
 - [**Role-Based Access Control**](docs/rbac.md)
 - [**API Reference**](docs/api-reference.md)

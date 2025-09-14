@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from './components/AIComponents';
+import { DatasetShareModal } from '@/components/DatasetShareModal';
+import { useDatasetCreation } from '@/hooks/useDatasetCreation';
 
 interface Customer {
   id: string;
@@ -63,6 +65,63 @@ interface AnalysisData {
 function seededRandom(seed: number): number {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
+}
+
+// Generate data from AI analysis
+function generateDataFromAnalysis(analysis: any): { customers: Customer[]; payments: Payment[]; businessMetrics: BusinessMetrics } {
+  const { businessContext, entities } = analysis;
+  
+  // Determine volume based on business stage
+  const stageMultipliers = {
+    startup: 0.2,
+    growth: 1.0,
+    mature: 3.0,
+    enterprise: 10.0
+  };
+  
+  const baseVolume = 100;
+  const stageMultiplier = stageMultipliers[businessContext.stage as keyof typeof stageMultipliers] || 1.0;
+  const customerCount = Math.floor(baseVolume * stageMultiplier);
+  
+  // Generate customers
+  const customers: Customer[] = [];
+  for (let i = 0; i < customerCount; i++) {
+    const seed = 50000 + i; // Different seed range for AI data
+    customers.push({
+      id: `ai-customer-${seed}`,
+      name: `AI Customer ${i + 1}`,
+      email: `customer${i + 1}@${businessContext.type || 'example'}.com`,
+      loyaltyTier: ['Bronze', 'Silver', 'Gold'][Math.floor(seededRandom(seed) * 3)],
+      createdAt: new Date(Date.now() - seededRandom(seed + 1) * 365 * 24 * 60 * 60 * 1000).toISOString()
+    });
+  }
+  
+  // Generate payments (2-3x customer count)
+  const paymentCount = Math.floor(customerCount * (2 + seededRandom(12345) * 1));
+  const payments: Payment[] = [];
+  for (let i = 0; i < paymentCount; i++) {
+    const seed = 60000 + i;
+    const customerIndex = Math.floor(seededRandom(seed) * customers.length);
+    payments.push({
+      id: `ai-payment-${seed}`,
+      customerId: customers[customerIndex]?.id || `ai-customer-${seed}`,
+      amount: Math.round((50 + seededRandom(seed + 1) * 200) * 100) / 100,
+      status: seededRandom(seed + 2) > 0.1 ? 'completed' : 'pending',
+      paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][Math.floor(seededRandom(seed + 3) * 3)],
+      createdAt: new Date(Date.now() - seededRandom(seed + 4) * 30 * 24 * 60 * 60 * 1000).toISOString()
+    });
+  }
+  
+  // Generate business metrics
+  const businessMetrics: BusinessMetrics = {
+    customerLifetimeValue: Math.round((150 + seededRandom(70000) * 300) * 100) / 100,
+    averageOrderValue: Math.round((75 + seededRandom(70001) * 150) * 100) / 100,
+    monthlyRecurringRevenue: Math.round((2000 + seededRandom(70002) * 8000) * 100) / 100,
+    dailyActiveUsers: Math.floor(customerCount * (0.1 + seededRandom(70003) * 0.4)),
+    conversionRate: Math.round((3 + seededRandom(70004) * 7) * 100) / 100
+  };
+  
+  return { customers, payments, businessMetrics };
 }
 
 // Realistic volume scaling with non-rounded values
@@ -295,6 +354,11 @@ export default function Home() {
   const [expectedPaymentCount, setExpectedPaymentCount] = useState(0);
   const [metricsLoaded, setMetricsLoaded] = useState(false);
 
+  // Dataset sharing state
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
+  const { createDataset, isCreating: isCreatingDataset, error: datasetError, clearError } = useDatasetCreation();
+
   // Calculate business metrics on client side to avoid hydration mismatch
   useEffect(() => {
     const volume = getRealisticVolume(scenario.stage, scenario.category);
@@ -434,6 +498,97 @@ export default function Home() {
     setScenario(prev => ({ ...prev, id: newId }));
   };
 
+  // Dataset sharing functions
+  const handleCreateScenarioDataset = async () => {
+    if (customers.length === 0 || payments.length === 0) {
+      alert('Please generate some data first by clicking "Refresh Customers" and "Refresh Payments"');
+      return;
+    }
+
+    const datasetRequest = {
+      type: 'scenario' as const,
+      data: {
+        customers,
+        payments,
+        businessMetrics
+      },
+      metadata: {
+        scenario: {
+          category: scenario.category,
+          role: scenario.role,
+          stage: scenario.stage,
+          id: scenario.id
+        }
+      }
+    };
+
+    const url = await createDataset(datasetRequest);
+    if (url) {
+      setSharedDatasetUrl(url);
+      setShareModalOpen(true);
+    }
+  };
+
+  const handleCreateAIDataset = async () => {
+    if (!analysisResult?.success || !analysisResult.analysis) {
+      alert('Please run AI analysis first');
+      return;
+    }
+
+    // Generate data from AI analysis if not already done
+    let aiGeneratedData = {
+      customers: customers.length > 0 ? customers : [],
+      payments: payments.length > 0 ? payments : [],
+      businessMetrics: businessMetrics
+    };
+
+    // If no data exists, generate some basic data from the AI analysis
+    if (aiGeneratedData.customers.length === 0) {
+      aiGeneratedData = generateDataFromAnalysis(analysisResult.analysis);
+    }
+
+    const datasetRequest = {
+      type: 'ai-generated' as const,
+      data: aiGeneratedData,
+      metadata: {
+        aiAnalysis: {
+          prompt: aiDescription,
+          analysis: analysisResult.analysis
+        }
+      }
+    };
+
+    const url = await createDataset(datasetRequest);
+    if (url) {
+      setSharedDatasetUrl(url);
+      setShareModalOpen(true);
+    }
+  };
+
+  const getDatasetInfo = () => {
+    const recordCounts = {
+      customers: customers.length,
+      payments: payments.length
+    };
+
+    if (analysisResult?.success) {
+      return {
+        type: 'ai-generated' as const,
+        recordCounts,
+        aiAnalysis: {
+          prompt: aiDescription,
+          businessType: analysisResult.analysis?.businessContext?.type
+        }
+      };
+    } else {
+      return {
+        type: 'scenario' as const,
+        recordCounts,
+        scenario: scenario
+      };
+    }
+  };
+
   const handleAiAnalyze = async () => {
     if (!aiDescription.trim()) {
       setAiError('Please enter a business description');
@@ -477,6 +632,10 @@ export default function Home() {
   };
 
   return (
+    <>
+    <div className="fixed top-4 left-4 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm z-50">
+      ✅ App Working
+    </div>
     <main className="flex min-h-screen flex-col items-center justify-start p-8">
       <div className="z-10 max-w-6xl w-full">
         <div className="flex justify-between items-center mb-8">
@@ -654,7 +813,7 @@ export default function Home() {
             <strong> Change the scenario above and click "Apply Scenario" to see how different categories, roles, stages, and IDs affect the data.</strong>
           </p>
           
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <button 
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
               onClick={fetchCustomers}
@@ -669,7 +828,35 @@ export default function Home() {
             >
               Refresh Payments
             </button>
+            <button 
+              className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:opacity-50 flex items-center gap-2"
+              onClick={handleCreateScenarioDataset}
+              disabled={mswStatus === 'loading' || isGenerating || isCreatingDataset || customers.length === 0}
+            >
+              {isCreatingDataset ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  📤 Share Dataset
+                </>
+              )}
+            </button>
           </div>
+          
+          {datasetError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{datasetError}</p>
+              <button 
+                onClick={clearError}
+                className="text-red-600 hover:text-red-800 text-xs underline mt-1"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Data Display with Pagination */}
@@ -815,7 +1002,7 @@ export default function Home() {
                 </button>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
                 <button
                   disabled={aiLoading || !aiDescription.trim()}
                   className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
@@ -823,6 +1010,24 @@ export default function Home() {
                 >
                   {aiLoading ? 'Analyzing...' : 'Analyze Business'}
                 </button>
+                {analysisResult?.success && (
+                  <button
+                    disabled={isCreatingDataset}
+                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    onClick={handleCreateAIDataset}
+                  >
+                    {isCreatingDataset ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        📤 Share AI Dataset
+                      </>
+                    )}
+                  </button>
+                )}
                 {aiError && (
                   <span className="text-red-600 text-sm">{aiError}</span>
                 )}
@@ -895,5 +1100,16 @@ export default function Home() {
         </div>
       </div>
     </main>
+
+    {/* Dataset Share Modal */}
+    {shareModalOpen && sharedDatasetUrl && (
+      <DatasetShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        url={sharedDatasetUrl}
+        datasetInfo={getDatasetInfo()}
+      />
+    )}
+    </>
   );
 }
