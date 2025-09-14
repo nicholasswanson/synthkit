@@ -139,10 +139,15 @@ function generatePayments(scenario: { category: string; role: string; stage: str
 }
 
 export default function Home() {
-  const [scenario, setScenario] = useState({
+  const [scenario, setScenario] = useState<{
+    category: string;
+    role: string;
+    stage: 'early' | 'growth' | 'enterprise';
+    id: number;
+  }>({
     category: 'modaic',
     role: 'admin',
-    stage: 'early' as const,
+    stage: 'early',
     id: 12345
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -256,7 +261,7 @@ export default function Home() {
     const defaultScenario = {
       category: 'modaic',
       role: 'admin',
-      stage: 'early' as const,
+      stage: 'early' as 'early' | 'growth' | 'enterprise',
       id: 12345
     };
     setScenario(defaultScenario);
