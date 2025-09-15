@@ -568,28 +568,7 @@ async function loadPrototypeData() {
   }
 }
 
-// 3. React Integration Example
-function useReactIntegration() {
-  const [data, setData] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  React.useEffect(() => {
-    synthkit.fetchData()
-      .then(data => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  return { data, loading, error };
-}
-
-// 4. Start your prototype
+// 3. Start your prototype
 loadPrototypeData();
 
 // Export for use in other modules
@@ -599,7 +578,7 @@ export default synthkit;`;
     tool: 'Fetch API',
     description: 'Complete JavaScript class for static dataset integration',
     code: code,
-    instructions: 'Copy this SynthkitDataset class for vanilla JavaScript projects or as a foundation for framework integration. Includes caching, utilities, and React example.',
+    instructions: 'Copy this SynthkitDataset class for vanilla JavaScript projects. For React projects, download the React Hook file above.',
     copyText: code
   };
 }
