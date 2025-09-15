@@ -454,7 +454,14 @@ export default function Home() {
         // Transform AI analysis to match expected structure
         const transformedAnalysis = {
           ...data.analysis,
-          userRoles: data.analysis.userRoles.map((role: string) => ({
+          businessContext: {
+            ...data.analysis.businessContext,
+            primaryFeatures: data.analysis.businessContext?.primaryFeatures || [],
+            targetAudience: data.analysis.businessContext?.targetAudience || []
+          },
+          entities: data.analysis.entities || [],
+          keyFeatures: data.analysis.keyFeatures || [],
+          userRoles: (data.analysis.userRoles || []).map((role: string) => ({
             name: role,
             permissions: ['Standard Access'], // Default permissions for AI-generated roles
             description: `${role} access level`
@@ -779,7 +786,7 @@ export default function Home() {
                 <div>
                   <span className="font-medium">Target Audience:</span>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {getCurrentBusinessContext()?.targetAudience.map((audience, i) => (
+                    {(getCurrentBusinessContext()?.targetAudience || []).map((audience, i) => (
                       <span key={i} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
                         {audience}
                       </span>
