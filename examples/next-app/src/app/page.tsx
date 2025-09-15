@@ -225,7 +225,7 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
   const baseVolumes = {
     early: { min: 47, max: 523 },
     growth: { min: 1247, max: 9876 },
-    enterprise: { min: 12456, max: 987654 }
+    enterprise: { min: 12456, max: 50000 } // Capped for demo memory efficiency (realistic: up to 1M+)
   };
   
   const categoryMultipliers: Record<string, number> = {
