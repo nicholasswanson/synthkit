@@ -274,7 +274,7 @@ export function PersonaScenarioSwitcher({
       <div className="mt-4 pt-4 border-t text-sm text-gray-600 dark:text-gray-400">
         <div className="grid grid-cols-2 gap-4">
           <div>MSW: {synth.mswEnabled ? '✅ Enabled' : '❌ Disabled'}</div>
-          <div>Packs: {synth.packs.length} loaded</div>
+          <div>Data: Direct generation (no packs)</div>
         </div>
       </div>
     </div>
