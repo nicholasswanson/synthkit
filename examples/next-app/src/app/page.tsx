@@ -426,12 +426,69 @@ function generateBusinessMetrics(category: string, stage: string, seed: number):
   
   const multiplier = stageMultipliers[stage as keyof typeof stageMultipliers] || stageMultipliers.growth;
   
+    // Persona-specific base metrics (industry-appropriate ranges)
+  const personaMetrics: Record<string, {
+    clvBase: number, clvRange: number,
+    aovBase: number, aovRange: number, 
+    mrrBase: number, mrrRange: number,
+    dauBase: number, dauRange: number,
+    conversionBase: number, conversionRange: number
+  }> = {
+    modaic: { // Fashion E-commerce
+      clvBase: 180.45, clvRange: 220.55, aovBase: 85.23, aovRange: 140.77,
+      mrrBase: 1200.34, mrrRange: 3800.66, dauBase: 45.67, dauRange: 120.33,
+      conversionBase: 2.89, conversionRange: 4.11
+    },
+    stratus: { // B2B SaaS Platform  
+      clvBase: 2400.67, clvRange: 4200.33, aovBase: 450.89, aovRange: 850.11,
+      mrrBase: 8500.45, mrrRange: 15000.55, dauBase: 15.23, dauRange: 35.77,
+      conversionBase: 1.45, conversionRange: 2.55
+    },
+    forksy: { // Food Delivery
+      clvBase: 95.34, clvRange: 180.66, aovBase: 28.45, aovRange: 65.55,
+      mrrBase: 800.23, mrrRange: 2200.77, dauBase: 85.67, dauRange: 200.33,
+      conversionBase: 4.56, conversionRange: 7.44
+    },
+    pulseon: { // Fitness Platform
+      clvBase: 220.78, clvRange: 380.22, aovBase: 35.67, aovRange: 75.33,
+      mrrBase: 3200.45, mrrRange: 7800.55, dauBase: 65.34, dauRange: 150.66,
+      conversionBase: 3.23, conversionRange: 5.77
+    },
+    procura: { // Procurement Platform
+      clvBase: 8500.34, clvRange: 18000.66, aovBase: 2800.45, aovRange: 12000.55,
+      mrrBase: 12000.67, mrrRange: 35000.33, dauBase: 8.23, dauRange: 25.77,
+      conversionBase: 0.89, conversionRange: 1.67
+    },
+    mindora: { // Mental Health Platform
+      clvBase: 450.67, clvRange: 850.33, aovBase: 125.34, aovRange: 185.66,
+      mrrBase: 2800.45, mrrRange: 6500.55, dauBase: 25.67, dauRange: 65.33,
+      conversionBase: 2.67, conversionRange: 4.33
+    },
+    keynest: { // Property Management
+      clvBase: 3200.45, clvRange: 8500.55, aovBase: 1850.67, aovRange: 3200.33,
+      mrrBase: 15000.34, mrrRange: 45000.66, dauBase: 12.45, dauRange: 35.55,
+      conversionBase: 1.23, conversionRange: 2.77
+    },
+    fluxly: { // Supply Chain Platform
+      clvBase: 5500.78, clvRange: 12000.22, aovBase: 850.34, aovRange: 4200.66,
+      mrrBase: 8500.45, mrrRange: 25000.55, dauBase: 18.67, dauRange: 45.33,
+      conversionBase: 1.67, conversionRange: 3.33
+    },
+    brightfund: { // Nonprofit Platform
+      clvBase: 125.45, clvRange: 450.55, aovBase: 45.67, aovRange: 185.33,
+      mrrBase: 1500.34, mrrRange: 4500.66, dauBase: 35.23, dauRange: 85.77,
+      conversionBase: 3.45, conversionRange: 6.55
+    }
+  };
+  
+  const persona = personaMetrics[category] || personaMetrics.modaic;
+  
   return {
-    customerLifetimeValue: Math.round(((150.34 + seededRandom(seed) * 200.41) * multiplier.clv) * 100) / 100,
-    averageOrderValue: Math.round(((75.67 + seededRandom(seed + 1) * 124.33) * multiplier.aov) * 100) / 100,
-    monthlyRecurringRevenue: Math.round(((2000.89 + seededRandom(seed + 2) * 6357.11) * multiplier.mrr) * 100) / 100,
-    dailyActiveUsers: Math.floor((25.45 + seededRandom(seed + 3) * 74.55) * multiplier.dau),
-    conversionRate: Math.round(((2.34 + seededRandom(seed + 4) * 3.67) * multiplier.conversion) * 100) / 100
+    customerLifetimeValue: Math.round(((persona.clvBase + seededRandom(seed) * persona.clvRange) * multiplier.clv) * 100) / 100,
+    averageOrderValue: Math.round(((persona.aovBase + seededRandom(seed + 1) * persona.aovRange) * multiplier.aov) * 100) / 100,
+    monthlyRecurringRevenue: Math.round(((persona.mrrBase + seededRandom(seed + 2) * persona.mrrRange) * multiplier.mrr) * 100) / 100,
+    dailyActiveUsers: Math.floor((persona.dauBase + seededRandom(seed + 3) * persona.dauRange) * multiplier.dau),
+    conversionRate: Math.round(((persona.conversionBase + seededRandom(seed + 4) * persona.conversionRange) * multiplier.conversion) * 100) / 100
   };
 }
 
