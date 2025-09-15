@@ -362,47 +362,32 @@ export default function Home() {
         }
       };
       
-      // Save to sessionStorage for same-browser live connection (with size limit)
-      try {
-        const dataString = JSON.stringify(currentDataset);
-        const sizeInMB = new Blob([dataString]).size / (1024 * 1024);
-        
-        if (sizeInMB > 4) {
-          // If data is too large, save a summary instead
-          const summaryDataset = {
-            ...currentDataset,
-            data: {
-              ...currentDataset.data,
-              customers: currentDataset.data.customers?.slice(0, 100) || [],
-              payments: currentDataset.data.payments?.slice(0, 200) || [],
-              // Keep other entities but limit their size
-              ...Object.fromEntries(
-                Object.entries(currentDataset.data)
-                  .filter(([key]) => !['customers', 'payments', 'businessMetrics'].includes(key))
-                  .map(([key, value]) => [key, Array.isArray(value) ? value.slice(0, 50) : value])
-              )
-            }
-          };
-          sessionStorage.setItem('synthkit-current-dataset', JSON.stringify(summaryDataset));
-          console.log(`📊 Saved dataset summary to sessionStorage (${sizeInMB.toFixed(1)}MB was too large)`);
-        } else {
-          sessionStorage.setItem('synthkit-current-dataset', dataString);
-          console.log(`📊 Saved full dataset to sessionStorage (${sizeInMB.toFixed(2)}MB)`);
-        }
-      } catch (error) {
-        console.warn('Failed to save to sessionStorage:', error instanceof Error ? error.message : String(error));
-        // Continue without sessionStorage - API endpoint will still work
-      }
-      
-      // Also save to API for cross-port live connection
+      // Save full dataset to Live API (primary method - unlimited size)
       fetch('/api/dataset/current', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(currentDataset)
+      }).then(() => {
+        console.log('📡 Full dataset saved to Live API (unlimited size)');
       }).catch(err => {
-        // Silently fail - API endpoint is optional for live features
-        console.log('Live API update failed (this is normal if not testing live features):', err.message);
+        console.warn('Live API update failed:', err.message);
       });
+      
+      // Optionally cache to sessionStorage for speed (if small enough)
+      try {
+        const dataString = JSON.stringify(currentDataset);
+        const sizeInMB = new Blob([dataString]).size / (1024 * 1024);
+        
+        if (sizeInMB <= 4) {
+          sessionStorage.setItem('synthkit-current-dataset', dataString);
+          console.log(`📊 Cached dataset to sessionStorage (${sizeInMB.toFixed(2)}MB)`);
+        } else {
+          console.log(`📊 Dataset too large for sessionStorage cache (${sizeInMB.toFixed(1)}MB) - using API only`);
+        }
+      } catch (error) {
+        // SessionStorage is optional - API is the primary method
+        console.log('SessionStorage cache unavailable - using API only');
+      }
     }
   }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
 

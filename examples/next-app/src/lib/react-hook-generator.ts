@@ -96,20 +96,7 @@ export function useSynthkitDataset() {
   useEffect(() => {
     async function loadData() {
       try {
-        // 1. Try live demo connection (sessionStorage - same browser)
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-          const liveData = sessionStorage.getItem('synthkit-current-dataset');
-          if (liveData) {
-            const parsed = JSON.parse(liveData);
-            setData(parsed.data);
-            setSource('live');
-            setLoading(false);
-            console.log('📊 Connected to live Synthkit demo!');
-            return;
-          }
-        }
-
-        // 2. Try live API endpoint (cross-port - different localhost ports)
+        // 1. Try live API endpoint FIRST (unlimited size, cross-port)
         if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
           try {
             const response = await fetch('http://localhost:3001/api/dataset/current');
@@ -118,11 +105,24 @@ export function useSynthkitDataset() {
               setData(dataset.data);
               setSource('api');
               setLoading(false);
-              console.log('📡 Connected to live Synthkit API!');
+              console.log('📡 Connected to live Synthkit API! (Full dataset)');
               return;
             }
           } catch (e) {
             // Demo not running, continue to fallback
+          }
+        }
+
+        // 2. Try sessionStorage cache (same browser, fast access)
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+          const liveData = sessionStorage.getItem('synthkit-current-dataset');
+          if (liveData) {
+            const parsed = JSON.parse(liveData);
+            setData(parsed.data);
+            setSource('live');
+            setLoading(false);
+            console.log('📊 Connected to live Synthkit demo! (Cached)');
+            return;
           }
         }
 
