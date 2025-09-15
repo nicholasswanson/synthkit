@@ -451,7 +451,17 @@ export default function Home() {
       const data: AnalysisData = await response.json();
       
       if (data.success && data.analysis) {
-        setAiAnalysis(data.analysis);
+        // Transform AI analysis to match expected structure
+        const transformedAnalysis = {
+          ...data.analysis,
+          userRoles: data.analysis.userRoles.map((role: string) => ({
+            name: role,
+            permissions: ['Standard Access'], // Default permissions for AI-generated roles
+            description: `${role} access level`
+          }))
+        };
+        
+        setAiAnalysis(transformedAnalysis);
         
         // Create new custom category
         const title = generateBusinessTitle(data.analysis);
@@ -460,7 +470,7 @@ export default function Home() {
         const newCategory: CustomCategory = {
           id: categoryId,
           displayName: title,
-          aiAnalysis: data.analysis,
+          aiAnalysis: transformedAnalysis,
           createdAt: new Date()
         };
         
@@ -805,7 +815,7 @@ export default function Home() {
                   <div className="font-medium text-purple-800 dark:text-purple-200">{role.name}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">{role.description}</div>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {role.permissions.map((permission, j) => (
+                    {(role.permissions || []).map((permission, j) => (
                       <span key={j} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs">
                         {permission}
                       </span>
@@ -827,7 +837,7 @@ export default function Home() {
                   <div className="font-medium text-gray-900 dark:text-white">{entity.name}</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 capitalize mb-2">{entity.type}</div>
                   <div className="space-y-1">
-                    {entity.properties.map((prop, j) => (
+                    {(entity.properties || []).map((prop, j) => (
                       <div key={j} className="text-sm">
                         <span className="font-medium">{prop.name}</span>
                         <span className="text-gray-500 dark:text-gray-400"> ({prop.type})</span>
