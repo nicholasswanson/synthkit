@@ -54,6 +54,19 @@ export async function POST(request: NextRequest) {
     // Validate request
     const validation = validateCreateRequest(body);
     if (!validation.valid) {
+      logger.error('Dataset validation failed', { 
+        error: validation.error, 
+        type: body.type,
+        dataKeys: Object.keys(body.data || {}),
+        recordCounts: Object.fromEntries(
+          Object.entries(body.data || {}).map(([key, value]) => [
+            key, 
+            Array.isArray(value) ? value.length : typeof value
+          ])
+        ),
+        hasMetadata: !!body.metadata,
+        clientIP
+      });
       return ApiErrorResponse.badRequest(validation.error || 'Invalid request data');
     }
 
@@ -123,19 +136,19 @@ function validateCreateRequest(body: any): { valid: boolean; error?: string } {
     }
   }
 
-  // Validate data size (prevent abuse)
+  // Validate data size (prevent abuse) - increased for enterprise scenarios
   const dataString = JSON.stringify(body.data);
-  if (dataString.length > 10 * 1024 * 1024) { // 10MB limit
-    return { valid: false, error: 'Dataset too large. Maximum size is 10MB' };
+  if (dataString.length > 50 * 1024 * 1024) { // 50MB limit (enterprise scenarios can be large)
+    return { valid: false, error: 'Dataset too large. Maximum size is 50MB' };
   }
 
-  // Validate record counts (align with early/growth/enterprise limits)
+  // Validate record counts (align with realistic enterprise limits)
   const totalRecords = Object.values(body.data).reduce((sum: number, value) => {
     return sum + (Array.isArray(value) ? value.length : 0);
   }, 0);
 
-  if (totalRecords > 1000000) { // 1M records max (enterprise level)
-    return { valid: false, error: 'Too many records. Maximum is 1,000,000 total records' };
+  if (totalRecords > 10000000) { // 10M records max (realistic enterprise level)
+    return { valid: false, error: 'Too many records. Maximum is 10,000,000 total records' };
   }
 
   return { valid: true };
