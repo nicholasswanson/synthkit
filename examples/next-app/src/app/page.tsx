@@ -529,13 +529,20 @@ export default function Home() {
 
   // Handle dataset sharing
   const handleCreateDataset = async () => {
+    console.log('handleCreateDataset called');
     const currentBusinessContext = getCurrentBusinessContext();
     
     const datasetData = {
       customers,
       payments,
-      businessMetrics
+      businessMetrics: businessMetrics || {}
     };
+    
+    console.log('Dataset data:', { 
+      customersCount: customers.length, 
+      paymentsCount: payments.length, 
+      hasBusinessMetrics: !!businessMetrics 
+    });
     
     const recordCounts = {
       customers: customers.length,
@@ -568,10 +575,16 @@ export default function Home() {
         metadata
       });
       
-      setSharedDatasetUrl(url);
-      setShareModalOpen(true);
+      if (url) {
+        setSharedDatasetUrl(url);
+        setShareModalOpen(true);
+      } else {
+        console.error('Dataset creation returned null URL');
+        alert('Failed to create dataset. Please check the console for details.');
+      }
     } catch (error) {
       console.error('Failed to create dataset:', error);
+      alert(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
