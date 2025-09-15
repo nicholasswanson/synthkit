@@ -1,13 +1,10 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
 import { 
   synthStore, 
-  loadPacks,
   type SynthStore, 
-  type SynthConfig,
-  type ScenarioPack 
+  type SynthConfig
 } from '@synthkit/sdk';
 import { setupMSW, useMSWHandlers } from '../msw/setup';
-import { createPackHandlers } from '../msw/route-handlers';
 import type { HttpHandler } from 'msw';
 
 export interface SynthProviderProps {
@@ -21,7 +18,6 @@ export interface SynthContextValue {
   store: SynthStore;
   isReady: boolean;
   mswEnabled: boolean;
-  packs: ScenarioPack[];
   refreshHandlers: () => Promise<void>;
 }
 
@@ -36,27 +32,12 @@ export function SynthProvider({
   const storeState = synthStore();
   const [isReady, setIsReady] = useState(false);
   const [mswEnabled, setMswEnabled] = useState(false);
-  const [packs, setPacks] = useState<ScenarioPack[]>([]);
-
-  const generateHandlers = (loadedPacks: ScenarioPack[]): HttpHandler[] => {
-    const handlers: HttpHandler[] = [];
-    
-    // Get current seed and locale from store
-    const seed = storeState.currentGenerationId;
-    const locale = 'en-US'; // Default locale
-    
-    // Generate handlers for each pack
-    for (const pack of loadedPacks) {
-      handlers.push(...createPackHandlers(pack, { seed, locale }));
-    }
-    
-    return handlers;
-  };
 
   const refreshHandlers = async () => {
-    if (!mswEnabled || packs.length === 0) return;
+    if (!mswEnabled) return;
     
-    const handlers = generateHandlers(packs);
+    // Simple MSW setup without pack loading
+    const handlers: HttpHandler[] = [];
     useMSWHandlers(handlers);
   };
 
@@ -68,22 +49,10 @@ export function SynthProvider({
           storeState.setConfig(config);
         }
 
-        // Load packs
-        if (config?.packs && config.packs.length > 0) {
-          const loadedPacks = await loadPacks(config.packs);
-          setPacks(loadedPacks);
-          
-          // Register packs in storeState
-          for (const pack of loadedPacks) {
-            storeState.registerPack(pack);
-          }
-          
-          // Setup MSW if enabled
-          if (enableMSW) {
-            const handlers = generateHandlers(loadedPacks);
-            await setupMSW(handlers);
-            setMswEnabled(true);
-          }
+        // Setup MSW if enabled
+        if (enableMSW) {
+          await setupMSW([]);
+          setMswEnabled(true);
         }
 
         // Load from localStorage if available
@@ -98,19 +67,12 @@ export function SynthProvider({
     }
 
     initialize();
-  }, [config, enableMSW, onReady, storeState]); // Add storeState to deps
-
-  // Update handlers when seed or locale changes
-  useEffect(() => {
-    if (!isReady || !mswEnabled) return;
-    refreshHandlers();
-  }, [isReady, mswEnabled, refreshHandlers]);
+  }, [config, enableMSW, onReady, storeState]);
 
   const value: SynthContextValue = {
     store: storeState,
     isReady,
     mswEnabled,
-    packs,
     refreshHandlers,
   };
 

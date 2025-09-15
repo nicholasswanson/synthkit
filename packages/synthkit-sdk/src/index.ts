@@ -1,6 +1,5 @@
 // Core exports
 export * from './generators';
-export * from './packs';
 export * from './store';
 export * from './config';
 
@@ -9,7 +8,6 @@ export * from './types';
 
 // Ensure specific exports are available
 export type { 
-  ScenarioPack, 
   DataPack,
   Category,
   Role,

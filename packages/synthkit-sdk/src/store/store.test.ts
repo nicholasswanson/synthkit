@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createSynthStore } from './store';
-import type { ScenarioPack } from '../types';
+import type { DataPack } from '../types';
 
 // Mock localStorage
 const localStorageMock = {
@@ -21,7 +21,7 @@ describe('SynthStore', () => {
     store = createSynthStore();
   });
 
-  const testPack: ScenarioPack = {
+  const testPack: DataPack = {
     id: 'test-pack',
     name: 'Test Pack',
     description: 'Test pack for unit tests',

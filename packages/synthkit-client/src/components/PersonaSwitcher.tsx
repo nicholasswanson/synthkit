@@ -8,7 +8,7 @@ export interface PersonaSwitcherProps {
 }
 
 export function PersonaSwitcher({ className, onPersonaChange }: PersonaSwitcherProps) {
-  const { packs } = useSynth();
+  const {} = useSynth();
   const { 
     currentPersona, 
     personas, 
@@ -38,8 +38,7 @@ export function PersonaSwitcher({ className, onPersonaChange }: PersonaSwitcherP
     // }
     
     return generators;
-  }, [packs]);
-
+  }, []);
   const handleCreatePersona = () => {
     if (!newPersonaName.trim() || selectedGenerators.length === 0) return;
     

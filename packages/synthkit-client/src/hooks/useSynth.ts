@@ -1,13 +1,12 @@
 import { useSynthContext } from '../providers/SynthProvider';
 
 export function useSynth() {
-  const { store, isReady, mswEnabled, packs, refreshHandlers } = useSynthContext();
+  const { store, isReady, mswEnabled, refreshHandlers } = useSynthContext();
   
   return {
     isReady,
     mswEnabled,
     config: store.config,
-    packs,
     activeCategories: Array.from(store.activeCategories),
     activeCategory: store.activeCategory,
     activeRole: store.activeRole,

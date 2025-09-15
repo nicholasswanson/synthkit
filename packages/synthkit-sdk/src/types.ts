@@ -120,5 +120,3 @@ export interface Generator<T = any> {
   schema?: any;
 }
 
-// ScenarioPack alias for backward compatibility
-export type ScenarioPack = DataPack;
