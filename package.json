@@ -22,7 +22,7 @@
     "validate:pack": "node tools/governance/validate-pack.js --all",
     "validate:single": "node tools/governance/validate-pack.js",
     "pre-commit": "pnpm validate && pnpm build && pnpm typecheck",
-    "dev": "pnpm --filter @synthkit/examples-next-app dev",
+    "dev": "pnpm --filter @synthkit/example-next dev",
     "cli": "node tools/cli/dist/cli.mjs",
     "setup": "./scripts/setup-dev-auto.sh",
     "setup:basic": "./scripts/setup-dev.sh",
