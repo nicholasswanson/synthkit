@@ -296,6 +296,7 @@ export default function Home() {
   // Generated data
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [dynamicEntities, setDynamicEntities] = useState<Record<string, any[]>>({});
   const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics | null>(null);
   const [metricsLoaded, setMetricsLoaded] = useState(false);
   
@@ -387,6 +388,54 @@ export default function Home() {
     return PREDEFINED_PERSONAS[selectedCategory as keyof typeof PREDEFINED_PERSONAS]?.userRoles || [];
   };
 
+  // Generate dynamic entity data based on AI analysis or predefined entities
+  const generateEntityData = (entityInfo: any, volume: number, seedOffset: number) => {
+    const entityData = [];
+    const entityName = entityInfo.name.toLowerCase();
+    
+    for (let i = 0; i < volume; i++) {
+      const seed = scenarioId + seedOffset + i;
+      const item: any = { id: `${entityName}-${seed}` };
+      
+      // Generate data based on entity properties
+      if (entityInfo.properties && entityInfo.properties.length > 0) {
+        entityInfo.properties.forEach((prop: any) => {
+          switch (prop.type) {
+            case 'string':
+              if (prop.name.includes('email')) {
+                item[prop.name] = `${entityName}${i + 1}@example.com`;
+              } else if (prop.name.includes('name') || prop.name.includes('title')) {
+                item[prop.name] = `${entityInfo.name} ${i + 1}`;
+              } else {
+                item[prop.name] = `Sample ${prop.name}`;
+              }
+              break;
+            case 'number':
+              if (prop.name.includes('amount') || prop.name.includes('price')) {
+                item[prop.name] = generateRealisticAmount(seed, 'modaic', stage);
+              } else {
+                item[prop.name] = Math.floor(seededRandom(seed) * 1000) + 1;
+              }
+              break;
+            case 'boolean':
+              item[prop.name] = seededRandom(seed) > 0.5;
+              break;
+            default:
+              item[prop.name] = `Sample ${prop.name}`;
+          }
+        });
+      } else {
+        // Default properties if none specified
+        item.name = `${entityInfo.name} ${i + 1}`;
+        item.createdAt = new Date(Date.now() - seededRandom(seed) * 365 * 24 * 60 * 60 * 1000).toISOString();
+      }
+      
+      entityData.push(item);
+    }
+    
+    return entityData;
+  };
+
   // Generate scenario data based on current configuration
   const generateScenarioData = () => {
     const mappedCategory = isCustomCategory(selectedCategory) 
@@ -395,45 +444,64 @@ export default function Home() {
 
     const scenario = { category: mappedCategory, role, stage, id: scenarioId };
     const volume = getRealisticVolume(scenario);
+    const entities = getCurrentEntities();
     
-    // Generate customers
-    const newCustomers: Customer[] = [];
-    for (let i = 0; i < volume.expected; i++) {
-      const seed = scenarioId + i;
-      newCustomers.push({
-        id: `customer-${seed}`,
-        name: `Customer ${i + 1}`,
-        email: `customer${i + 1}@example.com`,
-        loyaltyTier: ['Bronze', 'Silver', 'Gold'][Math.floor(seededRandom(seed) * 3)],
-        createdAt: new Date(Date.now() - seededRandom(seed + 1) * 365 * 24 * 60 * 60 * 1000).toISOString()
-      });
-    }
-    
-    // Generate payments with category-specific multipliers
-    const paymentMultipliers: Record<string, number> = {
-      modaic: 2.3, stratus: 0.8, forksy: 4.7
-    };
-    const paymentMultiplier = paymentMultipliers[mappedCategory] || 2.3;
-    const paymentCount = Math.floor(volume.expected * paymentMultiplier);
-    
-    const newPayments: Payment[] = [];
-    for (let i = 0; i < paymentCount; i++) {
-      const seed = scenarioId + 10000 + i;
-      const customerIndex = Math.floor(seededRandom(seed) * newCustomers.length);
-      const amount = generateRealisticAmount(seed, mappedCategory, stage);
+    if (isCustomCategory(selectedCategory) && entities.length > 0) {
+      // Generate dynamic entities for AI scenarios
+      const newDynamicEntities: Record<string, any[]> = {};
       
-      newPayments.push({
-        id: `payment-${seed}`,
-        customerId: newCustomers[customerIndex]?.id || `customer-${seed}`,
-        amount: amount,
-        status: seededRandom(seed + 1) > 0.1 ? 'completed' : 'pending',
-        paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][Math.floor(seededRandom(seed + 2) * 3)],
-        createdAt: new Date(Date.now() - seededRandom(seed + 3) * 30 * 24 * 60 * 60 * 1000).toISOString()
+      entities.forEach((entity, index) => {
+        const entityVolume = index === 0 ? volume.expected : Math.floor(volume.expected * (0.5 + seededRandom(scenarioId + index) * 1.5));
+        const seedOffset = index * 10000;
+        newDynamicEntities[entity.name.toLowerCase()] = generateEntityData(entity, entityVolume, seedOffset);
       });
+      
+      setDynamicEntities(newDynamicEntities);
+      // Clear legacy data for AI scenarios
+      setCustomers([]);
+      setPayments([]);
+    } else {
+      // Generate legacy customers/payments for predefined personas
+      const newCustomers: Customer[] = [];
+      for (let i = 0; i < volume.expected; i++) {
+        const seed = scenarioId + i;
+        newCustomers.push({
+          id: `customer-${seed}`,
+          name: `Customer ${i + 1}`,
+          email: `customer${i + 1}@example.com`,
+          loyaltyTier: ['Bronze', 'Silver', 'Gold'][Math.floor(seededRandom(seed) * 3)],
+          createdAt: new Date(Date.now() - seededRandom(seed + 1) * 365 * 24 * 60 * 60 * 1000).toISOString()
+        });
+      }
+      
+      // Generate payments with category-specific multipliers
+      const paymentMultipliers: Record<string, number> = {
+        modaic: 2.3, stratus: 0.8, forksy: 4.7
+      };
+      const paymentMultiplier = paymentMultipliers[mappedCategory] || 2.3;
+      const paymentCount = Math.floor(volume.expected * paymentMultiplier);
+      
+      const newPayments: Payment[] = [];
+      for (let i = 0; i < paymentCount; i++) {
+        const seed = scenarioId + 10000 + i;
+        const customerIndex = Math.floor(seededRandom(seed) * newCustomers.length);
+        const amount = generateRealisticAmount(seed, mappedCategory, stage);
+        
+        newPayments.push({
+          id: `payment-${seed}`,
+          customerId: newCustomers[customerIndex]?.id || `customer-${seed}`,
+          amount: amount,
+          status: seededRandom(seed + 1) > 0.1 ? 'completed' : 'pending',
+          paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][Math.floor(seededRandom(seed + 2) * 3)],
+          createdAt: new Date(Date.now() - seededRandom(seed + 3) * 30 * 24 * 60 * 60 * 1000).toISOString()
+        });
+      }
+      
+      setCustomers(newCustomers);
+      setPayments(newPayments);
+      // Clear dynamic entities for predefined personas
+      setDynamicEntities({});
     }
-    
-    setCustomers(newCustomers);
-    setPayments(newPayments);
   };
 
   // Handle AI business analysis
@@ -532,22 +600,18 @@ export default function Home() {
     console.log('handleCreateDataset called');
     const currentBusinessContext = getCurrentBusinessContext();
     
-    const datasetData = {
-      customers,
-      payments,
-      businessMetrics: businessMetrics || {}
-    };
+    const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+      ? { ...dynamicEntities, businessMetrics: businessMetrics || {} }
+      : { customers, payments, businessMetrics: businessMetrics || {} };
     
-    console.log('Dataset data:', { 
-      customersCount: customers.length, 
-      paymentsCount: payments.length, 
-      hasBusinessMetrics: !!businessMetrics 
-    });
+    console.log('Dataset data:', isCustomCategory(selectedCategory) 
+      ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
+      : { customersCount: customers.length, paymentsCount: payments.length, hasBusinessMetrics: !!businessMetrics }
+    );
     
-    const recordCounts = {
-      customers: customers.length,
-      payments: payments.length
-    };
+    const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
+      : { customers: customers.length, payments: payments.length };
     
     let metadata;
     if (isCustomCategory(selectedCategory)) {
@@ -589,10 +653,9 @@ export default function Home() {
   };
 
   const getDatasetInfo = () => {
-    const recordCounts = {
-      customers: customers.length,
-      payments: payments.length
-    };
+    const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
+      : { customers: customers.length, payments: payments.length };
     
     if (isCustomCategory(selectedCategory)) {
       return {
@@ -875,61 +938,103 @@ export default function Home() {
 
         {/* Object Lists */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Customers */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              👥 Customers ({customers.length.toLocaleString()})
-            </h3>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {customers.slice(0, 10).map((customer) => (
-                <div key={customer.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">{customer.name}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{customer.email}</div>
-                  </div>
-                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
-                    {customer.loyaltyTier}
-                  </span>
-                </div>
-              ))}
-              {customers.length > 10 && (
-                <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                  ... and {(customers.length - 10).toLocaleString()} more
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Payments */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              💳 Payments ({payments.length.toLocaleString()})
-            </h3>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {payments.slice(0, 10).map((payment) => (
-                <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      ${typeof payment.amount === 'number' ? payment.amount.toFixed(2) : payment.amount}
+          {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
+            // Dynamic entities for AI scenarios
+            Object.entries(dynamicEntities).map(([entityName, entityData]) => (
+              <div key={entityName} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  📊 {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
+                </h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {entityData.slice(0, 10).map((item: any) => (
+                    <div key={item.id} className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <div className="space-y-1">
+                        {Object.entries(item).slice(0, 4).map(([key, value]) => (
+                          <div key={key} className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
+                              {key}:
+                            </span>
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {typeof value === 'number' && key.includes('amount') 
+                                ? `$${value.toFixed(2)}`
+                                : typeof value === 'string' && value.length > 30
+                                ? `${value.substring(0, 30)}...`
+                                : String(value)
+                              }
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{payment.paymentMethod}</div>
-                  </div>
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    payment.status === 'completed' 
-                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                      : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
-                  }`}>
-                    {payment.status}
-                  </span>
+                  ))}
+                  {entityData.length > 10 && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                      ... and {(entityData.length - 10).toLocaleString()} more
+                    </div>
+                  )}
                 </div>
-              ))}
-              {payments.length > 10 && (
-                <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                  ... and {(payments.length - 10).toLocaleString()} more
+              </div>
+            ))
+          ) : (
+            // Legacy customers/payments for predefined personas
+            <>
+              {/* Customers */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  👥 Customers ({customers.length.toLocaleString()})
+                </h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {customers.slice(0, 10).map((customer) => (
+                    <div key={customer.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">{customer.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{customer.email}</div>
+                      </div>
+                      <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
+                        {customer.loyaltyTier}
+                      </span>
+                    </div>
+                  ))}
+                  {customers.length > 10 && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                      ... and {(customers.length - 10).toLocaleString()} more
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+
+              {/* Payments */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  💳 Payments ({payments.length.toLocaleString()})
+                </h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {payments.slice(0, 10).map((payment) => (
+                    <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          ${typeof payment.amount === 'number' ? payment.amount.toFixed(2) : payment.amount}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{payment.paymentMethod}</div>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-sm ${
+                        payment.status === 'completed' 
+                          ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                          : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+                      }`}>
+                        {payment.status}
+                      </span>
+                    </div>
+                  ))}
+                  {payments.length > 10 && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                      ... and {(payments.length - 10).toLocaleString()} more
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Realistic Business Metrics */}
