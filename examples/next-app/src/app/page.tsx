@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { AnalysisResult } from './components/AIComponents';
+import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
 import { useDatasetCreation } from '@/hooks/useDatasetCreation';
 
@@ -346,6 +346,36 @@ export default function Home() {
       setMetricsLoaded(true);
     }
   }, [selectedCategory, stage, scenarioId]);
+
+  // Save current dataset to sessionStorage and API for live integration
+  useEffect(() => {
+    if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
+      const currentDataset = {
+        data: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+          ? { ...dynamicEntities, customers: dynamicEntities.customers || [], payments: dynamicEntities.payments || [], businessMetrics: businessMetrics || {} }
+          : { customers, payments, businessMetrics: businessMetrics || {} },
+        metadata: {
+          type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
+          scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
+          aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
+          updatedAt: new Date().toISOString()
+        }
+      };
+      
+      // Save to sessionStorage for same-browser live connection
+      sessionStorage.setItem('synthkit-current-dataset', JSON.stringify(currentDataset));
+      
+      // Also save to API for cross-port live connection
+      fetch('/api/dataset/current', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentDataset)
+      }).catch(err => {
+        // Silently fail - API endpoint is optional for live features
+        console.log('Live API update failed (this is normal if not testing live features):', err.message);
+      });
+    }
+  }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {

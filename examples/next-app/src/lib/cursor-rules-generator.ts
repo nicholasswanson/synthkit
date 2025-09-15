@@ -76,22 +76,32 @@ const useDataset = () => {
 };
 \`\`\`
 
-## AI Assistant Instructions
-When helping with this project:
-1. Understand this is realistic ${businessContext} data
-2. Suggest appropriate UI patterns for the business domain
-3. Consider the data relationships when building features
-4. Recommend proper state management for the data volume
-5. Focus on production-ready code patterns
+## 🚀 Zero-Thought Data Upgrade
+When user says: "Replace my hardcoded data with realistic data" or "Use real-looking data instead"
 
-## Common Tasks
-- Building dashboards with business metrics
-- Creating data tables with pagination
-- Implementing search and filtering
-- Displaying charts and visualizations
-- Managing customer/payment relationships
+AUTOMATICALLY do this:
+1. Find hardcoded arrays like: \`const users = [{ id: 1, name: "John" }]\`
+2. Replace with: \`const { data, loading } = useSynthkitDataset(); const users = data?.customers || []\`
+3. Add loading state: \`if (loading) return <div>Loading...</div>\`
+4. Keep ALL existing UI, styling, and logic - just swap the data source
+5. Suggest: "Your data is now realistic ${businessContext} data with ${recordSummary}!"
 
-Remember: This data is production-ready and deterministic. Same URL always returns identical data.`;
+## 🎯 Vibe-Coder Instructions
+For users who don't know data structures:
+- Never ask about data format - just use what's available
+- Automatically handle missing properties gracefully
+- Add optional chaining everywhere: \`data?.customers?.[0]?.name\`
+- Preserve existing component structure and styling
+- Focus on making it "just work" without explanation
+
+## 🔄 Live Demo Connection (Local Development)
+If user is running Synthkit demo locally:
+1. Check sessionStorage for 'synthkit-current-dataset' first
+2. If found: use live data that updates when demo changes
+3. If not found: fallback to static URL
+4. Console log: "📊 Connected to live Synthkit demo!" or "📄 Using static dataset"
+
+Remember: Most users are vibe-coding and want zero friction. Make data upgrades feel magical! ✨`;
 }
 
 export function downloadCursorRules(url: string, datasetInfo: DatasetInfo): void {

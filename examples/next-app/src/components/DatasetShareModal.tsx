@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Copy, Check, ExternalLink, Download } from 'lucide-react';
 import { generateAllIntegrations, type DatasetInfo } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
+import { downloadReactHook } from '@/lib/react-hook-generator';
 
 interface DatasetShareModalProps {
   isOpen: boolean;
@@ -129,6 +130,38 @@ export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: Dataset
           </div>
         </div>
 
+        {/* Quick Download Section */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+            ⚡ Quick Setup Files
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Download ready-to-use files for instant integration in your prototype:
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => downloadReactHook(url, datasetInfo)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              React Hook (.ts)
+            </button>
+            <button
+              onClick={() => downloadCursorRules(url, datasetInfo)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Cursor Rules
+            </button>
+          </div>
+          <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <p className="text-xs text-green-700 dark:text-green-300">
+              💡 <strong>Pro tip:</strong> Download both files, add the React hook to your project, 
+              and place the .cursorrules file in your project root for optimal AI assistance!
+            </p>
+          </div>
+        </div>
+
         {/* Integration Examples */}
         <div className="p-6">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
@@ -154,16 +187,6 @@ export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: Dataset
                       {copiedItem === example.tool ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       {copiedItem === example.tool ? 'Copied!' : 'Copy'}
                     </button>
-                    {example.tool === 'Cursor' && (
-                      <button
-                        onClick={() => downloadCursorRules(url, datasetInfo)}
-                        className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm"
-                        title="Download .cursorrules file"
-                      >
-                        <Download className="w-4 h-4" />
-                        .cursorrules
-                      </button>
-                    )}
                   </div>
                 </div>
                 <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
