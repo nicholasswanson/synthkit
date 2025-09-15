@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync } from 'fs';
-import { glob } from 'glob';
+import { readFileSync, readdirSync, statSync } from 'fs';
+import { join } from 'path';
 
 const REQUIRED_ENGINES = {
   node: '>=20.11.0',
@@ -58,10 +58,34 @@ function validatePackage(packagePath) {
   return { errors, warnings };
 }
 
+// Simple recursive function to find package.json files
+function findPackageFiles(dir = '.', files = []) {
+  try {
+    const entries = readdirSync(dir);
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
+      try {
+        const stat = statSync(fullPath);
+        if (stat.isDirectory()) {
+          // Skip node_modules, dist, build directories
+          if (!['node_modules', 'dist', 'build', '.git', '.next'].includes(entry)) {
+            findPackageFiles(fullPath, files);
+          }
+        } else if (entry === 'package.json') {
+          files.push(fullPath);
+        }
+      } catch (e) {
+        // Skip files we can't read
+      }
+    }
+  } catch (e) {
+    // Skip directories we can't read
+  }
+  return files;
+}
+
 // Validate all packages
-const packageFiles = glob.sync('**/package.json', {
-  ignore: ['node_modules/**', 'dist/**', 'build/**']
-});
+const packageFiles = findPackageFiles();
 
 let hasErrors = false;
 let totalWarnings = 0;
