@@ -530,6 +530,7 @@ export default function Home() {
       metadata = {
         aiAnalysis: {
           prompt: aiPrompt,
+          businessType: currentBusinessContext?.type,
           analysis: getCustomCategory(selectedCategory)?.aiAnalysis
         }
       };
@@ -559,6 +560,7 @@ export default function Home() {
   };
 
   const getDatasetInfo = () => {
+    const currentBusinessContext = getCurrentBusinessContext();
     const recordCounts = {
       customers: customers.length,
       payments: payments.length
@@ -570,7 +572,7 @@ export default function Home() {
         recordCounts,
         aiAnalysis: {
           prompt: aiPrompt,
-          businessType: getCurrentBusinessContext()?.type
+          businessType: currentBusinessContext?.type
         }
       };
     } else {

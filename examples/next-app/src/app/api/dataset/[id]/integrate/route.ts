@@ -64,15 +64,6 @@ export async function GET(
       if (tool.toLowerCase() === 'cursor' && format === 'rules') {
         const cursorRules = generateCursorRules(datasetUrl, datasetInfo);
         
-        if (format === 'download') {
-          return new NextResponse(cursorRules, {
-            headers: {
-              'Content-Type': 'text/plain',
-              'Content-Disposition': 'attachment; filename=".cursorrules"'
-            }
-          });
-        }
-        
         return NextResponse.json({
           tool: 'cursor',
           type: 'rules',

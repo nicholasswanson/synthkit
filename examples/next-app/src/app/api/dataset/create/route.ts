@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Validate request
     const validation = validateCreateRequest(body);
     if (!validation.valid) {
-      return ApiErrorResponse.badRequest(validation.error);
+      return ApiErrorResponse.badRequest(validation.error || 'Invalid request data');
     }
 
     // Create dataset
@@ -130,7 +130,7 @@ function validateCreateRequest(body: any): { valid: boolean; error?: string } {
   }
 
   // Validate record counts (align with early/growth/enterprise limits)
-  const totalRecords = Object.values(body.data).reduce((sum, value) => {
+  const totalRecords = Object.values(body.data).reduce((sum: number, value) => {
     return sum + (Array.isArray(value) ? value.length : 0);
   }, 0);
 

@@ -17,6 +17,8 @@
     "@synthkit/ai": "workspace:*",
     "@synthkit/client": "workspace:*",
     "@synthkit/sdk": "workspace:*",
+    "@types/fs-extra": "^11.0.4",
+    "fs-extra": "^11.2.0",
     "lucide-react": "^0.544.0",
     "msw": "catalog:",
     "next": "catalog:",
