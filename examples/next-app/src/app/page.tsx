@@ -529,11 +529,23 @@ export default function Home() {
           },
           entities: data.analysis.entities || [],
           keyFeatures: data.analysis.keyFeatures || [],
-          userRoles: (data.analysis.userRoles || []).map((role: string) => ({
-            name: role,
-            permissions: ['Standard Access'], // Default permissions for AI-generated roles
-            description: `${role} access level`
-          }))
+          userRoles: (data.analysis.userRoles || []).map((role: any) => {
+            // Handle both string and object formats
+            if (typeof role === 'string') {
+              return {
+                name: role,
+                permissions: ['Standard Access'],
+                description: `${role} access level`
+              };
+            } else {
+              // Already an object, ensure it has required properties
+              return {
+                name: role.name || 'Unknown Role',
+                permissions: role.permissions || ['Standard Access'],
+                description: role.description || `${role.name || 'Unknown'} access level`
+              };
+            }
+          })
         };
         
         setAiAnalysis(transformedAnalysis);
@@ -601,7 +613,12 @@ export default function Home() {
     const currentBusinessContext = getCurrentBusinessContext();
     
     const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? { ...dynamicEntities, businessMetrics: businessMetrics || {} }
+      ? { 
+          ...dynamicEntities, 
+          customers: dynamicEntities.customers || [],
+          payments: dynamicEntities.payments || [],
+          businessMetrics: businessMetrics || {} 
+        }
       : { customers, payments, businessMetrics: businessMetrics || {} };
     
     console.log('Dataset data:', isCustomCategory(selectedCategory) 

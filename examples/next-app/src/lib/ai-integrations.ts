@@ -254,10 +254,10 @@ ${datasetInfo.scenario ? `**Scenario Details:**
 - Make it easy to switch between different datasets by changing the URL
 
 **Expected Usage Pattern:**
-```javascript
+\`\`\`javascript
 const { data, loading, error } = useSynthkitDataset('${url}');
 // User changes selection → new URL → automatic refetch
-```
+\`\`\`
 
 Please provide a complete, production-ready solution with detailed explanations for each part, including TypeScript interfaces, error handling patterns, and example UI components.`;
 
