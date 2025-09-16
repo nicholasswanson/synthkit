@@ -1,0 +1,1 @@
+**🎮 Interactive Demo**: The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!

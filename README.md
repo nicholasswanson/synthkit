@@ -65,8 +65,23 @@ nvm use        # Switches to project's Node version
 volta install node@20.11.0
 ```
 
-**🎮 Interactive Demo**: The Next.js example now includes integrated AI analysis - describe your business idea directly in the demo to see intelligent scenario recommendations alongside the traditional manual configuration.
+**�� Interactive Demo**: The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!
 
+### **🤖 Zero-Config AI Features**
+
+Synthkit includes AI-powered scenario generation that works immediately without any setup:
+
+- **No API Key Required**: AI features use a server-side proxy with pre-configured credentials
+- **Instant Analysis**: Describe your business idea and get intelligent recommendations
+- **Smart Data Generation**: AI automatically creates realistic entities and relationships
+- **Cost Monitored**: Usage is tracked and rate-limited to prevent abuse
+- **Perfect for Prototyping**: Designed for rapid iteration and experimentation
+
+```bash
+# AI features work immediately in the demo
+cd examples/next-app
+pnpm dev  # AI analysis available at http://localhost:3001
+```
 ### **Basic Usage**
 
 ```typescript

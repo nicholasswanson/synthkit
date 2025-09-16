@@ -83,7 +83,7 @@ setInterval(() => {
 // Specific rate limiters for different endpoints
 export const aiRateLimit = rateLimit({
   windowMs: 60 * 1000,  // 1 minute
-  max: 10,              // 10 AI requests per minute
+  max: 30,              // 30 AI requests per minute (generous for prototyping)
   message: 'AI request limit exceeded. Please wait before trying again.',
 });
 
