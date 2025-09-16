@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DescriptionAnalyzer, ScenarioMatcher } from '@synthkit/ai';
+import { DescriptionAnalyzer, ScenarioMatcher } from '@synthkit/sdk';
 
 export async function POST(request: NextRequest) {
   try {

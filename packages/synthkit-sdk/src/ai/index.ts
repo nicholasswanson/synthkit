@@ -1,4 +1,4 @@
-// Main exports
+// AI exports - moved from @synthkit/ai package
 export { DescriptionAnalyzer } from './analyzers/description-analyzer';
 export { ClaudeClient } from './analyzers/claude-client';
 export { ScenarioMatcher } from './analyzers/scenario-matcher';
@@ -22,4 +22,4 @@ export type {
 export { ValidationUtils } from './utils/validation';
 
 // Version
-export const VERSION = '0.1.0';
+export const AI_VERSION = '0.1.0';

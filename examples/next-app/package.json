@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "catalog:",
-    "@synthkit/ai": "workspace:*",
     "@synthkit/client": "workspace:*",
     "@synthkit/sdk": "workspace:*",
     "@types/fs-extra": "^11.0.4",

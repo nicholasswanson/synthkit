@@ -26,7 +26,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@synthkit/ai": "workspace:*",
     "@synthkit/sdk": "workspace:*",
     "clipboardy": "^4.0.0",
     "commander": "^12.0.0",

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DescriptionAnalyzer, ScenarioGenerator } from '@synthkit/ai';
+import { DescriptionAnalyzer, ScenarioGenerator } from '@synthkit/sdk';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 

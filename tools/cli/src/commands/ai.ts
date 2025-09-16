@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { DescriptionAnalyzer, ScenarioMatcher, ScenarioGenerator } from '@synthkit/ai';
+import { DescriptionAnalyzer, ScenarioMatcher, ScenarioGenerator } from '@synthkit/sdk';
 
 export function createAICommand(): Command {
   const ai = new Command('ai');

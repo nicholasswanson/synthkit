@@ -1,7 +1,7 @@
 {
   "name": "@synthkit/sdk",
   "version": "0.1.0",
-  "description": "Core SDK for synthkit - scenario generation, packs loader, config, and state management",
+  "description": "Core SDK for synthkit - scenario generation, AI analysis, config, and state management",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -25,6 +25,7 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "catalog:",
     "@faker-js/faker": "catalog:",
     "json-schema-faker": "catalog:",
     "zod": "catalog:",
@@ -41,7 +42,9 @@
     "synthkit",
     "sdk",
     "mock-data",
-    "scenario-generation"
+    "scenario-generation",
+    "ai",
+    "claude"
   ],
   "repository": {
     "type": "git",

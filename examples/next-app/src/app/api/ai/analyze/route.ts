@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DescriptionAnalyzer } from '@synthkit/ai';
+import { DescriptionAnalyzer } from '@synthkit/sdk';
 import { ApiErrorResponse } from '@/lib/api-errors';
 import { logger } from '@/lib/logger';
 import { aiRateLimit } from '@/lib/rate-limiter';
