@@ -122,11 +122,11 @@ ${datasetInfo.scenario ? `**Scenario Details:**
 - Custom entities based on AI analysis`}
 
 **Requirements:**
-1. Use the existing useSynthkitDataset.ts file (import it, don't create new)
+1. Create a React hook to fetch this dataset
 2. Add TypeScript interfaces for type safety
 3. Handle loading and error states
 4. Cache the data for performance (fetch only once)
-5. INTEGRATE INTO EXISTING COMPONENTS - Replace hardcoded data arrays, preserve all UI and styling
+5. Replace any hardcoded mock data with this real dataset
 
 **Data Structure:**
 The dataset contains these entities: ${Object.keys(datasetInfo.recordCounts).join(', ')}
@@ -138,7 +138,7 @@ Plus business metrics like CLV, AOV, MRR, etc.
 - Display loading states
 - Show realistic data counts and metrics
 
-Please help me upgrade my existing components to use this realistic data instead of hardcoded mock data. Focus on integrating into existing UI, not creating new pages.`;
+Please generate the React hook and show me how to use it in a component. Make it production-ready with proper TypeScript types.`;
 
   return {
     tool: 'Cursor',
