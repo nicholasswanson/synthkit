@@ -535,9 +535,15 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [integrationLoading, setIntegrationLoading] = useState(false);
   const [currentDatasetUrl, setCurrentDatasetUrl] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   
   // Dataset creation hook
   const { createDataset, isCreating, error, clearError } = useDatasetCreation();
+
+  // Set client flag to prevent hydration mismatches
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Load custom categories from localStorage on mount
   useEffect(() => {
@@ -560,21 +566,23 @@ export default function Home() {
     localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
   }, [customCategories]);
 
-  // Generate data when scenario configuration changes
+  // Generate data when scenario configuration changes (client-side only)
   useEffect(() => {
-    generateScenarioData();
-  }, [selectedCategory, role, stage, scenarioId]);
+    if (isClient) {
+      generateScenarioData();
+    }
+  }, [isClient, selectedCategory, role, stage, scenarioId]);
 
-  // Auto-generate dataset URL when data is ready
+  // Auto-generate dataset URL when data is ready (client-side only)
   useEffect(() => {
-    if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
+    if (isClient && metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
       handleCreateDataset();
     }
-  }, [metricsLoaded, customers, dynamicEntities, businessMetrics, selectedCategory, role, stage, scenarioId]);
+  }, [isClient, metricsLoaded, customers, dynamicEntities, businessMetrics, selectedCategory, role, stage, scenarioId]);
 
   // Generate business metrics on client side to avoid hydration mismatch
   useEffect(() => {
-    if (selectedCategory && stage) {
+    if (isClient && selectedCategory && stage) {
       const mappedCategory = isCustomCategory(selectedCategory) 
         ? mapAIBusinessTypeToCategory(getCustomCategory(selectedCategory)?.aiAnalysis?.businessContext?.type || '')
         : selectedCategory;
@@ -583,11 +591,11 @@ export default function Home() {
       setBusinessMetrics(metrics);
       setMetricsLoaded(true);
     }
-  }, [selectedCategory, stage, scenarioId]);
+  }, [isClient, selectedCategory, stage, scenarioId]);
 
-  // Save current dataset to sessionStorage and API for live integration
+  // Save current dataset to sessionStorage and API for live integration (client-side only)
   useEffect(() => {
-    if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
+    if (isClient && metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
       const currentDataset = {
         data: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
           ? { ...dynamicEntities, customers: dynamicEntities.customers || [], payments: dynamicEntities.payments || [], businessMetrics: businessMetrics || {} }
@@ -627,7 +635,7 @@ export default function Home() {
         console.log('SessionStorage cache unavailable - using API only');
       }
     }
-  }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId]);
+  }, [isClient, customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId]);
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {
@@ -1384,7 +1392,14 @@ export default function Home() {
 
         {/* Right Panel - Integration Examples */}
         <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-hidden">
-          {currentDatasetUrl ? (
+          {!isClient ? (
+            <div className="h-full flex items-center justify-center bg-white dark:bg-gray-800">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+              </div>
+            </div>
+          ) : currentDatasetUrl ? (
             <IntegrationPanel
               url={currentDatasetUrl}
               datasetInfo={getDatasetInfo()}
