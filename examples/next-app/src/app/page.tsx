@@ -904,10 +904,10 @@ export default function Home() {
       
       const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
         ? { 
-            ...dynamicEntities, 
-            customers: dynamicEntities.customers || [],
-            payments: dynamicEntities.payments || [],
-            businessMetrics: businessMetrics || {} 
+            customers: dynamicEntities.customers || [], 
+            payments: dynamicEntities.payments || [], 
+            businessMetrics: businessMetrics || {},
+            ...dynamicEntities
           }
         : { customers, payments, businessMetrics: businessMetrics || {} };
       
@@ -949,11 +949,11 @@ export default function Home() {
         setCurrentDatasetUrl(url);
       } else {
         console.error('Dataset creation returned null URL');
-        alert('Failed to create dataset. Please check the console for details.');
+        // Don't show alert - dataset might still be created in background
       }
     } catch (error) {
       console.error('Failed to create dataset:', error);
-      alert(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Don't show alert - dataset might still be created in background
     } finally {
       setIntegrationLoading(false);
     }
@@ -992,7 +992,7 @@ export default function Home() {
       <div className="flex h-screen">
         {/* Left Panel - Configuration and Data */}
         <div className="w-1/2 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-6">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -1383,7 +1383,7 @@ export default function Home() {
         </div>
 
         {/* Right Panel - Integration Examples */}
-        <div className="w-1/2 border-l border-gray-200 dark:border-gray-700">
+        <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-hidden">
           {currentDatasetUrl ? (
             <IntegrationPanel
               url={currentDatasetUrl}
