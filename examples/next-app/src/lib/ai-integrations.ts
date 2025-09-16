@@ -104,99 +104,48 @@ export function generateCursorIntegration(url: string, datasetInfo: DatasetInfo)
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
-  const cursorRules = `// Add to your .cursorrules file for better AI context:
+  const integrationPrompt = `I need help integrating a realistic dataset into my React prototype. Here are the details:
 
-// Synthkit Dataset Integration
-// Dataset: ${businessContext.name} (${businessContext.domain})
-// Contains: ${recordSummary}
-// URL: ${url}
+**Dataset Information:**
+- Business Type: ${businessContext.name} (${businessContext.domain})
+- Data URL: ${url}
+- Contains: ${recordSummary}
+- Format: Static JSON (cached, reliable, fast)
 
-${datasetInfo.scenario ? `// Scenario Configuration:
-// - Category: ${datasetInfo.scenario.category} (${businessContext.name})
-// - Stage: ${datasetInfo.scenario.stage} (affects data volume)
-// - Role: ${datasetInfo.scenario.role} (affects access patterns)
-// - ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `// AI-Generated Dataset:
-// - Original Prompt: "${datasetInfo.aiAnalysis?.prompt}"
-// - Business Type: ${datasetInfo.aiAnalysis?.businessType}
-// - Custom entities based on AI analysis`}
+${datasetInfo.scenario ? `**Scenario Details:**
+- Category: ${datasetInfo.scenario.category}
+- Stage: ${datasetInfo.scenario.stage} (affects data volume)
+- Role: ${datasetInfo.scenario.role} (affects access patterns)
+- ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `**AI-Generated Dataset:**
+- Original Prompt: "${datasetInfo.aiAnalysis?.prompt}"
+- Business Type: ${datasetInfo.aiAnalysis?.businessType}
+- Custom entities based on AI analysis`}
 
-// Dataset Characteristics:
-// - Static JSON file (cached, reliable, fast)
-// - Production-ready with realistic relationships
-// - Formatted values: currency in cents, percentages to hundredths
-// - Deterministic: same URL = identical data every time
-// - No authentication required, publicly accessible
+**Requirements:**
+1. Create a React hook to fetch this dataset
+2. Add TypeScript interfaces for type safety
+3. Handle loading and error states
+4. Cache the data for performance (fetch only once)
+5. Replace any hardcoded mock data with this real dataset
 
-// Integration Pattern:
-// 1. Fetch once on component mount or user selection change
-// 2. Cache the result for performance
-// 3. Use TypeScript interfaces for type safety
-// 4. Handle loading and error states properly
+**Data Structure:**
+The dataset contains these entities: ${Object.keys(datasetInfo.recordCounts).join(', ')}
+Plus business metrics like CLV, AOV, MRR, etc.
 
-const dataset = await fetch('${url}').then(r => r.json());
-const { ${Object.keys(datasetInfo.recordCounts).join(', ')}, businessMetrics } = dataset.data;`;
+**Integration Pattern:**
+- Fetch once on component mount
+- Use proper error handling
+- Display loading states
+- Show realistic data counts and metrics
 
-  const integrationCode = `// Synthkit Dataset Integration for ${businessContext.name}
-import { useState, useEffect } from 'react';
-
-${generateTypeScriptInterfaces(datasetInfo.recordCounts)}
-
-export function useSynthkitDataset() {
-  const [data, setData] = useState<Dataset | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    // Fetch static dataset - only runs once per component mount
-    fetch('${url}')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(\`Failed to load dataset: HTTP \${response.status}\`);
-        }
-        return response.json();
-      })
-      .then(dataset => {
-        setData(dataset.data);
-        setLoading(false);
-        console.log('📊 Synthkit dataset loaded:', {
-          ${Object.keys(datasetInfo.recordCounts).map(key => `${key}: dataset.data.${key}?.length || 0`).join(',\n          ')}
-        });
-      })
-      .catch(err => {
-        setError(err);
-        setLoading(false);
-        console.error('❌ Dataset loading failed:', err);
-      });
-  }, []); // Empty dependency array - fetch only once
-
-  return { data, loading, error };
-}
-
-// Usage in your component:
-export function MyPrototype() {
-  const { data, loading, error } = useSynthkitDataset();
-
-  if (loading) return <div>Loading ${recordSummary}...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No data available</div>;
-
-  return (
-    <div>
-      <h1>${businessContext.name} Prototype</h1>
-      ${Object.keys(datasetInfo.recordCounts).map(key => 
-        `<p>{data.${key}?.length || 0} ${key}</p>`
-      ).join('\n      ')}
-      <p>CLV: \${data.businessMetrics.customerLifetimeValue.toFixed(2)}</p>
-    </div>
-  );
-}`;
+Please generate the React hook and show me how to use it in a component. Make it production-ready with proper TypeScript types.`;
 
   return {
     tool: 'Cursor',
     description: 'AI-powered code editor with context-aware assistance',
-    code: integrationCode,
-    instructions: 'Copy the React hook code into your project. Add the .cursorrules content to your project root for better AI assistance context.',
-    copyText: cursorRules
+    code: integrationPrompt,
+    instructions: 'Paste this prompt into Cursor AI chat to get instant integration code for your prototype',
+    copyText: integrationPrompt
   };
 }
 
