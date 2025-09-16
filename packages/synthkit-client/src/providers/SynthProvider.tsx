@@ -4,21 +4,16 @@ import {
   type SynthStore, 
   type SynthConfig
 } from '@synthkit/sdk';
-import { setupMSW, useMSWHandlers } from '../msw/setup';
-import type { HttpHandler } from 'msw';
 
 export interface SynthProviderProps {
   children: React.ReactNode;
   config?: SynthConfig;
-  enableMSW?: boolean;
   onReady?: () => void;
 }
 
 export interface SynthContextValue {
   store: SynthStore;
   isReady: boolean;
-  mswEnabled: boolean;
-  refreshHandlers: () => Promise<void>;
 }
 
 const SynthContext = createContext<SynthContextValue | null>(null);
@@ -26,20 +21,10 @@ const SynthContext = createContext<SynthContextValue | null>(null);
 export function SynthProvider({ 
   children, 
   config,
-  enableMSW = true,
   onReady 
 }: SynthProviderProps) {
   const storeState = synthStore();
   const [isReady, setIsReady] = useState(false);
-  const [mswEnabled, setMswEnabled] = useState(false);
-
-  const refreshHandlers = async () => {
-    if (!mswEnabled) return;
-    
-    // Simple MSW setup without pack loading
-    const handlers: HttpHandler[] = [];
-    useMSWHandlers(handlers);
-  };
 
   useEffect(() => {
     async function initialize() {
@@ -47,12 +32,6 @@ export function SynthProvider({
         // Set config if provided
         if (config) {
           storeState.setConfig(config);
-        }
-
-        // Setup MSW if enabled
-        if (enableMSW) {
-          await setupMSW([]);
-          setMswEnabled(true);
         }
 
         // Load from localStorage if available
@@ -67,13 +46,11 @@ export function SynthProvider({
     }
 
     initialize();
-  }, [config, enableMSW, onReady, storeState]);
+  }, [config, onReady, storeState]);
 
   const value: SynthContextValue = {
     store: storeState,
     isReady,
-    mswEnabled,
-    refreshHandlers,
   };
 
   return (

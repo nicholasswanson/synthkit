@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@synthkit/sdk": "workspace:*",
-    "msw": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {

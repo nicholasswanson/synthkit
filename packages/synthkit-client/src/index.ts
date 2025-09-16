@@ -17,7 +17,4 @@ export { useSynth } from './hooks/useSynth';
 export { usePersona } from './hooks/usePersona';
 export { useScenario } from './hooks/useScenario';
 
-// MSW exports
-export { setupMSW, startMSW, stopMSW, resetMSWHandlers, useMSWHandlers } from './msw/setup';
-export { createMockHandler, createRESTHandlers } from './msw/handlers';
-export { createRouteHandlers, createPackHandlers } from './msw/route-handlers';
+// MSW exports removed - no longer supported
