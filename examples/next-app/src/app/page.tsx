@@ -620,7 +620,7 @@ export default function Home() {
         console.log('SessionStorage cache unavailable - using API only');
       }
     }
-  }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
+  }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId]);
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {
@@ -851,6 +851,9 @@ export default function Home() {
         // Update stage based on AI analysis
         const mappedStage = mapAIStageToScenarioStage(data.analysis.businessContext.stage);
         setStage(mappedStage);
+        
+        // Trigger dataset generation and saving after AI analysis completes
+        // This will be handled by the existing useEffect that watches for data changes
       }
     } catch (error) {
       console.error('Analysis failed:', error);
