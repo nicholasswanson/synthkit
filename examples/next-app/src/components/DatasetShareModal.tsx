@@ -162,13 +162,46 @@ export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: Dataset
           </div>
         </div>
 
-        {/* Integration Examples */}
+        {/* Cursor Integration - Featured */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+            🤖 Cursor AI Integration
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Copy this prompt to Cursor AI for instant integration with your dataset:
+          </p>
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🤖</span>
+                <span className="font-medium text-purple-900 dark:text-purple-100">Cursor AI Prompt</span>
+              </div>
+              <button
+                onClick={() => copyToClipboard(integrationExamples.find(e => e.tool === 'Cursor')?.code || '', 'cursor')}
+                className="flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm"
+              >
+                {copiedItem === 'cursor' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedItem === 'cursor' ? 'Copied!' : 'Copy Prompt'}
+              </button>
+            </div>
+            <pre className="bg-white dark:bg-gray-900 p-3 rounded text-sm overflow-x-auto border border-purple-200 dark:border-purple-800">
+              <code className="text-gray-800 dark:text-gray-200">
+                {integrationExamples.find(e => e.tool === 'Cursor')?.code || 'Loading...'}
+              </code>
+            </pre>
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
+              💡 Paste this into Cursor AI chat to get instant integration code for your prototype
+            </p>
+          </div>
+        </div>
+
+        {/* Other Integration Examples */}
         <div className="p-6">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-            🛠️ Integration Examples
+            🛠️ Other Integration Options
           </h3>
           <div className="space-y-4">
-            {integrationExamples.map((example, index) => (
+            {integrationExamples.filter(example => example.tool !== 'Cursor').map((example, index) => (
               <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>

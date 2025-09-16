@@ -20,7 +20,7 @@ export function DataFetcher({ title, endpoint, itemsKey }: DataFetcherProps) {
   }, [synth.currentGenerationId, synth.activeCategory, synth.activeRole]);
 
   const fetchData = async () => {
-    if (!synth.isReady || !synth.mswEnabled) {
+    if (!synth.isReady) {
       return;
     }
 
@@ -43,7 +43,7 @@ export function DataFetcher({ title, endpoint, itemsKey }: DataFetcherProps) {
   };
 
   const createNew = async () => {
-    if (!synth.isReady || !synth.mswEnabled) {
+    if (!synth.isReady) {
       return;
     }
 
@@ -76,7 +76,7 @@ export function DataFetcher({ title, endpoint, itemsKey }: DataFetcherProps) {
   };
 
   const deleteItem = async (id: string) => {
-    if (!synth.isReady || !synth.mswEnabled) {
+    if (!synth.isReady) {
       return;
     }
 
@@ -128,8 +128,6 @@ export function DataFetcher({ title, endpoint, itemsKey }: DataFetcherProps) {
         <div className="text-center py-8">Loading...</div>
       ) : !synth.isReady ? (
         <div className="text-center py-8 text-gray-500">Synthkit not ready</div>
-      ) : !synth.mswEnabled ? (
-        <div className="text-center py-8 text-gray-500">MSW not enabled</div>
       ) : data.length === 0 ? (
         <div className="text-center py-8 text-gray-500">No data</div>
       ) : (
