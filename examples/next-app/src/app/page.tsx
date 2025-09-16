@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
-import { DatasetShareModal } from '@/components/DatasetShareModal';
+import { IntegrationPanel } from '@/components/IntegrationPanel';
 import { useDatasetCreation } from '@/hooks/useDatasetCreation';
 
 interface Customer {
@@ -533,8 +533,8 @@ export default function Home() {
   
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
+  const [integrationLoading, setIntegrationLoading] = useState(false);
+  const [currentDatasetUrl, setCurrentDatasetUrl] = useState<string | null>(null);
   
   // Dataset creation hook
   const { createDataset, isCreating, error, clearError } = useDatasetCreation();
@@ -564,6 +564,13 @@ export default function Home() {
   useEffect(() => {
     generateScenarioData();
   }, [selectedCategory, role, stage, scenarioId]);
+
+  // Auto-generate dataset URL when data is ready
+  useEffect(() => {
+    if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
+      handleCreateDataset();
+    }
+  }, [metricsLoaded, customers, dynamicEntities, businessMetrics, selectedCategory, role, stage, scenarioId]);
 
   // Generate business metrics on client side to avoid hydration mismatch
   useEffect(() => {
@@ -890,46 +897,48 @@ export default function Home() {
   // Handle dataset sharing
   const handleCreateDataset = async () => {
     console.log('handleCreateDataset called');
-    const currentBusinessContext = getCurrentBusinessContext();
-    
-    const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? { 
-          ...dynamicEntities, 
-          customers: dynamicEntities.customers || [],
-          payments: dynamicEntities.payments || [],
-          businessMetrics: businessMetrics || {} 
-        }
-      : { customers, payments, businessMetrics: businessMetrics || {} };
-    
-    console.log('Dataset data:', isCustomCategory(selectedCategory) 
-      ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
-      : { customersCount: customers.length, paymentsCount: payments.length, hasBusinessMetrics: !!businessMetrics }
-    );
-    
-    const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-      : { customers: customers.length, payments: payments.length };
-    
-    let metadata;
-    if (isCustomCategory(selectedCategory)) {
-      metadata = {
-        aiAnalysis: {
-          prompt: aiPrompt,
-          analysis: getCustomCategory(selectedCategory)?.aiAnalysis
-        }
-      };
-    } else {
-      metadata = {
-        scenario: {
-          category: selectedCategory,
-          role,
-          stage,
-          id: scenarioId
-        }
-      };
-    }
+    setIntegrationLoading(true);
     
     try {
+      const currentBusinessContext = getCurrentBusinessContext();
+      
+      const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+        ? { 
+            ...dynamicEntities, 
+            customers: dynamicEntities.customers || [],
+            payments: dynamicEntities.payments || [],
+            businessMetrics: businessMetrics || {} 
+          }
+        : { customers, payments, businessMetrics: businessMetrics || {} };
+      
+      console.log('Dataset data:', isCustomCategory(selectedCategory) 
+        ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
+        : { customersCount: customers.length, paymentsCount: payments.length, hasBusinessMetrics: !!businessMetrics }
+      );
+      
+      const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+        ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
+        : { customers: customers.length, payments: payments.length };
+      
+      let metadata;
+      if (isCustomCategory(selectedCategory)) {
+        metadata = {
+          aiAnalysis: {
+            prompt: aiPrompt,
+            analysis: getCustomCategory(selectedCategory)?.aiAnalysis
+          }
+        };
+      } else {
+        metadata = {
+          scenario: {
+            category: selectedCategory,
+            role,
+            stage,
+            id: scenarioId
+          }
+        };
+      }
+      
       const url = await createDataset({
         type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
         data: datasetData,
@@ -937,8 +946,7 @@ export default function Home() {
       });
       
       if (url) {
-        setSharedDatasetUrl(url);
-        setShareModalOpen(true);
+        setCurrentDatasetUrl(url);
       } else {
         console.error('Dataset creation returned null URL');
         alert('Failed to create dataset. Please check the console for details.');
@@ -946,6 +954,8 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to create dataset:', error);
       alert(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIntegrationLoading(false);
     }
   };
 
@@ -979,7 +989,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="flex h-screen">
+        {/* Left Panel - Configuration and Data */}
+        <div className="w-1/2 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -1132,16 +1145,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Share Dataset Button */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleCreateDataset}
-              disabled={isCreating}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCreating ? '📤 Creating...' : '📤 Share Dataset'}
-            </button>
-          </div>
         </div>
 
         {/* Business Context, Key Features, User Roles, Data Entities */}
@@ -1375,18 +1378,33 @@ export default function Home() {
           ) : (
             <div className="text-gray-500 dark:text-gray-400">Loading metrics...</div>
           )}
+          </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Integration Examples */}
+        <div className="w-1/2 border-l border-gray-200 dark:border-gray-700">
+          {currentDatasetUrl ? (
+            <IntegrationPanel
+              url={currentDatasetUrl}
+              datasetInfo={getDatasetInfo()}
+              isLoading={integrationLoading}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center bg-white dark:bg-gray-800">
+              <div className="text-center">
+                <div className="text-6xl mb-4">📊</div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Configure Your Dataset
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Select a category and configure your scenario to see integration examples
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Dataset Share Modal */}
-      {shareModalOpen && sharedDatasetUrl && (
-        <DatasetShareModal
-          isOpen={shareModalOpen}
-          onClose={() => setShareModalOpen(false)}
-          url={sharedDatasetUrl}
-          datasetInfo={getDatasetInfo()}
-        />
-      )}
     </div>
   );
 }
