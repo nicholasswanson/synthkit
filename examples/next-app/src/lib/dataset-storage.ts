@@ -59,7 +59,7 @@ export interface DatasetCreateResponse {
 
 // Storage configuration
 const DATASETS_DIR = path.join(process.cwd(), 'public', 'datasets');
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || '';
 
 // Utility functions
 export function generateDatasetId(type: 'scenario' | 'ai-generated', config: any): string {
@@ -81,7 +81,7 @@ export function generateChecksum(data: any): string {
 }
 
 export function getDatasetUrl(id: string): string {
-  return `${BASE_URL}/datasets/${id}.json`;
+  return `/datasets/${id}.json`;
 }
 
 export function getDatasetFilePath(id: string): string {

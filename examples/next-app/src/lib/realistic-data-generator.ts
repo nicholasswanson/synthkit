@@ -265,3 +265,4 @@ export function generateProductDescription(category: string, seed: number): stri
   const categoryDescriptions = descriptions[category] || descriptions.modaic;
   return categoryDescriptions[Math.floor(seededRandom(seed) * categoryDescriptions.length)];
 }
+

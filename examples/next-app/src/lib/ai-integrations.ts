@@ -94,6 +94,65 @@ ${Object.keys(recordCounts).map(key => `  ${key}: ${key.charAt(0).toUpperCase() 
 }`;
 }
 
+// Cursor Integration - Human-readable prompt for AI assistance
+export function generateCursorPrompt(url: string, datasetInfo: DatasetInfo): IntegrationExample {
+  const businessContext = datasetInfo.scenario 
+    ? getBusinessContext(datasetInfo.scenario.category)
+    : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
+
+  const recordSummary = Object.entries(datasetInfo.recordCounts)
+    .map(([key, count]) => `${count.toLocaleString()} ${key}`)
+    .join(', ');
+
+  const prompt = `I have an existing ${businessContext.name.toLowerCase()} prototype and need to integrate a Synthkit dataset to replace my mock data with realistic data.
+
+**Integration Details:**
+- Dataset URL: ${url}
+- Contains: ${recordSummary}
+- Type: ${datasetInfo.type === 'scenario' ? 'Predefined scenario' : 'AI-generated from business description'}
+- Business Context: ${businessContext.name} (${businessContext.domain})
+
+${datasetInfo.scenario ? `**Scenario Configuration:**
+- Category: ${datasetInfo.scenario.category}
+- Stage: ${datasetInfo.scenario.stage} (affects data volume)
+- Role: ${datasetInfo.scenario.role} (affects access patterns)
+- ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `**AI-Generated Context:**
+- Original Prompt: "${datasetInfo.aiAnalysis?.prompt}"
+- Business Type: ${datasetInfo.aiAnalysis?.businessType}
+- Custom entities based on AI analysis`}
+
+**Integration Requirements:**
+1. **Use the provided React hook** - I already have a useSynthkitDataset() hook that fetches this dataset
+2. **Replace existing mock data** - Update my existing components to use the dataset instead of hardcoded data
+3. **Maintain existing UI** - Don't change my prototype's design, just populate it with real data
+4. **Handle data structure** - The dataset has ${Object.keys(datasetInfo.recordCounts).join(', ')} with realistic relationships
+5. **Preserve functionality** - Keep all existing features, just swap the data source
+
+**Dataset characteristics:**
+- Static JSON file (fast, reliable, cached)
+- Deterministic (same URL = same data every time)
+- Production-ready with realistic relationships
+- Currency values in cents, percentages to hundredths
+- No authentication required
+
+**What I need help with:**
+- How to integrate the useSynthkitDataset() hook into my existing components
+- How to map the dataset structure to my current data expectations
+- How to handle the data loading states in my existing UI
+- How to access business metrics for my existing dashboard components
+- How to ensure my existing functionality works with the new data structure
+
+Please focus on **integration guidance** - how to connect the dataset to my existing prototype without changing the UI or core functionality.`;
+
+  return {
+    tool: 'Cursor',
+    description: 'AI-powered code editor with context-aware assistance',
+    code: prompt,
+    instructions: 'Use this prompt in Cursor to get integration guidance for connecting the Synthkit dataset to your existing prototype without changing the UI.',
+    copyText: prompt
+  };
+}
+
 // Cursor Integration - Optimized for AI-powered development
 export function generateCursorIntegration(url: string, datasetInfo: DatasetInfo): IntegrationExample {
   const businessContext = datasetInfo.scenario 
@@ -206,10 +265,10 @@ export function generateClaudeIntegration(url: string, datasetInfo: DatasetInfo)
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
-  const prompt = `I'm building a ${businessContext.name.toLowerCase()} web application prototype and need help integrating a static dataset for realistic mock data.
+  const prompt = `I have an existing ${businessContext.name.toLowerCase()} prototype and need to integrate a Synthkit dataset to replace my mock data with realistic data.
 
-**Dataset Information:**
-- URL: ${url}
+**Integration Information:**
+- Dataset URL: ${url}
 - Type: ${datasetInfo.type === 'scenario' ? 'Predefined scenario' : 'AI-generated from business description'}
 - Domain: ${businessContext.domain}
 - Business Context: ${businessContext.name}
@@ -237,29 +296,29 @@ ${datasetInfo.scenario ? `**Scenario Details:**
 - No authentication required, publicly accessible
 - Perfect for prototyping without backend setup
 
-**What I need help with:**
-1. **React Integration**: Create a custom hook to fetch and manage this static dataset
-2. **TypeScript Safety**: Generate proper interfaces for all data types
-3. **Error Handling**: Implement robust loading states and error recovery
-4. **Performance**: Add caching to avoid unnecessary re-fetches
-5. **UI Components**: Build components to display the data effectively for a ${businessContext.domain} application
-6. **Best Practices**: Follow React patterns for data fetching and state management
-
 **Integration Requirements:**
-- Fetch data only when component mounts or user changes scenario selection
-- Cache the dataset in memory (it's static, so no need to refetch)
-- Handle network errors gracefully with retry logic
-- Provide loading states for better UX
-- Use the business metrics for dashboard-style displays
-- Make it easy to switch between different datasets by changing the URL
+1. **Use existing React hook** - I already have a useSynthkitDataset() hook that fetches this dataset
+2. **Replace mock data** - Update my existing components to use the dataset instead of hardcoded data
+3. **Maintain existing UI** - Don't change my prototype's design, just populate it with real data
+4. **Handle data mapping** - Map the dataset structure to my current data expectations
+5. **Preserve functionality** - Keep all existing features, just swap the data source
+6. **Handle loading states** - Integrate loading states into my existing UI components
 
-**Expected Usage Pattern:**
+**What I need help with:**
+- How to integrate the useSynthkitDataset() hook into my existing components
+- How to map the dataset structure to my current data expectations
+- How to handle the data loading states in my existing UI
+- How to access business metrics for my existing dashboard components
+- How to ensure my existing functionality works with the new data structure
+- How to handle data relationships and filtering in my existing components
+
+**Expected Integration Pattern:**
 \`\`\`javascript
 const { data, loading, error } = useSynthkitDataset('${url}');
-// User changes selection → new URL → automatic refetch
+// Replace my existing mock data with: data.customers, data.payments, etc.
 \`\`\`
 
-Please provide a complete, production-ready solution with detailed explanations for each part, including TypeScript interfaces, error handling patterns, and example UI components.`;
+Please focus on **integration guidance** - how to connect the dataset to my existing prototype without changing the UI or core functionality.`;
 
   return {
     tool: 'Claude',
@@ -276,19 +335,19 @@ export function generateChatGPTIntegration(url: string, datasetInfo: DatasetInfo
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
-  const prompt = `I need to integrate a static dataset into my React ${businessContext.name.toLowerCase()} prototype. Help me create a clean, production-ready solution.
+  const prompt = `I have an existing React ${businessContext.name.toLowerCase()} prototype and need to integrate a Synthkit dataset to replace my mock data.
 
 **Dataset URL:** ${url}
 **Contains:** ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${count.toLocaleString()} ${key}`).join(', ')}, plus business metrics
 
 ${datasetInfo.aiAnalysis ? `**Context:** AI-generated dataset from "${datasetInfo.aiAnalysis.prompt}"` : `**Context:** ${businessContext.name} scenario with ${datasetInfo.scenario?.stage} stage data`}
 
-**Requirements:**
-1. **React hook** to fetch and cache the static dataset
-2. **TypeScript interfaces** for type safety
-3. **Loading/error states** with proper handling
-4. **Basic component** to display the data
-5. **Performance** - cache the data (it's static, no need to refetch)
+**Integration Requirements:**
+1. **Use existing React hook** - I already have a useSynthkitDataset() hook that fetches this dataset
+2. **Replace mock data** - Update my existing components to use the dataset instead of hardcoded data
+3. **Maintain existing UI** - Don't change my prototype's design, just populate it with real data
+4. **Handle data mapping** - Map the dataset structure to my current data expectations
+5. **Preserve functionality** - Keep all existing features, just swap the data source
 
 **Dataset characteristics:**
 - Static JSON hosted on GitHub Pages
@@ -297,13 +356,13 @@ ${datasetInfo.aiAnalysis ? `**Context:** AI-generated dataset from "${datasetInf
 - Currency values in cents, percentages to hundredths
 - No authentication needed
 
-**Usage pattern:**
-\`\`\`javascript
-const { data, loading, error } = useSynthkitDataset();
-// When user changes selection, pass new URL to get different dataset
+**Integration pattern:**
+\`\`\javascript
+const { data, loading, error } = useSynthkitDataset('${url}');
+// Replace my existing mock data with: data.customers, data.payments, etc.
 \`\`\`
 
-Please provide a complete, copy-paste ready solution with TypeScript interfaces and a simple display component. Keep it clean and well-commented.`;
+Please focus on **integration guidance** - how to connect the dataset to my existing prototype without changing the UI or core functionality.`;
 
   return {
     tool: 'ChatGPT',
@@ -607,7 +666,7 @@ export default synthkit;`;
 // Main function to generate all integrations
 export function generateAllIntegrations(url: string, datasetInfo: DatasetInfo): IntegrationExample[] {
   return [
-    generateCursorIntegration(url, datasetInfo),
+    generateCursorPrompt(url, datasetInfo),
     generateClaudeIntegration(url, datasetInfo),
     generateChatGPTIntegration(url, datasetInfo),
     generateV0Integration(url, datasetInfo),

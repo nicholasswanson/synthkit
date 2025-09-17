@@ -18,9 +18,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="fixed top-4 left-4 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm z-50">
-          ✅ App Working
-        </div>
         {children}
       </body>
     </html>

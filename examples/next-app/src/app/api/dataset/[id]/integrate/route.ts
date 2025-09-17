@@ -46,8 +46,7 @@ export async function GET(
       aiAnalysis: dataset.metadata.aiAnalysis
     };
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nicholasswanson.github.io/synthkit';
-    const datasetUrl = `${baseUrl}/datasets/${sanitizedId}.json`;
+    const datasetUrl = `/datasets/${sanitizedId}.json`;
 
     // Generate integrations
     const integrations = generateAllIntegrations(datasetUrl, datasetInfo);

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
 import { useDatasetCreation } from '@/hooks/useDatasetCreation';
-import { Copy, Download } from 'lucide-react';
+import { Copy, Download, ExternalLink } from 'lucide-react';
 import { generateAllIntegrations } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
 import { downloadReactHook } from '@/lib/react-hook-generator';
@@ -499,29 +499,46 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
+  const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('cursor');
   
   // Dataset creation hook
   const { createDataset, isCreating, error, clearError } = useDatasetCreation();
 
   // Load custom categories from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('synthkit-custom-categories');
-    if (stored) {
-      try {
+    try {
+      // Clear old sessionStorage data to prevent quota issues
+      sessionStorage.removeItem('synthkit-current-dataset');
+      
+      const stored = localStorage.getItem('synthkit-custom-categories');
+      if (stored) {
         const parsed = JSON.parse(stored);
         setCustomCategories(parsed.map((cat: any) => ({
           ...cat,
           createdAt: new Date(cat.createdAt)
         })));
-      } catch (error) {
-        console.error('Failed to load custom categories:', error);
       }
+    } catch (error) {
+      console.error('Failed to load custom categories:', error);
+      // Clear corrupted data
+      localStorage.removeItem('synthkit-custom-categories');
     }
   }, []);
 
   // Save custom categories to localStorage
   useEffect(() => {
-    localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
+    try {
+      localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
+    } catch (error) {
+      console.warn('Failed to save custom categories to localStorage:', error);
+      // If storage is full, try to clear old data and save again
+      try {
+        localStorage.clear();
+        localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
+      } catch (retryError) {
+        console.error('Failed to save custom categories after clearing storage:', retryError);
+      }
+    }
   }, [customCategories]);
 
   // Generate data when scenario configuration changes
@@ -543,29 +560,40 @@ export default function Home() {
     }
   }, [selectedCategory, stage, scenarioId, customers, payments]);
 
-  // Save current dataset to sessionStorage and API for live integration
+  // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
     if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
-      const currentDataset = {
-        data: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-          ? { ...dynamicEntities, customers: dynamicEntities.customers || [], payments: dynamicEntities.payments || [], businessMetrics: businessMetrics || {} }
-          : { customers, payments, businessMetrics: businessMetrics || {} },
-        metadata: {
-          type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
-          scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
-          aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
-          updatedAt: new Date().toISOString()
-        }
+      // Only store metadata, not the full dataset to avoid storage quota issues
+      const datasetMetadata = {
+        type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
+        scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
+        aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
+        recordCounts: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
+          ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
+          : { customers: customers.length, payments: payments.length },
+        updatedAt: new Date().toISOString()
       };
       
-      // Save to sessionStorage for same-browser live connection
-      sessionStorage.setItem('synthkit-current-dataset', JSON.stringify(currentDataset));
+      try {
+        // Save only metadata to sessionStorage (much smaller)
+        sessionStorage.setItem('synthkit-current-dataset-metadata', JSON.stringify(datasetMetadata));
+      } catch (error) {
+        console.warn('Failed to save dataset metadata to sessionStorage:', error);
+        // Clear old data and try again
+        try {
+          sessionStorage.removeItem('synthkit-current-dataset');
+          sessionStorage.removeItem('synthkit-current-dataset-metadata');
+          sessionStorage.setItem('synthkit-current-dataset-metadata', JSON.stringify(datasetMetadata));
+        } catch (retryError) {
+          console.warn('Failed to save dataset metadata after cleanup:', retryError);
+        }
+      }
       
-      // Also save to API for cross-port live connection
+      // Also save to API for cross-port live connection (only metadata)
       fetch('/api/dataset/current', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentDataset)
+        body: JSON.stringify({ metadata: datasetMetadata })
       }).catch(err => {
         // Silently fail - API endpoint is optional for live features
         console.log('Live API update failed (this is normal if not testing live features):', err.message);
@@ -1005,36 +1033,41 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
       <div className="flex h-screen">
         {/* Left Panel - Configuration */}
         <div className="w-1/2 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">
             {/* Page Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                Synthkit
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
+              <div className="flex items-center justify-center mb-4">
+                <img 
+                  src="/synthkitlogo.png" 
+                  alt="Synthkit" 
+                  className="w-16 h-16"
+                  style={{ width: '64px', height: '64px' }}
+                />
+              </div>
+              <p className="text-lg text-gray-600">
                 Generate realistic synthetic data for your applications
               </p>
             </div>
 
         {/* Business Configuration Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Business Configuration
           </h2>
           
           {/* Category Selection */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Category
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
               {/* Predefined personas */}
               {Object.entries(PREDEFINED_PERSONAS).map(([key, persona]) => (
@@ -1046,14 +1079,14 @@ export default function Home() {
               {/* Custom AI categories */}
               {customCategories.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.displayName} ✨
+                  {category.displayName}
                 </option>
               ))}
             </select>
             
             {/* Custom category management */}
             {customCategories.length > 0 && (
-              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="mt-2 text-sm text-gray-600">
                 Custom categories:
                 {customCategories.map((category) => (
                   <span key={category.id} className="inline-flex items-center ml-2">
@@ -1063,7 +1096,7 @@ export default function Home() {
                       className="ml-1 text-red-500 hover:text-red-700"
                       title="Delete custom category"
                     >
-                      🗑️
+                      ×
                     </button>
                   </span>
                 ))}
@@ -1073,7 +1106,7 @@ export default function Home() {
 
           {/* AI Prompt Input */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               AI Business Prompt
             </label>
             <div className="flex gap-2">
@@ -1081,7 +1114,7 @@ export default function Home() {
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="Describe your business idea (e.g., 'A growth stage platform for food delivery with real-time tracking and restaurant partnerships')"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900"
                 rows={3}
               />
               <button
@@ -1089,18 +1122,18 @@ export default function Home() {
                 disabled={!aiPrompt.trim() || isAnalyzing}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isAnalyzing ? '🤖 Analyzing...' : '🤖 Analyze Business'}
+                {isAnalyzing ? 'Analyzing...' : 'Analyze Business'}
               </button>
             </div>
           </div>
 
           {/* AI Analysis Reasoning (only for AI-generated) */}
           {isCustomCategory(selectedCategory) && aiAnalysis && (
-            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-                💡 Analysis Reasoning
+            <div className="mt-4 p-4 bg-blue-50 rounded-md">
+              <h4 className="text-sm font-medium text-blue-900 mb-2">
+                Analysis Reasoning
               </h4>
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+              <p className="text-sm text-blue-800">
                 This appears to be a <strong>{aiAnalysis.businessContext.type}</strong> in the{' '}
                 <strong>{aiAnalysis.businessContext.stage}</strong> stage. Key features include{' '}
                 {aiAnalysis.keyFeatures.slice(0, 3).join(', ')}, targeting{' '}
@@ -1111,21 +1144,21 @@ export default function Home() {
         </div>
 
         {/* Scenario Configuration Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Scenario Configuration
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {/* Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Role
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'admin' | 'support')}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option value="admin">Admin</option>
                 <option value="support">Support</option>
@@ -1134,13 +1167,13 @@ export default function Home() {
 
             {/* Stage Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Stage
               </label>
               <select
                 value={stage}
                 onChange={(e) => setStage(e.target.value as 'early' | 'growth' | 'enterprise')}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option value="early">Early</option>
                 <option value="growth">Growth</option>
@@ -1150,36 +1183,26 @@ export default function Home() {
 
             {/* ID Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 ID
               </label>
               <input
                 type="number"
                 value={scenarioId}
                 onChange={(e) => setScenarioId(parseInt(e.target.value) || 12345)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               />
             </div>
           </div>
 
-          {/* Share Dataset Button */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleCreateDataset}
-              disabled={isCreating}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCreating ? '📤 Creating...' : '📤 Share Dataset'}
-            </button>
-          </div>
         </div>
 
         {/* Business Context, Key Features, User Roles, Data Entities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Business Context */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              📊 Business Context
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Business Context
             </h3>
             {getCurrentBusinessContext() && (
               <div className="space-y-3">
@@ -1190,7 +1213,7 @@ export default function Home() {
                   <span className="font-medium">Target Audience:</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {(getCurrentBusinessContext()?.targetAudience || []).map((audience, i) => (
-                      <span key={i} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
+                      <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
                         {audience}
                       </span>
                     ))}
@@ -1201,13 +1224,13 @@ export default function Home() {
           </div>
 
           {/* Key Features */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              ⚡ Key Features
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Key Features
             </h3>
             <div className="flex flex-wrap gap-2">
               {getCurrentKeyFeatures().map((feature, i) => (
-                <span key={i} className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
+                <span key={i} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
                   {feature}
                 </span>
               ))}
@@ -1215,18 +1238,18 @@ export default function Home() {
           </div>
 
           {/* User Roles */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              👥 User Roles
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              User Roles
             </h3>
             <div className="space-y-3">
               {getCurrentUserRoles().map((role, i) => (
                 <div key={i} className="border-l-4 border-purple-500 pl-4">
-                  <div className="font-medium text-purple-800 dark:text-purple-200">{role.name}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{role.description}</div>
+                  <div className="font-medium text-purple-800">{role.name}</div>
+                  <div className="text-sm text-gray-600">{role.description}</div>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {(role.permissions || []).map((permission, j) => (
-                      <span key={j} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs">
+                      <span key={j} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
                         {permission}
                       </span>
                     ))}
@@ -1237,22 +1260,22 @@ export default function Home() {
           </div>
 
           {/* Data Entities */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              🗃️ Data Entities
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Data Entities
             </h3>
             <div className="space-y-4">
               {getCurrentEntities().map((entity, i) => (
-                <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3">
-                  <div className="font-medium text-gray-900 dark:text-white">{entity.name}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 capitalize mb-2">{entity.type}</div>
+                <div key={i} className="border border-gray-200 rounded p-3">
+                  <div className="font-medium text-gray-900">{entity.name}</div>
+                  <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
                   <div className="space-y-1">
                     {(entity.properties || []).map((prop, j) => (
                       <div key={j} className="text-sm">
                         <span className="font-medium">{prop.name}</span>
-                        <span className="text-gray-500 dark:text-gray-400"> ({prop.type})</span>
+                        <span className="text-gray-500"> ({prop.type})</span>
                         {prop.description && (
-                          <span className="text-gray-600 dark:text-gray-300"> - {prop.description}</span>
+                          <span className="text-gray-600"> - {prop.description}</span>
                         )}
                       </div>
                     ))}
@@ -1268,20 +1291,20 @@ export default function Home() {
           {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
             // Dynamic entities for AI scenarios
             Object.entries(dynamicEntities).map(([entityName, entityData]) => (
-              <div key={entityName} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  📊 {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
+              <div key={entityName} className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {entityData.slice(0, 10).map((item: any) => (
-                    <div key={item.id} className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div key={item.id} className="p-2 bg-gray-50 rounded">
                       <div className="space-y-1">
                         {Object.entries(item).slice(0, 4).map(([key, value]) => (
                           <div key={key} className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
+                            <span className="text-sm font-medium text-gray-600 capitalize">
                               {key}:
                             </span>
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <span className="text-sm text-gray-900">
                               {typeof value === 'number' && key.includes('amount') 
                                 ? `$${value.toFixed(2)}`
                                 : typeof value === 'string' && value.length > 30
@@ -1295,7 +1318,7 @@ export default function Home() {
                     </div>
                   ))}
                   {entityData.length > 10 && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                    <div className="text-sm text-gray-500 text-center py-2">
                       ... and {(entityData.length - 10).toLocaleString()} more
                     </div>
                   )}
@@ -1306,34 +1329,34 @@ export default function Home() {
             // Legacy customers/payments for predefined personas
             <>
               {/* Customers */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  👥 Customers ({customers.length.toLocaleString()})
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  Customers ({customers.length.toLocaleString()})
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {customers.slice(0, 10).map((customer) => (
-                    <div key={customer.id} className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div key={customer.id} className="p-2 bg-gray-50 rounded">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900 dark:text-white">{customer.name}</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">{customer.email}</div>
+                          <div className="font-medium text-gray-900">{customer.name}</div>
+                          <div className="text-sm text-gray-600">{customer.email}</div>
                           {customer.phone && (
-                            <div className="text-xs text-gray-500 dark:text-gray-500">{customer.phone}</div>
+                            <div className="text-xs text-gray-500">{customer.phone}</div>
                           )}
                           {customer.address && (
-                            <div className="text-xs text-gray-500 dark:text-gray-500">
+                            <div className="text-xs text-gray-500">
                               {customer.address.city}, {customer.address.state}
                             </div>
                           )}
                         </div>
                         <div className="flex flex-col gap-1">
                           {customer.metadata?.loyaltyTier && (
-                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                               {customer.metadata.loyaltyTier}
                             </span>
                           )}
                           {customer.metadata?.subscriptionTier && (
-                            <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs">
+                            <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
                               {customer.metadata.subscriptionTier}
                             </span>
                           )}
@@ -1342,7 +1365,7 @@ export default function Home() {
                     </div>
                   ))}
                   {customers.length > 10 && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                    <div className="text-sm text-gray-500 text-center py-2">
                       ... and {(customers.length - 10).toLocaleString()} more
                     </div>
                   )}
@@ -1350,37 +1373,37 @@ export default function Home() {
               </div>
 
               {/* Payments */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  💳 Payments ({payments.length.toLocaleString()})
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  Payments ({payments.length.toLocaleString()})
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {payments.slice(0, 10).map((payment) => (
-                    <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                       <div>
-                        <div className="font-medium text-gray-900 dark:text-white">
+                        <div className="font-medium text-gray-900">
                           ${typeof payment.amount === 'number' ? (payment.amount / 100).toFixed(2) : payment.amount}
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">{payment.paymentMethod}</div>
+                        <div className="text-sm text-gray-600">{payment.paymentMethod}</div>
                         {payment.description && (
-                          <div className="text-xs text-gray-500 dark:text-gray-500 truncate max-w-48">
+                          <div className="text-xs text-gray-500 truncate max-w-48">
                             {payment.description}
                           </div>
                         )}
                       </div>
                       <span className={`px-2 py-1 rounded text-sm ${
                         payment.status === 'succeeded' 
-                          ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                          ? 'bg-green-100 text-green-800'
                           : payment.status === 'pending'
-                          ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
-                          : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
                       }`}>
                         {payment.status}
                       </span>
                     </div>
                   ))}
                   {payments.length > 10 && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                    <div className="text-sm text-gray-500 text-center py-2">
                       ... and {(payments.length - 10).toLocaleString()} more
                     </div>
                   )}
@@ -1394,161 +1417,131 @@ export default function Home() {
       </div>
 
       {/* Right Panel - Integration & Sharing */}
-      <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+      <div className="w-1/2 overflow-y-auto bg-gray-50">
         <div className="p-6">
           {/* Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              📤 Share Dataset
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Dataset
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your dataset is ready to use in any prototype or AI tool
-            </p>
           </div>
 
-          {/* Dataset Info */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              📊 Dataset Overview
-            </h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">Type:</span>
-                <div className="text-blue-700 dark:text-blue-300">
-                  {isCustomCategory(selectedCategory) ? 'AI-generated' : 'Scenario-based'}
-                </div>
-              </div>
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">Category:</span>
-                <div className="text-blue-700 dark:text-blue-300">{selectedCategory}</div>
-              </div>
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">Stage:</span>
-                <div className="text-blue-700 dark:text-blue-300">{stage}</div>
-              </div>
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">ID:</span>
-                <div className="text-blue-700 dark:text-blue-300">{scenarioId}</div>
-              </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
-              <span className="font-medium text-blue-800 dark:text-blue-200">Records:</span>
-              <div className="flex flex-wrap gap-3 mt-1">
-                {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
-                  Object.entries(dynamicEntities).map(([key, entities]) => (
-                    <span key={key} className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                      {key}: {entities.length.toLocaleString()}
-                    </span>
-                  ))
-                ) : (
-                  <>
-                    <span className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                      customers: {customers.length.toLocaleString()}
-                    </span>
-                    <span className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                      payments: {payments.length.toLocaleString()}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
 
           {/* URL Section */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-              🔗 Dataset URL
+            <h3 className="font-semibold text-gray-900 mb-3">
+              Dataset URL
             </h3>
-            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 break-all">
-                {sharedDatasetUrl || 'Generate dataset to get URL'}
+            <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <code className="flex-1 text-sm font-mono text-gray-800 break-all">
+                {sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
               </code>
-              {sharedDatasetUrl && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(sharedDatasetUrl)}
-                  className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy
-                </button>
-              )}
+              <button
+                onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json')}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+              >
+                <Copy className="w-4 h-4" />
+                Copy
+              </button>
+              <a
+                href={sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View
+              </a>
             </div>
           </div>
 
           {/* Quick Download Section */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-              ⚡ Quick Setup Files
+            <h3 className="font-semibold text-gray-900 mb-3">
+              Quick Setup Files
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-gray-600 mb-4">
               Download ready-to-use files for instant integration in your prototype:
             </p>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => sharedDatasetUrl && downloadReactHook(sharedDatasetUrl, getDatasetInfo())}
-                disabled={!sharedDatasetUrl}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
                 React Hook (.ts)
               </button>
               <button
-                onClick={() => sharedDatasetUrl && downloadCursorRules(sharedDatasetUrl, getDatasetInfo())}
-                disabled={!sharedDatasetUrl}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => downloadCursorRules(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
                 Cursor Rules
               </button>
             </div>
-            <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <p className="text-xs text-green-700 dark:text-green-300">
-                💡 <strong>Pro tip:</strong> Download both files, add the React hook to your project, 
+            <div className="mt-3 p-3 bg-green-50 rounded-lg">
+              <p className="text-xs text-green-700">
+                <strong>Pro tip:</strong> Download both files, add the React hook to your project, 
                 and place the .cursorrules file in your project root for optimal AI assistance!
               </p>
             </div>
           </div>
 
+
           {/* Integration Examples */}
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-              🛠️ Integration Examples
+            <h3 className="font-semibold text-gray-900 mb-4">
+              Integration Examples
             </h3>
-            <div className="space-y-4">
-              {sharedDatasetUrl && generateAllIntegrations(sharedDatasetUrl, getDatasetInfo()).map((example, index) => (
-                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white">
-                        {example.tool}
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {example.description}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(example.copyText || example.code)}
-                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
-                    >
-                      <Copy className="w-4 h-4" />
-                      Copy
-                    </button>
-                  </div>
-                  <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
-                    <code className="text-gray-800 dark:text-gray-200">
-                      {example.code}
-                    </code>
-                  </pre>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    💡 {example.instructions}
-                  </p>
-                </div>
+            
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 mb-4 bg-gray-100 rounded-lg p-1">
+              {['cursor', 'claude', 'openai', 'react'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveIntegrationTab(tab)}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeIntegrationTab === tab
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
               ))}
-              {!sharedDatasetUrl && (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p>Generate a dataset to see integration examples</p>
-                </div>
-              )}
+            </div>
+
+            {/* Tab Content */}
+            <div className="space-y-4">
+              {(() => {
+                const examples = generateAllIntegrations(
+                  sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', 
+                  getDatasetInfo()
+                );
+                const filteredExamples = examples.filter(example => {
+                  const toolName = example.tool.toLowerCase();
+                  if (activeIntegrationTab === 'cursor') {
+                    return toolName === 'cursor';
+                  } else if (activeIntegrationTab === 'claude') {
+                    return toolName === 'claude';
+                  } else if (activeIntegrationTab === 'openai') {
+                    return toolName === 'chatgpt';
+                  } else if (activeIntegrationTab === 'react') {
+                    return toolName === 'fetch api';
+                  }
+                  return false;
+                });
+                
+                return filteredExamples.map((example, index) => (
+                  <div key={index}>
+                    <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
+                      <code className="text-gray-800">
+                        {activeIntegrationTab === 'cursor' ? (example.copyText || example.code) : example.code}
+                      </code>
+                    </pre>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>
