@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
 import { useDatasetCreation } from '@/hooks/useDatasetCreation';
+import { Copy, Download } from 'lucide-react';
+import { generateAllIntegrations } from '@/lib/ai-integrations';
+import { downloadCursorRules } from '@/lib/cursor-rules-generator';
+import { downloadReactHook } from '@/lib/react-hook-generator';
 import { 
   generateRealisticName, 
   generateRealisticEmail, 
@@ -1389,169 +1393,168 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right Panel - Data Display */}
+      {/* Right Panel - Integration & Sharing */}
       <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
         <div className="p-6">
-          {/* Business Metrics */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              📊 Business Metrics
-            </h3>
-            {businessMetrics ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    ${businessMetrics.customerLifetimeValue.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Customer Lifetime Value</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    ${businessMetrics.averageOrderValue.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Average Order Value</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    ${businessMetrics.monthlyRecurringRevenue.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Monthly Recurring Revenue</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {businessMetrics.dailyActiveUsers.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Daily Active Users</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    {businessMetrics.conversionRate.toFixed(2)}%
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-gray-500 dark:text-gray-400">Loading metrics...</div>
-            )}
+          {/* Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              📤 Share Dataset
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Your dataset is ready to use in any prototype or AI tool
+            </p>
           </div>
 
-          {/* Data Display */}
-          {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
-            // AI-generated dynamic entities
-            <div className="space-y-6">
-              {Object.entries(dynamicEntities).map(([entityName, entities]) => (
-                <div key={entityName} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    {entityName} ({entities.length.toLocaleString()})
-                  </h3>
-                  <div className="max-h-96 overflow-y-auto">
-                    <div className="space-y-2">
-                      {entities.slice(0, 10).map((item, i) => (
-                        <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
-                          <div className="grid grid-cols-2 gap-2">
-                            {Object.entries(item).map(([key, value]) => (
-                              <div key={key}>
-                                <span className="font-medium text-gray-700 dark:text-gray-300">{key}:</span>
-                                <span className="ml-2 text-gray-600 dark:text-gray-400">
-                                  {typeof value === 'number' && key.includes('amount') 
-                                    ? `$${(value / 100).toFixed(2)}` 
-                                    : String(value)
-                                  }
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                      {entities.length > 10 && (
-                        <div className="text-center text-gray-500 dark:text-gray-400 py-2">
-                          ... and {entities.length - 10} more
-                        </div>
-                      )}
+          {/* Dataset Info */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+              📊 Dataset Overview
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-blue-800 dark:text-blue-200">Type:</span>
+                <div className="text-blue-700 dark:text-blue-300">
+                  {isCustomCategory(selectedCategory) ? 'AI-generated' : 'Scenario-based'}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium text-blue-800 dark:text-blue-200">Category:</span>
+                <div className="text-blue-700 dark:text-blue-300">{selectedCategory}</div>
+              </div>
+              <div>
+                <span className="font-medium text-blue-800 dark:text-blue-200">Stage:</span>
+                <div className="text-blue-700 dark:text-blue-300">{stage}</div>
+              </div>
+              <div>
+                <span className="font-medium text-blue-800 dark:text-blue-200">ID:</span>
+                <div className="text-blue-700 dark:text-blue-300">{scenarioId}</div>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+              <span className="font-medium text-blue-800 dark:text-blue-200">Records:</span>
+              <div className="flex flex-wrap gap-3 mt-1">
+                {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
+                  Object.entries(dynamicEntities).map(([key, entities]) => (
+                    <span key={key} className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                      {key}: {entities.length.toLocaleString()}
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    <span className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                      customers: {customers.length.toLocaleString()}
+                    </span>
+                    <span className="text-sm bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                      payments: {payments.length.toLocaleString()}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* URL Section */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              🔗 Dataset URL
+            </h3>
+            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 break-all">
+                {sharedDatasetUrl || 'Generate dataset to get URL'}
+              </code>
+              {sharedDatasetUrl && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(sharedDatasetUrl)}
+                  className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Download Section */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              ⚡ Quick Setup Files
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Download ready-to-use files for instant integration in your prototype:
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => sharedDatasetUrl && downloadReactHook(sharedDatasetUrl, getDatasetInfo())}
+                disabled={!sharedDatasetUrl}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                React Hook (.ts)
+              </button>
+              <button
+                onClick={() => sharedDatasetUrl && downloadCursorRules(sharedDatasetUrl, getDatasetInfo())}
+                disabled={!sharedDatasetUrl}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                Cursor Rules
+              </button>
+            </div>
+            <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <p className="text-xs text-green-700 dark:text-green-300">
+                💡 <strong>Pro tip:</strong> Download both files, add the React hook to your project, 
+                and place the .cursorrules file in your project root for optimal AI assistance!
+              </p>
+            </div>
+          </div>
+
+          {/* Integration Examples */}
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+              🛠️ Integration Examples
+            </h3>
+            <div className="space-y-4">
+              {sharedDatasetUrl && generateAllIntegrations(sharedDatasetUrl, getDatasetInfo()).map((example, index) => (
+                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">
+                        {example.tool}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {example.description}
+                      </p>
                     </div>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(example.copyText || example.code)}
+                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </button>
                   </div>
+                  <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
+                    <code className="text-gray-800 dark:text-gray-200">
+                      {example.code}
+                    </code>
+                  </pre>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    💡 {example.instructions}
+                  </p>
                 </div>
               ))}
-            </div>
-          ) : (
-            // Predefined persona data
-            <div className="space-y-6">
-              {/* Customers */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Customers ({customers.length.toLocaleString()})
-                </h3>
-                <div className="max-h-96 overflow-y-auto">
-                  <div className="space-y-2">
-                    {customers.slice(0, 10).map((customer, i) => (
-                      <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div><span className="font-medium">Name:</span> {customer.name}</div>
-                          <div><span className="font-medium">Email:</span> {customer.email}</div>
-                          <div><span className="font-medium">Phone:</span> {customer.phone}</div>
-                          <div><span className="font-medium">Location:</span> {customer.address.city}, {customer.address.state}</div>
-                          <div><span className="font-medium">Tier:</span> {customer.metadata.loyaltyTier}</div>
-                          <div><span className="font-medium">Subscription:</span> {customer.metadata.subscriptionTier}</div>
-                        </div>
-                      </div>
-                    ))}
-                    {customers.length > 10 && (
-                      <div className="text-center text-gray-500 dark:text-gray-400 py-2">
-                        ... and {customers.length - 10} more customers
-                      </div>
-                    )}
-                  </div>
+              {!sharedDatasetUrl && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>Generate a dataset to see integration examples</p>
                 </div>
-              </div>
-
-              {/* Payments */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Payments ({payments.length.toLocaleString()})
-                </h3>
-                <div className="max-h-96 overflow-y-auto">
-                  <div className="space-y-2">
-                    {payments.slice(0, 10).map((payment, i) => (
-                      <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div><span className="font-medium">Amount:</span> ${(payment.amount / 100).toFixed(2)}</div>
-                          <div><span className="font-medium">Status:</span> 
-                            <span className={`ml-1 px-2 py-1 rounded text-xs ${
-                              payment.status === 'succeeded' ? 'bg-green-100 text-green-800' :
-                              payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {payment.status}
-                            </span>
-                          </div>
-                          <div><span className="font-medium">Method:</span> {payment.paymentMethod}</div>
-                          <div><span className="font-medium">Description:</span> {payment.description}</div>
-                        </div>
-                      </div>
-                    ))}
-                    {payments.length > 10 && (
-                      <div className="text-center text-gray-500 dark:text-gray-400 py-2">
-                        ... and {payments.length - 10} more payments
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
 
-    {/* Dataset Share Modal */}
-      {shareModalOpen && sharedDatasetUrl && (
-        <DatasetShareModal
-          isOpen={shareModalOpen}
-          onClose={() => setShareModalOpen(false)}
-          url={sharedDatasetUrl}
-          datasetInfo={getDatasetInfo()}
-        />
-      )}
     </div>
   );
 }
