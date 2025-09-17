@@ -323,26 +323,6 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-// Generate realistic payment amounts based on category and stage
-function generateRealisticAmount(seed: number, category: string, stage: string): number {
-  const categoryRanges: Record<string, { min: number; max: number }> = {
-    modaic: { min: 25.00, max: 300.00 },     // Fashion e-commerce
-    stratus: { min: 49.00, max: 999.00 },    // B2B SaaS subscriptions
-    forksy: { min: 12.50, max: 89.99 },      // Food delivery orders
-    pulseon: { min: 19.99, max: 79.99 },     // Fitness subscriptions
-    procura: { min: 500.00, max: 25000.00 }, // B2B procurement orders
-    mindora: { min: 75.00, max: 200.00 },    // Therapy sessions
-    keynest: { min: 800.00, max: 3500.00 },  // Property rent payments
-    fluxly: { min: 150.00, max: 5000.00 },   // Supply chain logistics
-    brightfund: { min: 10.00, max: 500.00 }  // Nonprofit donations
-  };
-  
-  const range = categoryRanges[category] || categoryRanges.modaic;
-  const baseAmount = range.min + seededRandom(seed) * (range.max - range.min);
-  
-  return Math.round(baseAmount * 100) / 100;
-}
-
 // Generate business metrics
 function generateBusinessMetrics(category: string, stage: string, seed: number): BusinessMetrics {
   const stageMultipliers = {
@@ -398,61 +378,37 @@ export default function Home() {
     }
   }, [isClient, selectedCategory, stage, scenarioId]);
 
-  // Generate realistic data based on stage and category
+  // Generate sample data
   useEffect(() => {
-    if (isClient && selectedCategory && stage) {
-      // Get realistic volume based on stage
-      const stageMultipliers = {
-        early: { min: 50, max: 200, expected: 125 },
-        growth: { min: 200, max: 2000, expected: 1100 },
-        enterprise: { min: 2000, max: 50000, expected: 25000 }
-      };
-      
-      const volume = stageMultipliers[stage] || stageMultipliers.growth;
-      const customerCount = Math.floor(volume.expected + (Math.random() - 0.5) * (volume.max - volume.min) * 0.3);
-      
-      // Generate customers
+    if (isClient) {
+      // Generate sample customers
       const newCustomers: Customer[] = [];
-      for (let i = 0; i < customerCount; i++) {
-        const seed = scenarioId + i;
+      for (let i = 0; i < 15; i++) {
         newCustomers.push({
           id: `customer-${scenarioId}-${i}`,
           name: `Customer ${i + 1}`,
           email: `customer${i + 1}@example.com`,
-          loyaltyTier: ['Bronze', 'Silver', 'Gold'][Math.floor(seededRandom(seed) * 3)],
-          createdAt: new Date(Date.now() - seededRandom(seed + 1) * 365 * 24 * 60 * 60 * 1000).toISOString()
+          loyaltyTier: ['Bronze', 'Silver', 'Gold'][i % 3],
+          createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
         });
       }
       setCustomers(newCustomers);
 
-      // Generate payments with category-specific multipliers
-      const paymentMultipliers: Record<string, number> = {
-        modaic: 2.3, stratus: 0.8, forksy: 4.7,
-        pulseon: 1.2, procura: 3.1, mindora: 0.9,
-        keynest: 12.5, fluxly: 2.8, brightfund: 4.2
-      };
-      
-      const paymentMultiplier = paymentMultipliers[selectedCategory] || 2.3;
-      const paymentCount = Math.floor(customerCount * paymentMultiplier);
-      
+      // Generate sample payments
       const newPayments: Payment[] = [];
-      for (let i = 0; i < paymentCount; i++) {
-        const seed = scenarioId + 10000 + i;
-        const customerIndex = Math.floor(seededRandom(seed) * newCustomers.length);
-        const amount = generateRealisticAmount(seed, selectedCategory, stage);
-        
+      for (let i = 0; i < 25; i++) {
         newPayments.push({
           id: `payment-${scenarioId}-${i}`,
-          customerId: newCustomers[customerIndex]?.id || `customer-${scenarioId}-${i % customerCount}`,
-          amount: amount,
-          status: seededRandom(seed + 1) > 0.1 ? 'completed' : 'pending',
-          paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][Math.floor(seededRandom(seed + 2) * 3)],
-          createdAt: new Date(Date.now() - seededRandom(seed + 3) * 30 * 24 * 60 * 60 * 1000).toISOString()
+          customerId: `customer-${scenarioId}-${i % 15}`,
+          amount: Math.round((25 + Math.random() * 200) * 100) / 100,
+          status: ['completed', 'pending', 'failed'][i % 3],
+          paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][i % 3],
+          createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
         });
       }
       setPayments(newPayments);
     }
-  }, [isClient, selectedCategory, stage, scenarioId]);
+  }, [isClient, scenarioId]);
 
   // Auto-create dataset when data is ready
   useEffect(() => {
