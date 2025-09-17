@@ -1,17 +1,40 @@
-// Simplified MSW setup for Synthkit
-// Currently unused since demo app generates data directly in frontend
+import { http, HttpResponse } from 'msw';
 
+// This will be populated by Synthkit
 export const handlers: any[] = [];
 
-// Simplified MSW initialization (currently disabled)
-export async function startMSW() {
-  // MSW disabled - demo app generates data directly without API mocking
-  console.log('[MSW] Disabled - using direct data generation');
-  return null;
+// Create the worker instance only in browser
+export const worker = typeof window !== 'undefined' ? null : null;
+
+// Function to update handlers
+export function updateHandlers(newHandlers: any[]) {
+  handlers.length = 0;
+  handlers.push(...newHandlers);
+  // Note: In this simplified version, we'll just store the handlers
+  // The actual worker will be created and updated in startMSW
 }
 
-// Placeholder for future MSW handler updates
-export function updateHandlers(newHandlers: any[]) {
-  // Currently unused - handlers not needed for direct data generation
-  console.log('[MSW] Handler update skipped - direct generation mode');
+// Function to start MSW
+export async function startMSW() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    // Dynamic import to avoid SSR issues
+    const { setupWorker } = await import('msw/browser');
+    const worker = setupWorker(...handlers);
+    
+    await worker.start({
+      onUnhandledRequest: 'bypass',
+      serviceWorker: {
+        url: '/mockServiceWorker.js',
+      },
+    });
+    console.log('[MSW] Mock Service Worker started with', handlers.length, 'handlers');
+    return worker;
+  } catch (error) {
+    console.error('[MSW] Failed to start:', error);
+    throw error;
+  }
 }

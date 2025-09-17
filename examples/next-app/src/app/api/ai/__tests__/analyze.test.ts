@@ -3,7 +3,7 @@ import { POST } from '../analyze/route';
 import { NextRequest } from 'next/server';
 
 // Mock the AI module
-vi.mock('@synthkit/sdk', () => ({
+vi.mock('@synthkit/ai', () => ({
   DescriptionAnalyzer: vi.fn().mockImplementation(() => ({
     analyze: vi.fn().mockResolvedValue({
       success: true,

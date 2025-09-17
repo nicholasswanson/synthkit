@@ -52,7 +52,7 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             📤 Share Dataset
@@ -63,10 +63,8 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Dataset Info */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      {/* Dataset Info */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
             📊 Dataset Overview
@@ -237,7 +235,6 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
           <p>🔄 Same URL always returns identical data</p>
           <p>🌐 Works with any HTTP client or AI tool</p>
         </div>
-      </div>
       </div>
     </div>
   );

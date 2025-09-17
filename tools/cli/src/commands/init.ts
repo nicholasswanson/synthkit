@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
+import { getPackLoader } from '../utils/pack-loader';
 import { FileUtils } from '../utils/file-utils';
 
 export const initCommand = new Command('init')
@@ -18,18 +19,19 @@ export const initCommand = new Command('init')
       console.log(chalk.blue('🚀 Initializing Synthkit project...'));
       console.log();
 
-      // Available business categories (simplified from pack system)
-      const availableCategories = [
-        { id: 'modaic', name: 'Modaic (Admin Dashboard)', description: 'User management and admin tools' },
-        { id: 'stratus', name: 'Stratus (Cloud Platform)', description: 'Cloud infrastructure and services' },
-        { id: 'forksy', name: 'Forksy (Food Delivery)', description: 'Restaurant and delivery management' },
-        { id: 'pulseon', name: 'Pulseon (Fitness Platform)', description: 'Workout tracking and health data' },
-        { id: 'procura', name: 'Procura (Procurement)', description: 'Supply chain and vendor management' },
-        { id: 'mindora', name: 'Mindora (Mental Health)', description: 'Therapy and wellness tracking' },
-        { id: 'keynest', name: 'Keynest (Property Management)', description: 'Real estate and rental management' },
-        { id: 'fluxly', name: 'Fluxly (Analytics Platform)', description: 'Data analytics and reporting' },
-        { id: 'brightfund', name: 'Brightfund (Nonprofit)', description: 'Donation and fundraising management' }
-      ];
+      // Discover available packs
+      let availablePacks: any[] = [];
+      try {
+        const packLoader = getPackLoader();
+        availablePacks = await packLoader.discoverPacks(['../packs/*']);
+      } catch (error) {
+        // Fallback to default packs if discovery fails
+        availablePacks = [
+          { id: 'core', name: 'Core Pack', description: 'Essential user authentication and management' },
+          { id: 'saas', name: 'SaaS Pack', description: 'Subscriptions, billing, and usage analytics' },
+          { id: 'ecomm', name: 'E-commerce Pack', description: 'Products, orders, and marketplace features' }
+        ];
+      }
 
       // Gather project information
       const questions = [
@@ -57,14 +59,20 @@ export const initCommand = new Command('init')
           default: options.template || 'nextjs'
         },
         {
-          type: 'list',
-          name: 'category',
-          message: 'Select primary business category:',
-          choices: availableCategories.map(cat => ({
-            name: `${cat.name} - ${cat.description}`,
-            value: cat.id
+          type: 'checkbox',
+          name: 'packs',
+          message: 'Select business packs to include:',
+          choices: availablePacks.map(pack => ({
+            name: `${pack.name} - ${pack.description || 'No description'}`,
+            value: pack.id,
+            checked: pack.id === 'core' // Core is selected by default
           })),
-          default: 'modaic'
+          validate: (input: string[]) => {
+            if (input.length === 0) {
+              return 'Please select at least one pack';
+            }
+            return true;
+          }
         },
         {
           type: 'confirm',
@@ -83,7 +91,7 @@ export const initCommand = new Command('init')
       const answers = await inquirer.prompt(questions as any) as {
         projectName: string;
         template: string;
-        category: string;
+        packs: string[];
         installDeps: boolean;
         initGit: boolean;
       };
@@ -124,14 +132,18 @@ export const initCommand = new Command('init')
         name: answers.projectName,
         version: '1.0.0',
         template: answers.template,
-        category: answers.category,
+        packs: answers.packs,
         scenarios: {
-          default: 'growth'
+          default: answers.packs[0] || 'core'
         },
         generators: {
           id: 12345,
           locale: 'en-US',
           timeZone: 'UTC'
+        },
+        msw: {
+          enabled: true,
+          delay: 100
         }
       };
 
@@ -140,8 +152,9 @@ export const initCommand = new Command('init')
       // Generate template files based on chosen template
       await generateTemplateFiles(targetDir, answers.template, {
         projectName: answers.projectName,
-        category: answers.category,
-        categoryName: availableCategories.find(c => c.id === answers.category)?.name || answers.category
+        packs: answers.packs,
+        defaultPack: answers.packs[0] || 'core',
+        availablePacks
       });
 
       console.log(chalk.green('✅ Project structure created'));
@@ -197,8 +210,9 @@ async function generateTemplateFiles(
   template: string, 
   context: {
     projectName: string;
-    category: string;
-    categoryName: string;
+    packs: string[];
+    defaultPack: string;
+    availablePacks: any[];
   }
 ) {
   const templatesDir = path.join(__dirname, '../templates');

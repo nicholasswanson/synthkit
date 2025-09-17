@@ -15,7 +15,6 @@ interface DatasetShareModalProps {
 
 export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: DatasetShareModalProps) {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('Cursor');
 
   if (!isOpen) return null;
 
@@ -31,19 +30,9 @@ export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: Dataset
 
   const integrationExamples = generateAllIntegrations(url, datasetInfo);
 
-  const tabs = [
-    { id: 'Cursor', label: '🤖 Cursor', description: 'AI-powered code editor' },
-    { id: 'Claude', label: '🧠 Claude', description: 'Detailed development guidance' },
-    { id: 'ChatGPT', label: '💬 ChatGPT', description: 'Quick coding solutions' },
-    { id: 'v0', label: '⚡ v0', description: 'Component generator' },
-    { id: 'Fetch API', label: '🔗 Fetch API', description: 'Direct JavaScript integration' }
-  ];
-
-  const activeIntegration = integrationExamples.find(e => e.tool === activeTab);
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
@@ -173,71 +162,44 @@ export function DatasetShareModal({ isOpen, onClose, url, datasetInfo }: Dataset
           </div>
         </div>
 
-        {/* Integration Tabs */}
+        {/* Integration Examples */}
         <div className="p-6">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-            🛠️ Integration Options
+            🛠️ Integration Examples
           </h3>
-          
-          {/* Tab Navigation */}
-          <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                <div className="flex flex-col items-center">
-                  <span>{tab.label}</span>
-                  <span className="text-xs opacity-75">{tab.description}</span>
+          <div className="space-y-4">
+            {integrationExamples.map((example, index) => (
+              <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      {example.tool}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {example.description}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => copyToClipboard(example.copyText || example.code, example.tool)}
+                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                    >
+                      {copiedItem === example.tool ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copiedItem === example.tool ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          {activeIntegration && (
-            <div className="space-y-4">
-              {/* Integration Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {activeIntegration.tool} Integration
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {activeIntegration.description}
-                  </p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(activeIntegration.copyText || activeIntegration.code, activeIntegration.tool)}
-                  className="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm"
-                >
-                  {copiedItem === activeIntegration.tool ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copiedItem === activeIntegration.tool ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-
-              {/* Integration Content */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <pre className="bg-white dark:bg-gray-900 p-4 rounded text-sm overflow-x-auto border border-gray-200 dark:border-gray-700">
-                  <code className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                    {activeIntegration.code}
+                <pre className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
+                  <code className="text-gray-800 dark:text-gray-200">
+                    {example.code}
                   </code>
                 </pre>
-              </div>
-
-              {/* Instructions */}
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 {activeIntegration.instructions}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  💡 {example.instructions}
                 </p>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Footer */}

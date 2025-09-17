@@ -315,7 +315,7 @@ export function PersonaScenarioSwitcher({
 
       <div className="synthkit-switcher__info">
         <small>
-          Ready: {synth.isReady ? 'Yes' : 'No'} | 
+          MSW: {synth.mswEnabled ? 'Enabled' : 'Disabled'} | 
         </small>
       </div>
     </div>

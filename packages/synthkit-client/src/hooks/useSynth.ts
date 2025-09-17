@@ -1,10 +1,11 @@
 import { useSynthContext } from '../providers/SynthProvider';
 
 export function useSynth() {
-  const { store, isReady } = useSynthContext();
+  const { store, isReady, mswEnabled, refreshHandlers } = useSynthContext();
   
   return {
     isReady,
+    mswEnabled,
     config: store.config,
     activeCategories: Array.from(store.activeCategories),
     activeCategory: store.activeCategory,
@@ -55,5 +56,6 @@ export function useSynth() {
     
     // Utility actions
     reset: store.reset,
+    refreshHandlers,
   };
 }

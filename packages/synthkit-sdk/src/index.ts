@@ -2,8 +2,6 @@
 export * from './generators';
 export * from './store';
 export * from './config';
-
-// AI exports
 export * from './ai';
 
 // Type exports

@@ -3,7 +3,6 @@ import { DescriptionAnalyzer } from '@synthkit/sdk';
 import { ApiErrorResponse } from '@/lib/api-errors';
 import { logger } from '@/lib/logger';
 import { aiRateLimit } from '@/lib/rate-limiter';
-import { trackAIUsage } from '@/lib/usage-tracker';
 
 export async function POST(request: NextRequest) {
   // Apply rate limiting
@@ -54,16 +53,9 @@ export async function POST(request: NextRequest) {
     const analyzer = new DescriptionAnalyzer();
     const result = await analyzer.analyze(description);
 
-    // Track usage (estimate tokens based on description length)
-    const estimatedInputTokens = Math.ceil(description.length / 4); // Rough estimate
-    const estimatedOutputTokens = Math.ceil(JSON.stringify(result.analysis || {}).length / 4);
-    
-    trackAIUsage('analyze', 'claude-3-5-sonnet-20241022', estimatedInputTokens, estimatedOutputTokens);
-
     logger.info('AI analysis completed successfully', {
       descriptionLength: description.length,
       processingTime: result.processingTime,
-      estimatedTokens: estimatedInputTokens + estimatedOutputTokens,
     });
 
     const response = NextResponse.json(result);

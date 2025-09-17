@@ -104,55 +104,99 @@ export function generateCursorIntegration(url: string, datasetInfo: DatasetInfo)
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
-  // Extract dataset ID from URL
-  const datasetId = url.split('/').pop()?.replace('.json', '') || 'your-dataset-id';
-  
-  const integrationPrompt = `I need help integrating realistic data into my React prototype.
+  const cursorRules = `// Add to your .cursorrules file for better AI context:
 
-**Dataset ID**: ${datasetId}
-**Business Type**: ${businessContext.name} (${businessContext.domain})
-**Data**: ${recordSummary}
+// Synthkit Dataset Integration
+// Dataset: ${businessContext.name} (${businessContext.domain})
+// Contains: ${recordSummary}
+// URL: ${url}
 
-**Simple Integration**:
-1. Copy this hook to your project:
-\`\`\`typescript
-// useSynthkitData.ts
-export function useSynthkitData(datasetId: string) {
-  const [data, setData] = useState(null);
+${datasetInfo.scenario ? `// Scenario Configuration:
+// - Category: ${datasetInfo.scenario.category} (${businessContext.name})
+// - Stage: ${datasetInfo.scenario.stage} (affects data volume)
+// - Role: ${datasetInfo.scenario.role} (affects access patterns)
+// - ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `// AI-Generated Dataset:
+// - Original Prompt: "${datasetInfo.aiAnalysis?.prompt}"
+// - Business Type: ${datasetInfo.aiAnalysis?.businessType}
+// - Custom entities based on AI analysis`}
+
+// Dataset Characteristics:
+// - Static JSON file (cached, reliable, fast)
+// - Production-ready with realistic relationships
+// - Formatted values: currency in cents, percentages to hundredths
+// - Deterministic: same URL = identical data every time
+// - No authentication required, publicly accessible
+
+// Integration Pattern:
+// 1. Fetch once on component mount or user selection change
+// 2. Cache the result for performance
+// 3. Use TypeScript interfaces for type safety
+// 4. Handle loading and error states properly
+
+const dataset = await fetch('${url}').then(r => r.json());
+const { ${Object.keys(datasetInfo.recordCounts).join(', ')}, businessMetrics } = dataset.data;`;
+
+  const integrationCode = `// Synthkit Dataset Integration for ${businessContext.name}
+import { useState, useEffect } from 'react';
+
+${generateTypeScriptInterfaces(datasetInfo.recordCounts)}
+
+export function useSynthkitDataset() {
+  const [data, setData] = useState<Dataset | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    fetch(\`/api/datasets/\${datasetId}.json\`)
-      .then(r => r.json())
-      .then(d => { setData(d.data); setLoading(false); })
-      .catch(err => { setError(err); setLoading(false); });
-  }, [datasetId]);
+    // Fetch static dataset - only runs once per component mount
+    fetch('${url}')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(\`Failed to load dataset: HTTP \${response.status}\`);
+        }
+        return response.json();
+      })
+      .then(dataset => {
+        setData(dataset.data);
+        setLoading(false);
+        console.log('📊 Synthkit dataset loaded:', {
+          ${Object.keys(datasetInfo.recordCounts).map(key => `${key}: dataset.data.${key}?.length || 0`).join(',\n          ')}
+        });
+      })
+      .catch(err => {
+        setError(err);
+        setLoading(false);
+        console.error('❌ Dataset loading failed:', err);
+      });
+  }, []); // Empty dependency array - fetch only once
 
   return { data, loading, error };
 }
-\`\`\`
 
-2. Use it in your component:
-\`\`\`typescript
-function MyComponent() {
-  const { data, loading, error } = useSynthkitData('${datasetId}');
-  
-  if (loading) return <div>Loading...</div>;
+// Usage in your component:
+export function MyPrototype() {
+  const { data, loading, error } = useSynthkitDataset();
+
+  if (loading) return <div>Loading ${recordSummary}...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  
-  return <div>Data loaded: {data?.customers?.length || 0} customers</div>;
-}
-\`\`\`
+  if (!data) return <div>No data available</div>;
 
-**That's it!** No CORS, no complex setup, just works.`;
+  return (
+    <div>
+      <h1>${businessContext.name} Prototype</h1>
+      ${Object.keys(datasetInfo.recordCounts).map(key => 
+        `<p>{data.${key}?.length || 0} ${key}</p>`
+      ).join('\n      ')}
+      <p>CLV: \${data.businessMetrics.customerLifetimeValue.toFixed(2)}</p>
+    </div>
+  );
+}`;
 
   return {
     tool: 'Cursor',
     description: 'AI-powered code editor with context-aware assistance',
-    code: integrationPrompt,
-    instructions: 'Paste this prompt into Cursor AI chat to get instant integration code for your prototype',
-    copyText: integrationPrompt
+    code: integrationCode,
+    instructions: 'Copy the React hook code into your project. Add the .cursorrules content to your project root for better AI assistance context.',
+    copyText: cursorRules
   };
 }
 
@@ -162,51 +206,60 @@ export function generateClaudeIntegration(url: string, datasetInfo: DatasetInfo)
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
-  // Extract dataset ID from URL
-  const datasetId = url.split('/').pop()?.replace('.json', '') || 'your-dataset-id';
-  const recordSummary = Object.entries(datasetInfo.recordCounts)
-    .map(([key, count]) => `${count.toLocaleString()} ${key}`)
-    .join(', ');
+  const prompt = `I'm building a ${businessContext.name.toLowerCase()} web application prototype and need help integrating a static dataset for realistic mock data.
 
-  const prompt = `I need help integrating realistic data into my React prototype.
+**Dataset Information:**
+- URL: ${url}
+- Type: ${datasetInfo.type === 'scenario' ? 'Predefined scenario' : 'AI-generated from business description'}
+- Domain: ${businessContext.domain}
+- Business Context: ${businessContext.name}
 
-**Dataset ID**: ${datasetId}
-**Business Type**: ${businessContext.name} (${businessContext.domain})
-**Data**: ${recordSummary}
+**Data Structure:**
+${Object.entries(datasetInfo.recordCounts).map(([key, count]) => 
+  `- ${key}: ${count.toLocaleString()} records with realistic properties`
+).join('\n')}
+- businessMetrics: CLV, AOV, MRR, DAU, conversion rate (all properly formatted)
 
-**Simple Integration**:
-1. Copy this hook to your project:
-\`\`\`typescript
-// useSynthkitData.ts
-export function useSynthkitData(datasetId: string) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+${datasetInfo.scenario ? `**Scenario Details:**
+- Category: ${datasetInfo.scenario.category} (${businessContext.name})
+- Business Stage: ${datasetInfo.scenario.stage} (affects data volume and complexity)
+- User Role: ${datasetInfo.scenario.role} (affects data access patterns)
+- Deterministic ID: ${datasetInfo.scenario.id} (ensures reproducible data)` : `**AI-Generated Context:**
+- Original Business Description: "${datasetInfo.aiAnalysis?.prompt}"
+- Detected Business Type: ${datasetInfo.aiAnalysis?.businessType}
+- Custom entities generated based on the business description`}
 
-  useEffect(() => {
-    fetch(\`/api/datasets/\${datasetId}.json\`)
-      .then(r => r.json())
-      .then(d => { setData(d.data); setLoading(false); })
-      .catch(err => { setError(err); setLoading(false); });
-  }, [datasetId]);
+**Dataset Characteristics:**
+- Static JSON file hosted on GitHub Pages (fast, reliable, cached)
+- Production-ready with realistic relationships between entities
+- Properly formatted values: currency in cents ($123.45), percentages to hundredths (5.67%)
+- Deterministic: same URL always returns identical data
+- No authentication required, publicly accessible
+- Perfect for prototyping without backend setup
 
-  return { data, loading, error };
-}
+**What I need help with:**
+1. **React Integration**: Create a custom hook to fetch and manage this static dataset
+2. **TypeScript Safety**: Generate proper interfaces for all data types
+3. **Error Handling**: Implement robust loading states and error recovery
+4. **Performance**: Add caching to avoid unnecessary re-fetches
+5. **UI Components**: Build components to display the data effectively for a ${businessContext.domain} application
+6. **Best Practices**: Follow React patterns for data fetching and state management
+
+**Integration Requirements:**
+- Fetch data only when component mounts or user changes scenario selection
+- Cache the dataset in memory (it's static, so no need to refetch)
+- Handle network errors gracefully with retry logic
+- Provide loading states for better UX
+- Use the business metrics for dashboard-style displays
+- Make it easy to switch between different datasets by changing the URL
+
+**Expected Usage Pattern:**
+\`\`\`javascript
+const { data, loading, error } = useSynthkitDataset('${url}');
+// User changes selection → new URL → automatic refetch
 \`\`\`
 
-2. Use it in your component:
-\`\`\`typescript
-function MyComponent() {
-  const { data, loading, error } = useSynthkitData('${datasetId}');
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return <div>Data loaded: {data?.customers?.length || 0} customers</div>;
-}
-\`\`\`
-
-**That's it!** No CORS, no complex setup, just works.`;
+Please provide a complete, production-ready solution with detailed explanations for each part, including TypeScript interfaces, error handling patterns, and example UI components.`;
 
   return {
     tool: 'Claude',
@@ -223,51 +276,34 @@ export function generateChatGPTIntegration(url: string, datasetInfo: DatasetInfo
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
-  // Extract dataset ID from URL
-  const datasetId = url.split('/').pop()?.replace('.json', '') || 'your-dataset-id';
-  const recordSummary = Object.entries(datasetInfo.recordCounts)
-    .map(([key, count]) => `${count.toLocaleString()} ${key}`)
-    .join(', ');
+  const prompt = `I need to integrate a static dataset into my React ${businessContext.name.toLowerCase()} prototype. Help me create a clean, production-ready solution.
 
-  const prompt = `I need help integrating realistic data into my React prototype.
+**Dataset URL:** ${url}
+**Contains:** ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${count.toLocaleString()} ${key}`).join(', ')}, plus business metrics
 
-**Dataset ID**: ${datasetId}
-**Business Type**: ${businessContext.name} (${businessContext.domain})
-**Data**: ${recordSummary}
+${datasetInfo.aiAnalysis ? `**Context:** AI-generated dataset from "${datasetInfo.aiAnalysis.prompt}"` : `**Context:** ${businessContext.name} scenario with ${datasetInfo.scenario?.stage} stage data`}
 
-**Simple Integration**:
-1. Copy this hook to your project:
-\`\`\`typescript
-// useSynthkitData.ts
-export function useSynthkitData(datasetId: string) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+**Requirements:**
+1. **React hook** to fetch and cache the static dataset
+2. **TypeScript interfaces** for type safety
+3. **Loading/error states** with proper handling
+4. **Basic component** to display the data
+5. **Performance** - cache the data (it's static, no need to refetch)
 
-  useEffect(() => {
-    fetch(\`/api/datasets/\${datasetId}.json\`)
-      .then(r => r.json())
-      .then(d => { setData(d.data); setLoading(false); })
-      .catch(err => { setError(err); setLoading(false); });
-  }, [datasetId]);
+**Dataset characteristics:**
+- Static JSON hosted on GitHub Pages
+- Deterministic (same URL = same data)
+- Production-ready with realistic relationships
+- Currency values in cents, percentages to hundredths
+- No authentication needed
 
-  return { data, loading, error };
-}
+**Usage pattern:**
+\`\`\`javascript
+const { data, loading, error } = useSynthkitDataset();
+// When user changes selection, pass new URL to get different dataset
 \`\`\`
 
-2. Use it in your component:
-\`\`\`typescript
-function MyComponent() {
-  const { data, loading, error } = useSynthkitData('${datasetId}');
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return <div>Data loaded: {data?.customers?.length || 0} customers</div>;
-}
-\`\`\`
-
-**That's it!** No CORS, no complex setup, just works.`;
+Please provide a complete, copy-paste ready solution with TypeScript interfaces and a simple display component. Keep it clean and well-commented.`;
 
   return {
     tool: 'ChatGPT',
@@ -290,52 +326,61 @@ export function generateV0Integration(url: string, datasetInfo: DatasetInfo): In
 
   const entityList = Object.keys(datasetInfo.recordCounts).join(', ');
 
-  // Extract dataset ID from URL
-  const datasetId = url.split('/').pop()?.replace('.json', '') || 'your-dataset-id';
+  const prompt = `Create a modern, professional dashboard component for a ${businessContext.name.toLowerCase()} prototype that integrates with a static Synthkit dataset.
 
-  const prompt = `Create a modern dashboard component for a ${businessContext.name.toLowerCase()} prototype.
+**Dataset Integration:**
+- URL: ${url}
+- Contains: ${recordSummary}
+- Static JSON file (reliable, fast, cached)
+- Production-ready with realistic business relationships
 
-**Dataset ID**: ${datasetId}
-**Data**: ${recordSummary}
+**Component Requirements:**
+1. **Data Fetching**: Fetch the static dataset on component mount with proper error handling
+2. **Loading State**: Show skeleton loaders while data loads
+3. **Metrics Cards**: Display key business metrics (CLV, AOV, MRR, DAU, conversion rate) in attractive cards
+4. **Data Tables**: Show ${entityList} in clean, paginated tables (10 items per page)
+5. **Responsive Design**: Works on desktop and mobile
+6. **Error Handling**: Graceful error states with retry options
+7. **Professional Styling**: Modern ${businessContext.domain} application aesthetic
 
-**Simple Integration**:
-1. Use this hook:
+**Data Structure to Expect:**
 \`\`\`typescript
-export function useSynthkitData(datasetId: string) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch(\`/api/datasets/\${datasetId}.json\`)
-      .then(r => r.json())
-      .then(d => { setData(d.data); setLoading(false); })
-      .catch(err => { setError(err); setLoading(false); });
-  }, [datasetId]);
-
-  return { data, loading, error };
+{
+  data: {
+    ${Object.keys(datasetInfo.recordCounts).map(key => {
+      if (key === 'customers') return `${key}: Array<{id: string, name: string, email: string, loyaltyTier: string}>`;
+      if (key === 'payments') return `${key}: Array<{id: string, amount: number, status: string, paymentMethod: string}>`;
+      return `${key}: Array<{id: string, [key: string]: any}>`;
+    }).join(',\n    ')}
+    businessMetrics: {
+      customerLifetimeValue: number,
+      averageOrderValue: number, 
+      monthlyRecurringRevenue: number,
+      dailyActiveUsers: number,
+      conversionRate: number
+    }
+  }
 }
 \`\`\`
 
-2. Create dashboard component:
-\`\`\`typescript
-function Dashboard() {
-  const { data, loading, error } = useSynthkitData('${datasetId}');
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Customers: {data?.customers?.length || 0}</p>
-      <p>Payments: {data?.payments?.length || 0}</p>
-    </div>
-  );
-}
-\`\`\`
+**Design Guidelines:**
+- Use a clean, modern card-based layout
+- Implement proper spacing and typography
+- Add subtle shadows and borders
+- Use appropriate colors for ${businessContext.domain} (professional, trustworthy)
+- Include icons for different data types
+- Make tables sortable and searchable
+- Format currency values properly ($123.45)
+- Format percentages properly (12.34%)
 
-**That's it!** No CORS, no complex setup, just works.`;
+**Technical Notes:**
+- The dataset URL is static and deterministic (same URL = same data)
+- No authentication required
+- Cache the data after first fetch
+- Handle network errors gracefully
+- Use React hooks for state management
+
+Generate a complete, production-ready component that I can copy-paste into my React project.`;
 
   return {
     tool: 'v0',
@@ -354,39 +399,207 @@ export function generateFetchIntegration(url: string, datasetInfo: DatasetInfo):
 
   const entityKeys = Object.keys(datasetInfo.recordCounts);
 
-  // Extract dataset ID from URL
-  const datasetId = url.split('/').pop()?.replace('.json', '') || 'your-dataset-id';
-  const recordSummary = Object.entries(datasetInfo.recordCounts)
-    .map(([key, count]) => `${count.toLocaleString()} ${key}`)
-    .join(', ');
+  const code = `// Synthkit Dataset Manager for ${businessContext.name}
+// Handles static dataset fetching, caching, and utilities
 
-  const code = `// Simple Synthkit Data Hook
-// No CORS issues, no complex setup, just works
+class SynthkitDataset {
+  constructor(datasetUrl) {
+    this.url = datasetUrl;
+    this.cache = null;
+    this.loading = false;
+    this.lastFetch = null;
+  }
 
-export function useSynthkitData(datasetId) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  async fetchData() {
+    // Return cached data if available (static datasets don't change)
+    if (this.cache) {
+      console.log('📊 Using cached Synthkit dataset');
+      return this.cache;
+    }
+    
+    // Prevent concurrent fetches
+    if (this.loading) {
+      console.log('⏳ Dataset fetch already in progress...');
+      return null;
+    }
+    
+    this.loading = true;
+    console.log('🔄 Fetching Synthkit dataset from:', this.url);
+    
+    try {
+      const response = await fetch(this.url);
+      
+      if (!response.ok) {
+        throw new Error(\`Failed to fetch dataset: HTTP \${response.status} \${response.statusText}\`);
+      }
+      
+      const dataset = await response.json();
+      
+      // Validate dataset structure
+      if (!dataset.data) {
+        throw new Error('Invalid dataset format: missing data property');
+      }
+      
+      this.cache = dataset.data;
+      this.lastFetch = new Date();
+      
+      // Log dataset summary
+      console.log('✅ Synthkit dataset loaded successfully:', {
+        ${entityKeys.map(key => `${key}: this.cache.${key}?.length || 0`).join(',\n        ')},
+        businessMetrics: !!this.cache.businessMetrics,
+        fetchedAt: this.lastFetch.toISOString()
+      });
+      
+      return this.cache;
+      
+    } catch (error) {
+      console.error('❌ Synthkit dataset fetch failed:', error);
+      throw error;
+    } finally {
+      this.loading = false;
+    }
+  }
 
-  useEffect(() => {
-    fetch(\`/api/datasets/\${datasetId}.json\`)
-      .then(r => r.json())
-      .then(d => { setData(d.data); setLoading(false); })
-      .catch(err => { setError(err); setLoading(false); });
-  }, [datasetId]);
+  // Get all data entities
+  getData() {
+    return this.cache;
+  }
+
+  // Get specific entity by name
+  getEntity(entityName) {
+    return this.cache?.[entityName] || [];
+  }
+
+  // Get business metrics
+  getBusinessMetrics() {
+    return this.cache?.businessMetrics || {};
+  }
+
+  // Utility: Find entity by ID
+  findById(entityName, id) {
+    const entities = this.getEntity(entityName);
+    return entities.find(item => item.id === id);
+  }
+
+  // Utility: Filter entities by property
+  filterBy(entityName, property, value) {
+    const entities = this.getEntity(entityName);
+    return entities.filter(item => item[property] === value);
+  }
+
+  // Utility: Get entity statistics
+  getEntityStats(entityName) {
+    const entities = this.getEntity(entityName);
+    if (!entities.length) return null;
+
+    return {
+      total: entities.length,
+      sample: entities.slice(0, 3),
+      properties: Object.keys(entities[0] || {})
+    };
+  }
+
+  // Advanced: Calculate relationships (e.g., payments per customer)
+  getRelationshipStats() {
+    if (!this.cache) return null;
+
+    const stats = {};
+    
+    // Example: If we have customers and payments
+    if (this.cache.customers && this.cache.payments) {
+      const paymentsByCustomer = {};
+      this.cache.payments.forEach(payment => {
+        const customerId = payment.customerId;
+        if (customerId) {
+          paymentsByCustomer[customerId] = (paymentsByCustomer[customerId] || 0) + 1;
+        }
+      });
+
+      stats.avgPaymentsPerCustomer = Object.values(paymentsByCustomer).reduce((a, b) => a + b, 0) / this.cache.customers.length;
+      stats.customersWithPayments = Object.keys(paymentsByCustomer).length;
+    }
+
+    return stats;
+  }
+
+  // Clear cache (useful for development/testing)
+  clearCache() {
+    this.cache = null;
+    this.lastFetch = null;
+    console.log('🗑️ Synthkit dataset cache cleared');
+  }
+
+  // Get dataset info
+  getInfo() {
+    return {
+      url: this.url,
+      cached: !!this.cache,
+      lastFetch: this.lastFetch,
+      entities: this.cache ? Object.keys(this.cache).filter(key => Array.isArray(this.cache[key])) : []
+    };
+  }
+}
+
+// Usage Examples for ${businessContext.name} Prototype
+
+// 1. Basic Setup
+const synthkit = new SynthkitDataset('${url}');
+
+// 2. Load and display data
+async function loadPrototypeData() {
+  try {
+    const data = await synthkit.fetchData();
+    
+    // Display entity counts
+    ${entityKeys.map(key => `console.log('${key.charAt(0).toUpperCase() + key.slice(1)}:', data.${key}?.length || 0);`).join('\n    ')}
+    
+    // Display business metrics
+    const metrics = synthkit.getBusinessMetrics();
+    console.log('Customer Lifetime Value: $' + metrics.customerLifetimeValue?.toFixed(2));
+    console.log('Monthly Recurring Revenue: $' + metrics.monthlyRecurringRevenue?.toFixed(2));
+    console.log('Conversion Rate: ' + metrics.conversionRate?.toFixed(2) + '%');
+    
+    // Get relationship insights
+    const relationships = synthkit.getRelationshipStats();
+    console.log('Relationship Stats:', relationships);
+    
+  } catch (error) {
+    console.error('Failed to load prototype data:', error);
+  }
+}
+
+// 3. React Integration Example
+function useReactIntegration() {
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    synthkit.fetchData()
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   return { data, loading, error };
 }
 
-// Usage:
-// const { data, loading, error } = useSynthkitData('${datasetId}');
-// Dataset: ${recordSummary}`;
+// 4. Start your prototype
+loadPrototypeData();
+
+// Export for use in other modules
+export default synthkit;`;
 
   return {
     tool: 'Fetch API',
-    description: 'Simple React hook for dataset integration',
+    description: 'Complete JavaScript class for static dataset integration',
     code: code,
-    instructions: 'Copy this hook for React projects. No CORS, no complex setup, just works.',
+    instructions: 'Copy this SynthkitDataset class for vanilla JavaScript projects or as a foundation for framework integration. Includes caching, utilities, and React example.',
     copyText: code
   };
 }

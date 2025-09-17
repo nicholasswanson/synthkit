@@ -8,6 +8,7 @@ interface DemoStore {
   activeRole?: string;
   activeStage: 'development' | 'testing' | 'production';
   currentGenerationId: number;
+  packs: any[];
 }
 
 interface SynthContextValue {
@@ -72,7 +73,8 @@ export function useSynth() {
   return {
     // State
     isReady,
-    mswEnabled: false, // MSW disabled - using direct data generation
+    mswEnabled: true,
+    packs: store.packs,
     activeCategories: store.activeCategory ? [store.activeCategory] : [],
     activeCategory: store.activeCategory,
     activeRole: store.activeRole,
