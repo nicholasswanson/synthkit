@@ -343,22 +343,41 @@ function generateRealisticAmount(seed: number, category: string, stage: string):
   return Math.round(baseAmount * 100) / 100;
 }
 
-// Generate business metrics
+// Generate business metrics with realistic ranges (from documentation)
 function generateBusinessMetrics(category: string, stage: string, seed: number): BusinessMetrics {
-  const stageMultipliers = {
-    early: { clv: 0.6, aov: 0.8, mrr: 0.4, dau: 0.3, conversion: 0.7 },
-    growth: { clv: 1.0, aov: 1.0, mrr: 1.0, dau: 1.0, conversion: 1.0 },
-    enterprise: { clv: 2.1, aov: 1.4, mrr: 3.2, dau: 4.7, conversion: 1.3 }
+  // Stage-specific ranges from documentation
+  const stageRanges = {
+    early: {
+      clv: { min: 85, max: 320 },
+      aov: { min: 67, max: 213 },
+      mrr: { min: 1248, max: 6926 },
+      dau: { min: 4, max: 45 },
+      conversion: { min: 2.3, max: 6.0 }
+    },
+    growth: {
+      clv: { min: 196, max: 736 },
+      aov: { min: 121, max: 383 },
+      mrr: { min: 3993, max: 22163 },
+      dau: { min: 16, max: 185 },
+      conversion: { min: 3.2, max: 8.4 }
+    },
+    enterprise: {
+      clv: { min: 488, max: 1824 },
+      aov: { min: 229, max: 725 },
+      mrr: { min: 11106, max: 61643 },
+      dau: { min: 49, max: 570 },
+      conversion: { min: 4.9, max: 15.4 }
+    }
   };
   
-  const multiplier = stageMultipliers[stage as keyof typeof stageMultipliers] || stageMultipliers.growth;
+  const ranges = stageRanges[stage as keyof typeof stageRanges] || stageRanges.growth;
   
   return {
-    customerLifetimeValue: Math.round(((180.45 + seededRandom(seed) * 220.55) * multiplier.clv) * 100) / 100,
-    averageOrderValue: Math.round(((85.23 + seededRandom(seed + 1) * 140.77) * multiplier.aov) * 100) / 100,
-    monthlyRecurringRevenue: Math.round(((1200.34 + seededRandom(seed + 2) * 3800.66) * multiplier.mrr) * 100) / 100,
-    dailyActiveUsers: Math.floor((45.67 + seededRandom(seed + 3) * 120.33) * multiplier.dau),
-    conversionRate: Math.round(((2.89 + seededRandom(seed + 4) * 4.11) * multiplier.conversion) * 100) / 100
+    customerLifetimeValue: Math.round((ranges.clv.min + seededRandom(seed) * (ranges.clv.max - ranges.clv.min)) * 100) / 100,
+    averageOrderValue: Math.round((ranges.aov.min + seededRandom(seed + 1) * (ranges.aov.max - ranges.aov.min)) * 100) / 100,
+    monthlyRecurringRevenue: Math.round((ranges.mrr.min + seededRandom(seed + 2) * (ranges.mrr.max - ranges.mrr.min)) * 100) / 100,
+    dailyActiveUsers: Math.floor(ranges.dau.min + seededRandom(seed + 3) * (ranges.dau.max - ranges.dau.min)),
+    conversionRate: Math.round((ranges.conversion.min + seededRandom(seed + 4) * (ranges.conversion.max - ranges.conversion.min)) * 100) / 100
   };
 }
 
@@ -401,19 +420,35 @@ export default function Home() {
   // Generate realistic data based on stage and category
   useEffect(() => {
     if (isClient && selectedCategory && stage) {
-      // Get realistic volume based on stage
-      const stageMultipliers = {
-        early: { min: 50, max: 200, expected: 125 },
-        growth: { min: 200, max: 2000, expected: 1100 },
-        enterprise: { min: 2000, max: 50000, expected: 25000 }
+      // Get realistic volume based on stage (from documentation)
+      const baseVolumes = {
+        early: { min: 47, max: 523 },
+        growth: { min: 1247, max: 9876 },
+        enterprise: { min: 12456, max: 987654 }
       };
       
-      const volume = stageMultipliers[stage] || stageMultipliers.growth;
-      const customerCount = Math.floor(volume.expected + (Math.random() - 0.5) * (volume.max - volume.min) * 0.3);
+      const volume = baseVolumes[stage] || baseVolumes.growth;
+      const customerCount = Math.floor(volume.min + seededRandom(scenarioId) * (volume.max - volume.min));
+      
+      // Apply category-specific multipliers (from documentation)
+      const categoryMultipliers: Record<string, number> = {
+        modaic: 1.0,      // Standard e-commerce
+        stratus: 0.267,   // B2B SaaS (fewer customers)
+        forksy: 2.143,    // Food delivery (high volume)
+        pulseon: 0.867,   // Fitness (moderate volume)
+        procura: 0.234,   // Healthcare (fewer, high-value)
+        mindora: 0.423,   // Online learning (moderate volume)
+        keynest: 0.056,   // Real estate (very few, very high-value)
+        fluxly: 0.534,    // Creator economy (moderate volume)
+        brightfund: 0.123 // Non-profit (very few, high-value donors)
+      };
+      
+      const categoryMultiplier = categoryMultipliers[selectedCategory] || 1.0;
+      const finalCustomerCount = Math.floor(customerCount * categoryMultiplier);
       
       // Generate customers
       const newCustomers: Customer[] = [];
-      for (let i = 0; i < customerCount; i++) {
+      for (let i = 0; i < finalCustomerCount; i++) {
         const seed = scenarioId + i;
         newCustomers.push({
           id: `customer-${scenarioId}-${i}`,
@@ -425,15 +460,21 @@ export default function Home() {
       }
       setCustomers(newCustomers);
 
-      // Generate payments with category-specific multipliers
+      // Generate payments with realistic multipliers
       const paymentMultipliers: Record<string, number> = {
-        modaic: 2.3, stratus: 0.8, forksy: 4.7,
-        pulseon: 1.2, procura: 3.1, mindora: 0.9,
-        keynest: 12.5, fluxly: 2.8, brightfund: 4.2
+        modaic: 1.0,      // Standard e-commerce
+        stratus: 0.8,     // B2B SaaS (fewer transactions)
+        forksy: 4.7,      // Food delivery (high frequency)
+        pulseon: 1.2,     // Fitness (monthly subscriptions)
+        procura: 3.1,     // Healthcare (regular supplies)
+        mindora: 0.9,     // Online learning (course purchases)
+        keynest: 12.5,    // Real estate (rent payments)
+        fluxly: 2.8,      // Creator economy (content purchases)
+        brightfund: 4.2   // Non-profit (donations)
       };
       
-      const paymentMultiplier = paymentMultipliers[selectedCategory] || 2.3;
-      const paymentCount = Math.floor(customerCount * paymentMultiplier);
+      const paymentMultiplier = paymentMultipliers[selectedCategory] || 1.0;
+      const paymentCount = Math.floor(finalCustomerCount * paymentMultiplier);
       
       const newPayments: Payment[] = [];
       for (let i = 0; i < paymentCount; i++) {
@@ -443,7 +484,7 @@ export default function Home() {
         
         newPayments.push({
           id: `payment-${scenarioId}-${i}`,
-          customerId: newCustomers[customerIndex]?.id || `customer-${scenarioId}-${i % customerCount}`,
+          customerId: newCustomers[customerIndex]?.id || `customer-${scenarioId}-${i % finalCustomerCount}`,
           amount: amount,
           status: seededRandom(seed + 1) > 0.1 ? 'completed' : 'pending',
           paymentMethod: ['credit_card', 'paypal', 'bank_transfer'][Math.floor(seededRandom(seed + 2) * 3)],
