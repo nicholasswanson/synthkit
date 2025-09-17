@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
-import { IntegrationPanel } from '@/components/IntegrationPanel';
+import { DynamicRightPanel } from '@/components/DynamicRightPanel';
 import { useDatasetCreation } from '@/hooks/useDatasetCreation';
 
 interface Customer {
@@ -1392,32 +1392,11 @@ export default function Home() {
 
         {/* Right Panel - Integration Examples */}
         <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-hidden">
-          {!isClient ? (
-            <div className="h-full flex items-center justify-center bg-white dark:bg-gray-800">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-              </div>
-            </div>
-          ) : currentDatasetUrl ? (
-            <IntegrationPanel
-              url={currentDatasetUrl}
-              datasetInfo={getDatasetInfo()}
-              isLoading={integrationLoading}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center bg-white dark:bg-gray-800">
-              <div className="text-center">
-                <div className="text-6xl mb-4">📊</div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Configure Your Dataset
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Select a category and configure your scenario to see integration examples
-                </p>
-              </div>
-            </div>
-          )}
+          <DynamicRightPanel
+            currentDatasetUrl={currentDatasetUrl}
+            datasetInfo={getDatasetInfo()}
+            integrationLoading={integrationLoading}
+          />
         </div>
       </div>
     </div>
