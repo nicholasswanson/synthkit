@@ -152,8 +152,173 @@ const PREDEFINED_PERSONAS = {
       { name: 'Admin', permissions: ['Full Access', 'Restaurant Management', 'Driver Coordination'], description: 'Platform administration' },
       { name: 'Support', permissions: ['Order Support', 'Customer Service'], description: 'Customer support access' }
     ]
+  },
+  pulseon: {
+    name: 'Pulseon (Fitness Platform)',
+    businessContext: {
+      type: 'Fitness Streaming Platform',
+      stage: 'growth',
+      primaryFeatures: ['Workout Streaming', 'Trainer Profiles', 'Health Tracking', 'Subscription Management'],
+      targetAudience: ['Fitness Enthusiasts', 'Home Workout Users', 'Health-Conscious Individuals'],
+      monetizationModel: 'Subscription + Premium Content'
+    },
+    entities: [
+      { name: 'Customer', type: 'person', properties: [
+        { name: 'name', type: 'string', description: 'Member full name' },
+        { name: 'email', type: 'string', description: 'Member email address' },
+        { name: 'fitnessLevel', type: 'string', description: 'Beginner, intermediate, advanced, expert' },
+        { name: 'subscriptionTier', type: 'string', description: 'Free, basic, premium, elite' }
+      ]},
+      { name: 'Payment', type: 'subscription', properties: [
+        { name: 'amount', type: 'number', description: 'Subscription payment amount' },
+        { name: 'subscriptionTier', type: 'string', description: 'Subscription tier level' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Live Workouts', 'On-Demand Classes', 'Progress Tracking', 'Community Features'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Content Management', 'Trainer Administration'], description: 'Platform administration' },
+      { name: 'Support', permissions: ['Member Support', 'Subscription Management'], description: 'Member support access' }
+    ]
+  },
+  procura: {
+    name: 'Procura (Procurement Platform)',
+    businessContext: {
+      type: 'B2B Procurement Platform',
+      stage: 'growth',
+      primaryFeatures: ['Vendor Management', 'Purchase Orders', 'Invoice Processing', 'Spend Analytics'],
+      targetAudience: ['Procurement Teams', 'Finance Departments', 'Suppliers'],
+      monetizationModel: 'SaaS Subscription + Transaction Fees'
+    },
+    entities: [
+      { name: 'Customer', type: 'organization', properties: [
+        { name: 'companyName', type: 'string', description: 'Business customer name' },
+        { name: 'industry', type: 'string', description: 'Industry sector' },
+        { name: 'spendVolume', type: 'number', description: 'Annual procurement spend' }
+      ]},
+      { name: 'Payment', type: 'transaction', properties: [
+        { name: 'amount', type: 'number', description: 'Purchase order amount' },
+        { name: 'vendor', type: 'string', description: 'Supplier name' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Supplier Network', 'Contract Management', 'Approval Workflows', 'Cost Optimization'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Vendor Management', 'Financial Oversight'], description: 'Platform administration' },
+      { name: 'Support', permissions: ['User Support', 'Order Tracking'], description: 'Customer support access' }
+    ]
+  },
+  mindora: {
+    name: 'Mindora (Mental Health Platform)',
+    businessContext: {
+      type: 'Mental Health & Wellness Platform',
+      stage: 'growth',
+      primaryFeatures: ['Therapy Sessions', 'Wellness Programs', 'Progress Tracking', 'Resource Library'],
+      targetAudience: ['Individuals Seeking Therapy', 'Mental Health Professionals', 'Wellness Coaches'],
+      monetizationModel: 'Session Fees + Subscription Plans'
+    },
+    entities: [
+      { name: 'Customer', type: 'person', properties: [
+        { name: 'name', type: 'string', description: 'Client full name' },
+        { name: 'email', type: 'string', description: 'Client email address' },
+        { name: 'therapyType', type: 'string', description: 'Type of therapy or wellness program' },
+        { name: 'sessionCount', type: 'number', description: 'Number of completed sessions' }
+      ]},
+      { name: 'Payment', type: 'session', properties: [
+        { name: 'amount', type: 'number', description: 'Session or subscription fee' },
+        { name: 'sessionType', type: 'string', description: 'Individual, group, or subscription' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Video Therapy', 'Mood Tracking', 'Crisis Support', 'Therapist Matching'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Provider Management', 'Clinical Oversight'], description: 'Platform administration' },
+      { name: 'Support', permissions: ['Client Support', 'Session Coordination'], description: 'Client support access' }
+    ]
+  },
+  keynest: {
+    name: 'Keynest (Property Management)',
+    businessContext: {
+      type: 'Real Estate Property Management',
+      stage: 'growth',
+      primaryFeatures: ['Property Listings', 'Tenant Management', 'Lease Tracking', 'Maintenance Requests'],
+      targetAudience: ['Property Owners', 'Tenants', 'Property Managers'],
+      monetizationModel: 'Property Management Fees + Service Charges'
+    },
+    entities: [
+      { name: 'Customer', type: 'person', properties: [
+        { name: 'name', type: 'string', description: 'Tenant full name' },
+        { name: 'email', type: 'string', description: 'Tenant email address' },
+        { name: 'propertyType', type: 'string', description: 'Apartment, house, condo, etc.' },
+        { name: 'monthlyRent', type: 'number', description: 'Monthly rent amount' }
+      ]},
+      { name: 'Payment', type: 'rent', properties: [
+        { name: 'amount', type: 'number', description: 'Rent payment amount' },
+        { name: 'paymentType', type: 'string', description: 'Rent, deposit, or fee' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Online Rent Collection', 'Maintenance Portal', 'Lease Management', 'Financial Reporting'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Property Management', 'Financial Reports'], description: 'Property management access' },
+      { name: 'Support', permissions: ['Tenant Support', 'Maintenance Coordination'], description: 'Tenant support access' }
+    ]
+  },
+  fluxly: {
+    name: 'Fluxly (Supply Chain Platform)',
+    businessContext: {
+      type: 'Supply Chain Management Platform',
+      stage: 'growth',
+      primaryFeatures: ['Inventory Tracking', 'Supplier Management', 'Logistics Coordination', 'Demand Forecasting'],
+      targetAudience: ['Supply Chain Managers', 'Procurement Teams', 'Logistics Coordinators'],
+      monetizationModel: 'SaaS Subscription + Premium Analytics'
+    },
+    entities: [
+      { name: 'Customer', type: 'organization', properties: [
+        { name: 'companyName', type: 'string', description: 'Business customer name' },
+        { name: 'industry', type: 'string', description: 'Manufacturing, retail, etc.' },
+        { name: 'shipmentVolume', type: 'number', description: 'Monthly shipment volume' }
+      ]},
+      { name: 'Payment', type: 'logistics', properties: [
+        { name: 'amount', type: 'number', description: 'Logistics and shipping costs' },
+        { name: 'shipmentType', type: 'string', description: 'Express, standard, bulk' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Real-time Tracking', 'Route Optimization', 'Warehouse Management', 'Supplier Portal'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Supplier Management', 'Analytics Dashboard'], description: 'Supply chain administration' },
+      { name: 'Support', permissions: ['Shipment Support', 'Vendor Coordination'], description: 'Operations support access' }
+    ]
+  },
+  brightfund: {
+    name: 'Brightfund (Nonprofit Platform)',
+    businessContext: {
+      type: 'Nonprofit Impact Platform',
+      stage: 'growth',
+      primaryFeatures: ['Donor Management', 'Campaign Creation', 'Impact Tracking', 'Volunteer Coordination'],
+      targetAudience: ['Nonprofit Organizations', 'Donors', 'Volunteers'],
+      monetizationModel: 'Platform Fees + Premium Features'
+    },
+    entities: [
+      { name: 'Customer', type: 'person', properties: [
+        { name: 'name', type: 'string', description: 'Donor full name' },
+        { name: 'email', type: 'string', description: 'Donor email address' },
+        { name: 'donorType', type: 'string', description: 'Individual, corporation, foundation' },
+        { name: 'totalDonated', type: 'number', description: 'Total lifetime donations' }
+      ]},
+      { name: 'Payment', type: 'donation', properties: [
+        { name: 'amount', type: 'number', description: 'Donation amount' },
+        { name: 'donationType', type: 'string', description: 'One-time, monthly, annual' },
+        { name: 'status', type: 'string', description: 'Payment status' }
+      ]}
+    ],
+    keyFeatures: ['Fundraising Campaigns', 'Donor Portal', 'Impact Reporting', 'Event Management'],
+    userRoles: [
+      { name: 'Admin', permissions: ['Full Access', 'Campaign Management', 'Financial Reports'], description: 'Nonprofit administration' },
+      { name: 'Support', permissions: ['Donor Support', 'Campaign Assistance'], description: 'Donor support access' }
+    ]
   }
-  // Add other personas as needed...
 };
 
 // seededRandom is now imported from realistic-data-generator
@@ -223,7 +388,15 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
   };
   
   const categoryMultipliers: Record<string, number> = {
-    modaic: 1.0, stratus: 0.267, forksy: 2.143
+    modaic: 1.0,      // Standard e-commerce
+    stratus: 0.267,   // B2B SaaS (fewer customers)
+    forksy: 2.143,    // Food delivery (high volume)
+    pulseon: 0.867,   // Fitness (moderate volume)
+    procura: 0.234,   // Healthcare (fewer, high-value)
+    mindora: 0.423,   // Online learning (moderate volume)
+    keynest: 0.056,   // Real estate (very few, very high-value)
+    fluxly: 0.534,    // Creator economy (moderate volume)
+    brightfund: 0.123 // Non-profit (very few, high-value donors)
   };
   
   const base = baseVolumes[scenario.stage as keyof typeof baseVolumes] || baseVolumes.growth;
@@ -575,7 +748,15 @@ export default function Home() {
       
       // Generate payments with category-specific multipliers
       const paymentMultipliers: Record<string, number> = {
-        modaic: 2.3, stratus: 0.8, forksy: 4.7
+        modaic: 2.3,      // Fashion e-commerce (moderate frequency)
+        stratus: 0.8,     // B2B SaaS (fewer transactions)
+        forksy: 4.7,      // Food delivery (high frequency)
+        pulseon: 1.2,     // Fitness (monthly subscriptions)
+        procura: 3.1,     // Healthcare (regular supplies)
+        mindora: 0.9,     // Online learning (course purchases)
+        keynest: 12.5,    // Real estate (rent payments)
+        fluxly: 2.8,      // Creator economy (content purchases)
+        brightfund: 4.2   // Non-profit (donations)
       };
       const paymentMultiplier = paymentMultipliers[mappedCategory] || 2.3;
       const paymentCount = Math.floor(volume.expected * paymentMultiplier);
