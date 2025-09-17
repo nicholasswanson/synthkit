@@ -1002,16 +1002,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Page Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Synthkit
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            Generate realistic synthetic data for your applications
-          </p>
-        </div>
+      <div className="flex h-screen">
+        {/* Left Panel - Configuration */}
+        <div className="w-1/2 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Page Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                Synthkit
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Generate realistic synthetic data for your applications
+              </p>
+            </div>
 
         {/* Business Configuration Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
@@ -1383,51 +1386,164 @@ export default function Home() {
           )}
         </div>
 
-        {/* Realistic Business Metrics */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            📊 Realistic Business Metrics
-          </h3>
-          {metricsLoaded && businessMetrics ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  ${businessMetrics.customerLifetimeValue.toFixed(2)}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Customer Lifetime Value</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  ${businessMetrics.averageOrderValue.toFixed(2)}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Average Order Value</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  ${businessMetrics.monthlyRecurringRevenue.toFixed(2)}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Monthly Recurring Revenue</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                  {businessMetrics.dailyActiveUsers.toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Daily Active Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  {businessMetrics.conversionRate.toFixed(2)}%
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-gray-500 dark:text-gray-400">Loading metrics...</div>
-          )}
         </div>
       </div>
 
-      {/* Dataset Share Modal */}
+      {/* Right Panel - Data Display */}
+      <div className="w-1/2 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+        <div className="p-6">
+          {/* Business Metrics */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              📊 Business Metrics
+            </h3>
+            {businessMetrics ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    ${businessMetrics.customerLifetimeValue.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Customer Lifetime Value</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    ${businessMetrics.averageOrderValue.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Average Order Value</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    ${businessMetrics.monthlyRecurringRevenue.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Monthly Recurring Revenue</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    {businessMetrics.dailyActiveUsers.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Daily Active Users</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {businessMetrics.conversionRate.toFixed(2)}%
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-gray-500 dark:text-gray-400">Loading metrics...</div>
+            )}
+          </div>
+
+          {/* Data Display */}
+          {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
+            // AI-generated dynamic entities
+            <div className="space-y-6">
+              {Object.entries(dynamicEntities).map(([entityName, entities]) => (
+                <div key={entityName} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    {entityName} ({entities.length.toLocaleString()})
+                  </h3>
+                  <div className="max-h-96 overflow-y-auto">
+                    <div className="space-y-2">
+                      {entities.slice(0, 10).map((item, i) => (
+                        <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            {Object.entries(item).map(([key, value]) => (
+                              <div key={key}>
+                                <span className="font-medium text-gray-700 dark:text-gray-300">{key}:</span>
+                                <span className="ml-2 text-gray-600 dark:text-gray-400">
+                                  {typeof value === 'number' && key.includes('amount') 
+                                    ? `$${(value / 100).toFixed(2)}` 
+                                    : String(value)
+                                  }
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {entities.length > 10 && (
+                        <div className="text-center text-gray-500 dark:text-gray-400 py-2">
+                          ... and {entities.length - 10} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Predefined persona data
+            <div className="space-y-6">
+              {/* Customers */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Customers ({customers.length.toLocaleString()})
+                </h3>
+                <div className="max-h-96 overflow-y-auto">
+                  <div className="space-y-2">
+                    {customers.slice(0, 10).map((customer, i) => (
+                      <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div><span className="font-medium">Name:</span> {customer.name}</div>
+                          <div><span className="font-medium">Email:</span> {customer.email}</div>
+                          <div><span className="font-medium">Phone:</span> {customer.phone}</div>
+                          <div><span className="font-medium">Location:</span> {customer.address.city}, {customer.address.state}</div>
+                          <div><span className="font-medium">Tier:</span> {customer.metadata.loyaltyTier}</div>
+                          <div><span className="font-medium">Subscription:</span> {customer.metadata.subscriptionTier}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {customers.length > 10 && (
+                      <div className="text-center text-gray-500 dark:text-gray-400 py-2">
+                        ... and {customers.length - 10} more customers
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payments */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Payments ({payments.length.toLocaleString()})
+                </h3>
+                <div className="max-h-96 overflow-y-auto">
+                  <div className="space-y-2">
+                    {payments.slice(0, 10).map((payment, i) => (
+                      <div key={i} className="border border-gray-200 dark:border-gray-600 rounded p-3 text-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div><span className="font-medium">Amount:</span> ${(payment.amount / 100).toFixed(2)}</div>
+                          <div><span className="font-medium">Status:</span> 
+                            <span className={`ml-1 px-2 py-1 rounded text-xs ${
+                              payment.status === 'succeeded' ? 'bg-green-100 text-green-800' :
+                              payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {payment.status}
+                            </span>
+                          </div>
+                          <div><span className="font-medium">Method:</span> {payment.paymentMethod}</div>
+                          <div><span className="font-medium">Description:</span> {payment.description}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {payments.length > 10 && (
+                      <div className="text-center text-gray-500 dark:text-gray-400 py-2">
+                        ... and {payments.length - 10} more payments
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* Dataset Share Modal */}
       {shareModalOpen && sharedDatasetUrl && (
         <DatasetShareModal
           isOpen={shareModalOpen}
