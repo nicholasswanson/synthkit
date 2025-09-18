@@ -170,7 +170,7 @@ Contains: ${recordSummary}
 URL: ${url}
 
 ${datasetInfo.scenario ? `Scenario Configuration:
-- Category: ${datasetInfo.scenario.category} (${businessContext.name})
+- Category: ${businessContext.name}
 - Stage: ${datasetInfo.scenario.stage} (affects data volume)
 - Role: ${datasetInfo.scenario.role} (affects access patterns)
 - ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `AI-Generated Dataset:

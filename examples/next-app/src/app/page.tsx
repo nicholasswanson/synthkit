@@ -437,23 +437,30 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
 }
 
 // Calculate realistic business metrics from actual data
-function calculateBusinessMetricsFromData(customers: Customer[], payments: Payment[], stage: string, seed: number): BusinessMetrics {
-  if (customers.length === 0 || payments.length === 0) {
+function calculateBusinessMetricsFromStripeData(stripeData: Record<string, any[]>, stage: string, seed: number): BusinessMetrics {
+  const customers = stripeData.customers || [];
+  const charges = stripeData.charges || [];
+  
+  if (customers.length === 0 || charges.length === 0) {
     // Fallback to generated metrics if no data
     return generateFallbackMetrics(stage, seed);
   }
 
-  // Calculate metrics from actual data
-  const succeededPayments = payments.filter(p => p.status === 'succeeded');
-  const totalRevenue = succeededPayments.reduce((sum, p) => sum + (p.amount / 100), 0); // Convert from cents
-  const averageOrderValue = succeededPayments.length > 0 ? totalRevenue / succeededPayments.length : 0;
+  // Calculate metrics from Stripe data
+  const succeededCharges = charges.filter((c: any) => c.status === 'succeeded');
+  const totalRevenue = succeededCharges.reduce((sum: number, c: any) => sum + (c.amount / 100), 0); // Convert from cents
+  const averageOrderValue = succeededCharges.length > 0 ? totalRevenue / succeededCharges.length : 0;
   
   // Calculate customer lifetime value (simplified: total revenue / total customers)
   const customerLifetimeValue = customers.length > 0 ? totalRevenue / customers.length : 0;
   
-  // Estimate monthly recurring revenue based on category and stage
-  const monthlyMultipliers = { early: 0.15, growth: 0.25, enterprise: 0.35 };
-  const monthlyRecurringRevenue = totalRevenue * (monthlyMultipliers[stage as keyof typeof monthlyMultipliers] || 0.25);
+  // Calculate monthly recurring revenue from subscriptions
+  const subscriptions = stripeData.subscriptions || [];
+  const activeSubscriptions = subscriptions.filter((s: any) => s.status === 'active');
+  const monthlyRecurringRevenue = activeSubscriptions.reduce((sum: number, s: any) => {
+    const plan = stripeData.plans?.find((p: any) => p.id === s.plan?.id);
+    return sum + (plan?.amount || 0) / 100; // Convert from cents
+  }, 0);
   
   // Estimate daily active users (percentage of total customers)
   const dauPercentages = { early: 0.12, growth: 0.18, enterprise: 0.25 };
@@ -506,8 +513,6 @@ export default function Home() {
   const [scenarioId, setScenarioId] = useState<number>(12345);
   
   // Generated data
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [dynamicEntities, setDynamicEntities] = useState<Record<string, any[]>>({});
   const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics | null>(null);
   const [metricsLoaded, setMetricsLoaded] = useState(false);
@@ -566,10 +571,10 @@ export default function Home() {
     generateScenarioData();
   }, [selectedCategory, role, stage, scenarioId]);
 
-  // Calculate business metrics from actual data
+  // Calculate business metrics from Stripe data
   useEffect(() => {
-    if (selectedCategory && stage && (customers.length > 0 || payments.length > 0)) {
-      const metrics = calculateBusinessMetricsFromData(customers, payments, stage, scenarioId);
+    if (selectedCategory && stage && Object.keys(stripeData).length > 0) {
+      const metrics = calculateBusinessMetricsFromStripeData(stripeData, stage, scenarioId);
       setBusinessMetrics(metrics);
       setMetricsLoaded(true);
     } else if (selectedCategory && stage) {
@@ -578,7 +583,7 @@ export default function Home() {
       setBusinessMetrics(metrics);
       setMetricsLoaded(true);
     }
-  }, [selectedCategory, stage, scenarioId, customers, payments]);
+  }, [selectedCategory, stage, scenarioId, stripeData]);
 
   // Generate Stripe data when persona changes
   useEffect(() => {
@@ -627,7 +632,7 @@ export default function Home() {
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
-    if (metricsLoaded && (customers.length > 0 || Object.keys(dynamicEntities).length > 0)) {
+    if (metricsLoaded && (Object.keys(stripeData).length > 0 || Object.keys(dynamicEntities).length > 0)) {
       // Only store metadata, not the full dataset to avoid storage quota issues
       const datasetMetadata = {
         type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
@@ -635,7 +640,7 @@ export default function Home() {
         aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
         recordCounts: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
           ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-          : { customers: customers.length, payments: payments.length },
+          : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length])),
         updatedAt: new Date().toISOString()
       };
       
@@ -664,7 +669,7 @@ export default function Home() {
         console.log('Live API update failed (this is normal if not testing live features):', err.message);
       });
     }
-  }, [customers, payments, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
+  }, [stripeData, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {
@@ -817,96 +822,7 @@ export default function Home() {
       });
       
       setDynamicEntities(newDynamicEntities);
-      // Clear legacy data for AI scenarios
-      setCustomers([]);
-      setPayments([]);
     } else {
-      // Generate realistic customers for predefined personas
-      const newCustomers: Customer[] = [];
-      for (let i = 0; i < volume.expected; i++) {
-        const seed = scenarioId + i;
-        const nameData = generateRealisticName(seed);
-        const email = generateRealisticEmail(nameData.firstName, nameData.lastName, seed);
-        const phone = generateRealisticPhone(seed + 1000);
-        const address = generateRealisticAddress(seed + 2000);
-        
-        // Persona-specific metadata
-        const loyaltyTiers = ['Bronze', 'Silver', 'Gold', 'Platinum'];
-        const subscriptionTiers = ['Free', 'Basic', 'Premium', 'Elite'];
-        const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing'];
-        const companySizes = ['Startup (1-10)', 'Small (11-50)', 'Medium (51-200)', 'Large (201-1000)', 'Enterprise (1000+)'];
-        
-        newCustomers.push({
-          id: `cus_${scenarioId}_${i.toString().padStart(6, '0')}`,
-          email,
-          name: nameData.fullName,
-          phone,
-          address,
-          created: Math.floor((Date.now() - seededRandom(seed + 1) * 365 * 24 * 60 * 60 * 1000) / 1000),
-          metadata: {
-            loyaltyTier: loyaltyTiers[Math.floor(seededRandom(seed + 2) * loyaltyTiers.length)],
-            subscriptionTier: subscriptionTiers[Math.floor(seededRandom(seed + 3) * subscriptionTiers.length)],
-            industry: industries[Math.floor(seededRandom(seed + 4) * industries.length)],
-            companySize: companySizes[Math.floor(seededRandom(seed + 5) * companySizes.length)]
-          }
-        });
-      }
-      
-      // Generate payments with category-specific multipliers
-      const paymentMultipliers: Record<string, number> = {
-        'checkout-ecommerce': 2.3,      // Fashion e-commerce (moderate frequency)
-        'b2b-saas-subscriptions': 0.8,     // B2B SaaS (fewer transactions)
-        'food-delivery-platform': 4.7,      // Food delivery (high frequency)
-        'consumer-fitness-app': 1.2,     // Fitness (monthly subscriptions)
-        'b2b-invoicing': 3.1,     // Healthcare (regular supplies)
-        'property-management-platform': 12.5,    // Real estate (rent payments)
-        'creator-platform': 2.8,      // Creator economy (content purchases)
-        'donation-marketplace': 4.2   // Non-profit (donations)
-      };
-      const paymentMultiplier = paymentMultipliers[mappedCategory] || 2.3;
-      const paymentCount = Math.floor(volume.expected * paymentMultiplier);
-      
-      const newPayments: Payment[] = [];
-      for (let i = 0; i < paymentCount; i++) {
-        const seed = scenarioId + 10000 + i;
-        const customerIndex = Math.floor(seededRandom(seed) * newCustomers.length);
-        const customer = newCustomers[customerIndex];
-        const amount = generateRealisticAmount(seed, mappedCategory, stage);
-        const description = generateProductDescription(mappedCategory, seed);
-        
-        // Realistic payment statuses with proper distribution
-        const statusRandom = seededRandom(seed + 1);
-        let status: string;
-        if (statusRandom > 0.95) status = 'failed';
-        else if (statusRandom > 0.85) status = 'pending';
-        else status = 'succeeded';
-        
-        // Realistic payment methods based on category
-        const paymentMethods = mappedCategory === 'b2b-saas-subscriptions' 
-          ? ['card', 'ach_debit', 'wire_transfer'] // B2B prefers bank transfers
-          : mappedCategory === 'food-delivery-platform'
-          ? ['card', 'apple_pay', 'google_pay'] // Food delivery prefers mobile
-          : ['card', 'paypal', 'bank_transfer']; // General mix
-        
-        newPayments.push({
-          id: `ch_${scenarioId}_${i.toString().padStart(8, '0')}`,
-          customerId: customer?.id || `cus_${scenarioId}_${customerIndex.toString().padStart(6, '0')}`,
-          amount: Math.round(amount * 100), // Stripe amounts are in cents
-          currency: 'usd',
-          status,
-          paymentMethod: paymentMethods[Math.floor(seededRandom(seed + 2) * paymentMethods.length)],
-          created: Math.floor((Date.now() - seededRandom(seed + 3) * 30 * 24 * 60 * 60 * 1000) / 1000),
-          description,
-          metadata: {
-            category: mappedCategory,
-            productType: mappedCategory === 'b2b-saas-subscriptions' ? 'subscription' : 'one_time',
-            customerTier: customer?.metadata?.loyaltyTier || 'Bronze'
-          }
-        });
-      }
-      
-      setCustomers(newCustomers);
-      setPayments(newPayments);
       // Clear dynamic entities for predefined personas
       setDynamicEntities({});
     }
@@ -1023,20 +939,18 @@ export default function Home() {
     const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
       ? { 
           ...dynamicEntities, 
-          customers: dynamicEntities.customers || [],
-          payments: dynamicEntities.payments || [],
           businessMetrics: businessMetrics || {} 
         }
-      : { customers, payments, businessMetrics: businessMetrics || {} };
+      : { ...stripeData, businessMetrics: businessMetrics || {} };
     
     console.log('Dataset data:', isCustomCategory(selectedCategory) 
       ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
-      : { customersCount: customers.length, paymentsCount: payments.length, hasBusinessMetrics: !!businessMetrics }
+      : { stripeDataKeys: Object.keys(stripeData), stripeDataCounts: Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length])), hasBusinessMetrics: !!businessMetrics }
     );
     
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
       ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-      : { customers: customers.length, payments: payments.length };
+      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]));
     
     let metadata;
     if (isCustomCategory(selectedCategory)) {
@@ -1080,7 +994,7 @@ export default function Home() {
   const getDatasetInfo = () => {
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
       ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-      : { customers: customers.length, payments: payments.length };
+      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]));
     
     if (isCustomCategory(selectedCategory)) {
       return {
@@ -1366,7 +1280,7 @@ export default function Home() {
 
         {/* Object Lists */}
         <div className="mb-8">
-          {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
+          {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 && (
             // Dynamic entities for AI scenarios
             Object.entries(dynamicEntities).map(([entityName, entityData]) => (
               <div key={entityName} className="mb-6">
@@ -1403,91 +1317,6 @@ export default function Home() {
                 </div>
               </div>
             ))
-          ) : (
-            // Legacy customers/payments for predefined personas
-            <>
-              {/* Customers */}
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Customers ({(customers?.length || 0).toLocaleString()})
-                </h3>
-                <div className="space-y-2">
-                  {(customers || []).slice(0, 3).map((customer) => (
-                    <div key={customer.id} className="p-2 bg-gray-50 rounded">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">{customer.name}</div>
-                          <div className="text-sm text-gray-600">{customer.email}</div>
-                          {customer.phone && (
-                            <div className="text-xs text-gray-500">{customer.phone}</div>
-                          )}
-                          {customer.address && (
-                            <div className="text-xs text-gray-500">
-                              {customer.address.city}, {customer.address.state}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          {customer.metadata?.loyaltyTier && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                              {customer.metadata.loyaltyTier}
-                            </span>
-                          )}
-                          {customer.metadata?.subscriptionTier && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                              {customer.metadata.subscriptionTier}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {customers.length > 3 && (
-                    <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {((customers?.length || 0) - 3).toLocaleString()} more
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Payments */}
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Payments ({(payments?.length || 0).toLocaleString()})
-                </h3>
-                <div className="space-y-2">
-                  {(payments || []).slice(0, 3).map((payment) => (
-                    <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          ${typeof payment.amount === 'number' ? (payment.amount / 100).toFixed(2) : payment.amount}
-                        </div>
-                        <div className="text-sm text-gray-600">{payment.paymentMethod}</div>
-                        {payment.description && (
-                          <div className="text-xs text-gray-500 truncate max-w-48">
-                            {payment.description}
-                          </div>
-                        )}
-                      </div>
-                      <span className={`px-2 py-1 rounded text-sm ${
-                        payment.status === 'succeeded' 
-                          ? 'bg-green-100 text-green-800'
-                          : payment.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {payment.status}
-                      </span>
-                    </div>
-                  ))}
-                  {payments.length > 3 && (
-                    <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {((payments?.length || 0) - 3).toLocaleString()} more
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
           )}
         </div>
 

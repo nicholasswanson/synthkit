@@ -31,8 +31,6 @@ export interface StoredDataset {
 export interface DatasetCreateRequest {
   type: 'scenario' | 'ai-generated';
   data: {
-    customers: any[];
-    payments: any[];
     businessMetrics: any;
     [key: string]: any;
   };
