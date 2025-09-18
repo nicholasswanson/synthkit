@@ -545,54 +545,6 @@ export default function Home() {
   // Dataset creation hook
   const { createDataset, isCreating, error, clearError } = useDatasetCreation();
 
-
-  // Helper functions
-  const isCustomCategory = (categoryId: string): boolean => {
-    return !ENHANCED_PERSONAS.hasOwnProperty(categoryId);
-  };
-
-  const getCustomCategory = (categoryId: string): CustomCategory | undefined => {
-    return customCategories.find(cat => cat.id === categoryId);
-  };
-
-  const getCurrentBusinessContext = () => {
-    if (isCustomCategory(selectedCategory)) {
-      const customCat = getCustomCategory(selectedCategory);
-      return customCat?.aiAnalysis?.businessContext;
-    }
-    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.businessContext;
-  };
-
-  const getCurrentEntities = () => {
-    if (isCustomCategory(selectedCategory)) {
-      const customCat = getCustomCategory(selectedCategory);
-      return customCat?.aiAnalysis?.entities || [];
-    }
-    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.entities || [];
-  };
-
-  const getCurrentKeyFeatures = () => {
-    if (isCustomCategory(selectedCategory)) {
-      const customCat = getCustomCategory(selectedCategory);
-      return customCat?.aiAnalysis?.keyFeatures || [];
-    }
-    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.keyFeatures || [];
-  };
-
-  const getCurrentUserRoles = () => {
-    if (isCustomCategory(selectedCategory)) {
-      const customCat = getCustomCategory(selectedCategory);
-      return customCat?.aiAnalysis?.userRoles || [];
-    }
-    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.userRoles || [];
-  };
-
-  const getCurrentStripeAnalysis = () => {
-    if (isCustomCategory(selectedCategory)) {
-      return null;
-    }
-    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.stripeAnalysis;
-  };
   // Load custom categories from localStorage on mount
   useEffect(() => {
     try {
@@ -651,7 +603,7 @@ export default function Home() {
 
   // Generate Stripe data when persona or stage changes
   useEffect(() => {
-    console.log('=== Stripe Data useEffect Running ===');
+    const generateDataset = async () => {    console.log('=== Stripe Data useEffect Running ===');
     console.log('Selected category:', selectedCategory);
     console.log('Stage:', stage);
     console.log('Is custom category:', isCustomCategory(selectedCategory));
@@ -676,13 +628,24 @@ export default function Home() {
         console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
         setStripeData(generatedStripeData);
         
+        // Also generate the full dataset and save it via API
+        console.log('Generating full dataset for JSON file...');
+        try {
+          await handleCreateDataset();
+          console.log('Full dataset created and saved via API');
+        } catch (error) {
+          console.error('Error creating full dataset:', error);
+        }        
       } catch (error) {
         console.error('Error generating Stripe data:', error);
         setStripeData({});
-      } else {
+      }    } else {
       console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
+    };
+    
+    generateDataset();  }, [selectedCategory, stage]);
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
@@ -727,12 +690,57 @@ export default function Home() {
     }
   }, [stripeData, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
 
+  // Helper functions
+  const isCustomCategory = (categoryId: string): boolean => {
+    return !ENHANCED_PERSONAS.hasOwnProperty(categoryId);
+  };
+
+  const getCustomCategory = (categoryId: string): CustomCategory | undefined => {
+    return customCategories.find(cat => cat.id === categoryId);
+  };
+
+  const getCurrentBusinessContext = () => {
+    if (isCustomCategory(selectedCategory)) {
+      const customCat = getCustomCategory(selectedCategory);
+      return customCat?.aiAnalysis?.businessContext;
+    }
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.businessContext;
+  };
+
+  const getCurrentEntities = () => {
+    if (isCustomCategory(selectedCategory)) {
       const customCat = getCustomCategory(selectedCategory);
       return customCat?.aiAnalysis?.entities || [];
     }
     return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.entities || [];
   };
 
+  const getCurrentKeyFeatures = () => {
+    if (isCustomCategory(selectedCategory)) {
+      const customCat = getCustomCategory(selectedCategory);
+      return customCat?.aiAnalysis?.keyFeatures || [];
+    }
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.keyFeatures || [];
+  };
+
+  const getCurrentUserRoles = () => {
+    if (isCustomCategory(selectedCategory)) {
+      const customCat = getCustomCategory(selectedCategory);
+      return customCat?.aiAnalysis?.userRoles || [];
+    }
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.userRoles || [];
+  };
+
+  // New function to get Stripe analysis for current persona
+  const getCurrentStripeAnalysis = () => {
+    if (isCustomCategory(selectedCategory)) {
+      // For custom categories, we'd need to analyze them too
+      return null;
+    }
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.stripeAnalysis;
+  };
+
+  // Generate realistic dynamic entity data based on AI analysis
   const generateEntityData = (entityInfo: any, volume: number, seedOffset: number) => {
     const entityData = [];
     const entityName = entityInfo.name.toLowerCase();
