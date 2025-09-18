@@ -3,8 +3,8 @@ import { generateStripeDataForPersona } from '@/lib/stripe-data-generators';
 
 export async function GET() {
   try {
-    // Test with modaic persona (Checkout e-commerce)
-    const modaicPersona = {
+    // Test with checkout-ecommerce persona (Checkout e-commerce)
+    const checkoutEcommercePersona = {
       name: 'Checkout e-commerce',
       businessContext: {
         type: 'Checkout e-commerce',
@@ -13,9 +13,9 @@ export async function GET() {
     };
     
     console.log('=== Testing Stripe Data Generation ===');
-    console.log('Persona:', modaicPersona);
+    console.log('Persona:', checkoutEcommercePersona);
     
-    const result = generateStripeDataForPersona(modaicPersona);
+    const result = generateStripeDataForPersona(checkoutEcommercePersona);
     
     console.log('Generated data keys:', Object.keys(result));
     console.log('Customers count:', result.customers?.length || 0);

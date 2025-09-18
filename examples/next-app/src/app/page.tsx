@@ -114,7 +114,7 @@ interface CustomCategory {
 
 // Predefined personas with business context
 const PREDEFINED_PERSONAS = {
-  modaic: {
+  'checkout-ecommerce': {
     name: 'Checkout e-commerce',
     businessContext: {
       type: 'Checkout e-commerce',
@@ -141,7 +141,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Customer Support', 'Order Management'], description: 'Customer service access' }
     ]
   },
-  stratus: {
+  'b2b-saas-subscriptions': {
     name: 'B2B SaaS subscriptions',
     businessContext: {
       type: 'B2B SaaS subscriptions',
@@ -168,7 +168,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Customer Support', 'Usage Monitoring'], description: 'Support team access' }
     ]
   },
-  forksy: {
+  'food-delivery-platform': {
     name: 'Food delivery platform',
     businessContext: {
       type: 'Food delivery platform',
@@ -195,7 +195,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Order Support', 'Customer Service'], description: 'Customer support access' }
     ]
   },
-  pulseon: {
+  'consumer-fitness-app': {
     name: 'Consumer fitness app',
     businessContext: {
       type: 'Consumer fitness app',
@@ -223,7 +223,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Member Support', 'Subscription Management'], description: 'Member support access' }
     ]
   },
-  procura: {
+  'b2b-invoicing': {
     name: 'B2B invoicing',
     businessContext: {
       type: 'B2B invoicing',
@@ -250,7 +250,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['User Support', 'Order Tracking'], description: 'Customer support access' }
     ]
   },
-  keynest: {
+  'property-management-platform': {
     name: 'Property management platform',
     businessContext: {
       type: 'Property management platform',
@@ -278,7 +278,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Tenant Support', 'Maintenance Coordination'], description: 'Tenant support access' }
     ]
   },
-  fluxly: {
+  'creator-platform': {
     name: 'Creator platform',
     businessContext: {
       type: 'Creator platform',
@@ -305,7 +305,7 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['Shipment Support', 'Vendor Coordination'], description: 'Operations support access' }
     ]
   },
-  brightfund: {
+  'donation-marketplace': {
     name: 'Donation marketplace',
     businessContext: {
       type: 'Donation marketplace',
@@ -379,16 +379,16 @@ function generateBusinessTitle(analysis: AnalysisData['analysis']): string {
 // Map AI business types to our category system (from previous implementation)
 function mapAIBusinessTypeToCategory(businessType: string): string {
   const typeMapping: Record<string, string> = {
-    'ecommerce': 'modaic', 'fashion': 'modaic', 'retail': 'modaic',
-    'saas': 'stratus', 'software': 'stratus', 'b2b': 'stratus',
-    'food': 'forksy', 'delivery': 'forksy', 'restaurant': 'forksy',
+    'ecommerce': 'checkout-ecommerce', 'fashion': 'checkout-ecommerce', 'retail': 'checkout-ecommerce',
+    'saas': 'b2b-saas-subscriptions', 'software': 'b2b-saas-subscriptions', 'b2b': 'b2b-saas-subscriptions',
+    'food': 'food-delivery-platform', 'delivery': 'food-delivery-platform', 'restaurant': 'food-delivery-platform',
   };
   
   const businessTypeLower = businessType.toLowerCase();
   for (const [key, category] of Object.entries(typeMapping)) {
     if (businessTypeLower.includes(key)) return category;
   }
-  return 'modaic';
+  return 'checkout-ecommerce';
 }
 
 // Map AI stages to our stage system
@@ -410,14 +410,14 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
   };
   
   const categoryMultipliers: Record<string, number> = {
-    modaic: 1.0,      // Standard e-commerce
-    stratus: 0.267,   // B2B SaaS (fewer customers)
-    forksy: 2.143,    // Food delivery (high volume)
-    pulseon: 0.867,   // Fitness (moderate volume)
-    procura: 0.234,   // Healthcare (fewer, high-value)
-    keynest: 0.056,   // Real estate (very few, very high-value)
-    fluxly: 0.534,    // Creator economy (moderate volume)
-    brightfund: 0.123 // Non-profit (very few, high-value donors)
+    'checkout-ecommerce': 1.0,      // Standard e-commerce
+    'b2b-saas-subscriptions': 0.267,   // B2B SaaS (fewer customers)
+    'food-delivery-platform': 2.143,    // Food delivery (high volume)
+    'consumer-fitness-app': 0.867,   // Fitness (moderate volume)
+    'b2b-invoicing': 0.234,   // Healthcare (fewer, high-value)
+    'property-management-platform': 0.056,   // Real estate (very few, very high-value)
+    'creator-platform': 0.534,    // Creator economy (moderate volume)
+    'donation-marketplace': 0.123 // Non-profit (very few, high-value donors)
   };
   
   const base = baseVolumes[scenario.stage as keyof typeof baseVolumes] || baseVolumes.growth;
@@ -495,7 +495,7 @@ function generateFallbackMetrics(stage: string, seed: number): BusinessMetrics {
 
 export default function Home() {
   // Unified state management
-  const [selectedCategory, setSelectedCategory] = useState<string>('modaic');
+  const [selectedCategory, setSelectedCategory] = useState<string>('checkout-ecommerce');
   const [aiPrompt, setAiPrompt] = useState<string>('');
   const [aiAnalysis, setAiAnalysis] = useState<AnalysisData['analysis'] | null>(null);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
@@ -854,14 +854,14 @@ export default function Home() {
       
       // Generate payments with category-specific multipliers
       const paymentMultipliers: Record<string, number> = {
-        modaic: 2.3,      // Fashion e-commerce (moderate frequency)
-        stratus: 0.8,     // B2B SaaS (fewer transactions)
-        forksy: 4.7,      // Food delivery (high frequency)
-        pulseon: 1.2,     // Fitness (monthly subscriptions)
-        procura: 3.1,     // Healthcare (regular supplies)
-        keynest: 12.5,    // Real estate (rent payments)
-        fluxly: 2.8,      // Creator economy (content purchases)
-        brightfund: 4.2   // Non-profit (donations)
+        'checkout-ecommerce': 2.3,      // Fashion e-commerce (moderate frequency)
+        'b2b-saas-subscriptions': 0.8,     // B2B SaaS (fewer transactions)
+        'food-delivery-platform': 4.7,      // Food delivery (high frequency)
+        'consumer-fitness-app': 1.2,     // Fitness (monthly subscriptions)
+        'b2b-invoicing': 3.1,     // Healthcare (regular supplies)
+        'property-management-platform': 12.5,    // Real estate (rent payments)
+        'creator-platform': 2.8,      // Creator economy (content purchases)
+        'donation-marketplace': 4.2   // Non-profit (donations)
       };
       const paymentMultiplier = paymentMultipliers[mappedCategory] || 2.3;
       const paymentCount = Math.floor(volume.expected * paymentMultiplier);
@@ -882,9 +882,9 @@ export default function Home() {
         else status = 'succeeded';
         
         // Realistic payment methods based on category
-        const paymentMethods = mappedCategory === 'stratus' 
+        const paymentMethods = mappedCategory === 'b2b-saas-subscriptions' 
           ? ['card', 'ach_debit', 'wire_transfer'] // B2B prefers bank transfers
-          : mappedCategory === 'forksy'
+          : mappedCategory === 'food-delivery-platform'
           ? ['card', 'apple_pay', 'google_pay'] // Food delivery prefers mobile
           : ['card', 'paypal', 'bank_transfer']; // General mix
         
@@ -899,7 +899,7 @@ export default function Home() {
           description,
           metadata: {
             category: mappedCategory,
-            productType: mappedCategory === 'stratus' ? 'subscription' : 'one_time',
+            productType: mappedCategory === 'b2b-saas-subscriptions' ? 'subscription' : 'one_time',
             customerTier: customer?.metadata?.loyaltyTier || 'Bronze'
           }
         });
@@ -1598,17 +1598,17 @@ export default function Home() {
           </h3>
           <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
             <code className="flex-1 text-sm font-mono text-gray-800 break-all">
-              {sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
+              {sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json'}
             </code>
             <button
-              onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json')}
+              onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json')}
               className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
             >
               <Copy className="w-4 h-4" />
               Copy
             </button>
             <a
-              href={sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
+              href={sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json'}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
@@ -1650,7 +1650,7 @@ export default function Home() {
             </h3>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
+                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json', getDatasetInfo())}
                 className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
@@ -1666,7 +1666,7 @@ export default function Home() {
             <div className="space-y-4">
               {(() => {
                 const examples = generateAllIntegrations(
-                  sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', 
+                  sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json', 
                   getDatasetInfo()
                 );
                 const filteredExamples = examples.filter(example => {

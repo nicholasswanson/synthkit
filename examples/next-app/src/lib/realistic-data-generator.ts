@@ -167,18 +167,17 @@ export function generateRealisticAddress(seed: number): Address {
 // Generate realistic amount (non-rounded)
 export function generateRealisticAmount(seed: number, category: string, stage: string): number {
   const categoryRanges: Record<string, { min: number; max: number }> = {
-    modaic: { min: 25.99, max: 299.99 },     // Fashion e-commerce
-    stratus: { min: 49.00, max: 999.00 },    // B2B SaaS subscriptions
-    forksy: { min: 12.50, max: 89.99 },      // Food delivery orders
-    pulseon: { min: 19.99, max: 79.99 },     // Fitness subscriptions
-    procura: { min: 500.00, max: 25000.00 }, // B2B procurement orders
-    mindora: { min: 75.00, max: 200.00 },    // Therapy sessions
-    keynest: { min: 800.00, max: 3500.00 },  // Property rent payments
-    fluxly: { min: 150.00, max: 5000.00 },   // Supply chain logistics
-    brightfund: { min: 10.00, max: 500.00 }  // Nonprofit donations
+    'checkout-ecommerce': { min: 25.99, max: 299.99 },     // Fashion e-commerce
+    'b2b-saas-subscriptions': { min: 49.00, max: 999.00 },    // B2B SaaS subscriptions
+    'food-delivery-platform': { min: 12.50, max: 89.99 },      // Food delivery orders
+    'consumer-fitness-app': { min: 19.99, max: 79.99 },     // Fitness subscriptions
+    'b2b-invoicing': { min: 500.00, max: 25000.00 }, // B2B procurement orders
+    'property-management-platform': { min: 800.00, max: 3500.00 },  // Property rent payments
+    'creator-platform': { min: 150.00, max: 5000.00 },   // Supply chain logistics
+    'donation-marketplace': { min: 10.00, max: 500.00 }  // Nonprofit donations
   };
   
-  const range = categoryRanges[category] || categoryRanges.modaic;
+  const range = categoryRanges[category] || categoryRanges['checkout-ecommerce'];
   const baseAmount = range.min + seededRandom(seed) * (range.max - range.min);
   
   // Apply stage multiplier for more realistic scaling
@@ -197,63 +196,56 @@ export function generateRealisticAmount(seed: number, category: string, stage: s
 // Generate realistic product descriptions
 export function generateProductDescription(category: string, seed: number): string {
   const descriptions: Record<string, string[]> = {
-    modaic: [
+    'checkout-ecommerce': [
       'Premium cotton t-shirt with modern fit',
       'Designer denim jacket with vintage wash',
       'Elegant silk blouse for professional wear',
       'Comfortable sneakers with memory foam',
       'Classic leather handbag with gold hardware'
     ],
-    stratus: [
+    'b2b-saas-subscriptions': [
       'Professional plan with advanced analytics',
       'Team collaboration tools and integrations',
       'Enterprise security and compliance features',
       'Custom API access and webhooks',
       'Priority support and dedicated account manager'
     ],
-    forksy: [
+    'food-delivery-platform': [
       'Fresh Mediterranean bowl with quinoa',
       'Artisan pizza with local ingredients',
       'Gourmet burger with truffle fries',
       'Healthy smoothie bowl with acai',
       'Authentic Thai curry with jasmine rice'
     ],
-    pulseon: [
+    'consumer-fitness-app': [
       'Monthly unlimited workout access',
       'Personal training session package',
       'Nutrition consultation and meal planning',
       'Group fitness class membership',
       'Recovery and wellness spa treatment'
     ],
-    procura: [
+    'b2b-invoicing': [
       'Medical supplies and equipment order',
       'Pharmaceutical inventory restock',
       'Laboratory testing and analysis',
       'Emergency medical equipment delivery',
       'Specialized healthcare consultation'
     ],
-    mindora: [
-      'Individual therapy session with licensed counselor',
-      'Group therapy workshop for anxiety management',
-      'Couples counseling session package',
-      'Mindfulness and meditation course',
-      'Crisis intervention and support services'
-    ],
-    keynest: [
+    'property-management-platform': [
       'Monthly rent payment for 2-bedroom apartment',
       'Security deposit for commercial space',
       'Property management service fee',
       'Maintenance and repair service',
       'Lease renewal and processing fee'
     ],
-    fluxly: [
+    'creator-platform': [
       'Supply chain optimization consultation',
       'Inventory management software license',
       'Logistics and shipping coordination',
       'Supplier relationship management',
       'Demand forecasting and analytics'
     ],
-    brightfund: [
+    'donation-marketplace': [
       'General fund donation for community programs',
       'Emergency relief fund contribution',
       'Educational scholarship fund donation',
@@ -262,7 +254,7 @@ export function generateProductDescription(category: string, seed: number): stri
     ]
   };
   
-  const categoryDescriptions = descriptions[category] || descriptions.modaic;
+  const categoryDescriptions = descriptions[category] || descriptions['checkout-ecommerce'];
   return categoryDescriptions[Math.floor(seededRandom(seed) * categoryDescriptions.length)];
 }
 

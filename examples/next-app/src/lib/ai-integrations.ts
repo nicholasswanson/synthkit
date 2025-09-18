@@ -26,14 +26,14 @@ export interface IntegrationExample {
 
 // Business context mapping for better AI understanding
 const BUSINESS_CONTEXTS = {
-  modaic: { name: 'Checkout e-commerce', domain: 'retail', complexity: 'medium' },
-  stratus: { name: 'B2B SaaS subscriptions', domain: 'software', complexity: 'high' },
-  forksy: { name: 'Food delivery platform', domain: 'marketplace', complexity: 'high' },
-  fluxly: { name: 'Creator platform', domain: 'social', complexity: 'medium' },
-  pulseon: { name: 'Consumer fitness app', domain: 'health', complexity: 'medium' },
-  procura: { name: 'B2B invoicing', domain: 'healthcare', complexity: 'high' },
-  brightfund: { name: 'Donation marketplace', domain: 'finance', complexity: 'high' },
-  keynest: { name: 'Property management platform', domain: 'real-estate', complexity: 'high' }
+  'checkout-ecommerce': { name: 'Checkout e-commerce', domain: 'retail', complexity: 'medium' },
+  'b2b-saas-subscriptions': { name: 'B2B SaaS subscriptions', domain: 'software', complexity: 'high' },
+  'food-delivery-platform': { name: 'Food delivery platform', domain: 'marketplace', complexity: 'high' },
+  'creator-platform': { name: 'Creator platform', domain: 'social', complexity: 'medium' },
+  'consumer-fitness-app': { name: 'Consumer fitness app', domain: 'health', complexity: 'medium' },
+  'b2b-invoicing': { name: 'B2B invoicing', domain: 'healthcare', complexity: 'high' },
+  'donation-marketplace': { name: 'Donation marketplace', domain: 'finance', complexity: 'high' },
+  'property-management-platform': { name: 'Property management platform', domain: 'real-estate', complexity: 'high' }
 };
 
 function getBusinessContext(category: string) {
