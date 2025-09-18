@@ -94,11 +94,28 @@ export function generateRealisticStripeData(
     invoices?: number;
   } = {}
 ): Record<string, any[]> {
+  // Generate realistic volumes based on business type and stage
+  const getRealisticCounts = (type: string) => {
+    const baseCounts = {
+      saas: { customers: 1200, subscriptions: 800, charges: 2400, invoices: 1200 },
+      ecommerce: { customers: 2500, subscriptions: 0, charges: 5000, invoices: 2500 },
+      marketplace: { customers: 1800, subscriptions: 0, charges: 3600, invoices: 1800 }
+    };
+    
+    const businessCounts = baseCounts[type as keyof typeof baseCounts] || baseCounts.saas;
+    
+    // Add some randomness (±20%) to make it more realistic
+    return {
+      customers: Math.floor(businessCounts.customers * (0.8 + Math.random() * 0.4)),
+      subscriptions: Math.floor(businessCounts.subscriptions * (0.8 + Math.random() * 0.4)),
+      charges: Math.floor(businessCounts.charges * (0.8 + Math.random() * 0.4)),
+      invoices: Math.floor(businessCounts.invoices * (0.8 + Math.random() * 0.4))
+    };
+  };
+  
+  const realisticCounts = getRealisticCounts(businessType);
   const counts = {
-    customers: 25,
-    subscriptions: 15,
-    charges: 40,
-    invoices: 20,
+    ...realisticCounts,
     ...options
   };
 
@@ -121,60 +138,71 @@ export function generateRealisticStripeData(
   const subscriptions = [];
   const subscriptionIds = [];
   
-  for (let i = 0; i < counts.subscriptions; i++) {
-    const seed = i * 3000;
-    const customer = customers[Math.floor(seededRandom(seed) * customers.length)];
-    const plan = plans[Math.floor(seededRandom(seed + 1) * plans.length)];
-    const created = Math.max(customer.created, Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 180)); // Last 6 months
-    
-    const subscriptionId = `sub_${seededRandom(seed + 3).toString(36).substring(2, 15)}`;
-    subscriptionIds.push(subscriptionId);
-    
-    const statuses = ['active', 'trialing', 'past_due', 'canceled'];
-    const status = statuses[Math.floor(seededRandom(seed + 4) * statuses.length)];
-    
-    const currentPeriodStart = created + Math.floor(seededRandom(seed + 5) * 86400 * 30);
-    const currentPeriodEnd = currentPeriodStart + (plan.interval === 'month' ? 86400 * 30 : 86400 * 365);
-    
-    subscriptions.push({
-      id: subscriptionId,
-      object: 'subscription',
-      customer: customer.id,
-      status,
-      created,
-      current_period_start: currentPeriodStart,
-      current_period_end: currentPeriodEnd,
-      plan: plan,
-      amount: plan.amount,
-      interval: plan.interval,
-      currency: 'usd',
-      billing_cycle_anchor: currentPeriodStart,
-      cancel_at_period_end: false,
-      collection_method: 'charge_automatically',
-      automatic_tax: { enabled: false },
-      default_tax_rates: [],
-      livemode: false,
-      metadata: {
-        plan_name: plan.name,
-        customer_name: customer.name
-      }
-    });
+  if (counts.subscriptions > 0 && customers.length > 0 && plans.length > 0) {
+    for (let i = 0; i < counts.subscriptions; i++) {
+      const seed = i * 3000;
+      const customer = customers[Math.floor(seededRandom(seed) * customers.length)];
+      const plan = plans[Math.floor(seededRandom(seed + 1) * plans.length)];
+      const created = Math.max(customer.created, Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 180)); // Last 6 months
+      
+      const subscriptionId = `sub_${seededRandom(seed + 3).toString(36).substring(2, 15)}`;
+      subscriptionIds.push(subscriptionId);
+      
+      const statuses = ['active', 'trialing', 'past_due', 'canceled'];
+      const status = statuses[Math.floor(seededRandom(seed + 4) * statuses.length)];
+      
+      const currentPeriodStart = created + Math.floor(seededRandom(seed + 5) * 86400 * 30);
+      const currentPeriodEnd = currentPeriodStart + (plan.interval === 'month' ? 86400 * 30 : 86400 * 365);
+      
+      subscriptions.push({
+        id: subscriptionId,
+        object: 'subscription',
+        customer: customer.id,
+        status,
+        created,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+        plan: plan,
+        amount: plan.amount,
+        interval: plan.interval,
+        currency: 'usd',
+        billing_cycle_anchor: currentPeriodStart,
+        cancel_at_period_end: false,
+        collection_method: 'charge_automatically',
+        automatic_tax: { enabled: false },
+        default_tax_rates: [],
+        livemode: false,
+        metadata: {
+          plan_name: plan.name,
+          customer_name: customer.name
+        }
+      });
+    }
   }
 
   // Generate invoices linked to subscriptions
   const invoices = [];
   const invoiceIds = [];
   
-  for (let i = 0; i < counts.invoices; i++) {
-    const seed = i * 4000;
-    const subscription = subscriptions[Math.floor(seededRandom(seed) * subscriptions.length)];
-    const customer = customers.find(c => c.id === subscription.customer);
+  if (counts.invoices > 0 && customers.length > 0) {
+    for (let i = 0; i < counts.invoices; i++) {
+      const seed = i * 4000;
+      let subscription, customer;
+      
+      if (subscriptions.length > 0) {
+        subscription = subscriptions[Math.floor(seededRandom(seed) * subscriptions.length)];
+        customer = customers.find(c => c.id === subscription.customer);
+      } else {
+        // For e-commerce, create invoices without subscriptions
+        customer = customers[Math.floor(seededRandom(seed) * customers.length)];
+        subscription = null;
+      }
     
     const invoiceId = `in_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
     invoiceIds.push(invoiceId);
     
-    const amount = subscription.amount || 0;
-    const created = subscription.current_period_start + Math.floor(seededRandom(seed + 2) * 86400 * 30);
+    const amount = subscription?.amount || 0;
+    const created = subscription ? subscription.current_period_start + Math.floor(seededRandom(seed + 2) * 86400 * 30) : Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 30);
     const statuses = ['paid', 'open', 'draft'];
     const status = statuses[Math.floor(seededRandom(seed + 3) * statuses.length)];
     
@@ -185,7 +213,7 @@ export function generateRealisticStripeData(
       id: invoiceId,
       object: 'invoice',
       customer: customer!.id,
-      subscription: subscription.id,
+      subscription: subscription?.id || null,
       amount_due: status === 'paid' ? 0 : validAmount,
       amount_paid: status === 'paid' ? validAmount : 0,
       amount_remaining: status === 'paid' ? 0 : validAmount,
@@ -194,8 +222,8 @@ export function generateRealisticStripeData(
       currency: 'usd',
       status,
       created,
-      period_start: subscription.current_period_start,
-      period_end: subscription.current_period_end,
+      period_start: subscription?.current_period_start || created,
+      period_end: subscription?.current_period_end || created + 86400 * 30,
       paid: status === 'paid',
       attempt_count: status === 'paid' ? 1 : 0,
       attempted: status === 'paid',
@@ -204,10 +232,11 @@ export function generateRealisticStripeData(
       default_tax_rates: [],
       livemode: false,
       metadata: {
-        subscription_id: subscription.id,
+        subscription_id: subscription?.id || null,
         customer_name: customer!.name
       }
     });
+  }
   }
 
   // Generate charges linked to invoices and customers
@@ -267,9 +296,10 @@ export function generateRealisticStripeData(
   }
   
   // Generate additional one-time charges if needed
-  for (let i = invoices.length; i < counts.charges; i++) {
-    const seed = i * 5000;
-    const customer = customers[Math.floor(seededRandom(seed) * customers.length)];
+  if (customers.length > 0) {
+    for (let i = invoices.length; i < counts.charges; i++) {
+      const seed = i * 5000;
+      const customer = customers[Math.floor(seededRandom(seed) * customers.length)];
     
     const chargeId = `ch_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
     const oneTimeAmount = generateRealisticAmount(businessType, 'oneTime', seed + 4);
@@ -307,6 +337,7 @@ export function generateRealisticStripeData(
         }
       }
     });
+  }
   }
 
   return {
