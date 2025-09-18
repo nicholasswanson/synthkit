@@ -1036,7 +1036,7 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <div className="flex h-screen">
         {/* Left Panel - Configuration */}
-        <div className="w-1/2 overflow-y-auto p-6">
+        <div className="w-3/10 overflow-y-auto" style={{ padding: '40px', width: '30%' }}>
           <div className="max-w-4xl mx-auto">
             {/* Page Header */}
             <div className="text-center mb-8">
@@ -1054,7 +1054,7 @@ export default function Home() {
             </div>
 
         {/* Business Configuration Section */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Business Configuration
           </h2>
@@ -1144,12 +1144,12 @@ export default function Home() {
         </div>
 
         {/* Scenario Configuration Section */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <div className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Scenario Configuration
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Role Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1194,104 +1194,76 @@ export default function Home() {
               />
             </div>
           </div>
-
         </div>
 
-        {/* Business Context, Key Features, User Roles, Data Entities */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Business Context */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Business Context
-            </h3>
-            {getCurrentBusinessContext() && (
-              <div className="space-y-3">
-                <div><span className="font-medium">Type:</span> <span className="capitalize">{getCurrentBusinessContext()?.type}</span></div>
-                <div><span className="font-medium">Stage:</span> <span className="capitalize">{getCurrentBusinessContext()?.stage}</span></div>
-                <div><span className="font-medium">Monetization:</span> <span className="capitalize">{getCurrentBusinessContext()?.monetizationModel}</span></div>
-                <div>
-                  <span className="font-medium">Target Audience:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {(getCurrentBusinessContext()?.targetAudience || []).map((audience, i) => (
-                      <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                        {audience}
-                      </span>
-                    ))}
-                  </div>
+        {/* Key Features */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Key Features
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {getCurrentKeyFeatures().map((feature, i) => (
+              <span key={i} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                {feature}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* User Roles */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            User Roles
+          </h3>
+          <div className="space-y-3">
+            {getCurrentUserRoles().map((role, i) => (
+              <div key={i} className="border-l-4 border-purple-500 pl-4">
+                <div className="font-medium text-purple-800">{role.name}</div>
+                <div className="text-sm text-gray-600">{role.description}</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {(role.permissions || []).map((permission, j) => (
+                    <span key={j} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                      {permission}
+                    </span>
+                  ))}
                 </div>
               </div>
-            )}
+            ))}
           </div>
+        </div>
 
-          {/* Key Features */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Key Features
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {getCurrentKeyFeatures().map((feature, i) => (
-                <span key={i} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                  {feature}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* User Roles */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              User Roles
-            </h3>
-            <div className="space-y-3">
-              {getCurrentUserRoles().map((role, i) => (
-                <div key={i} className="border-l-4 border-purple-500 pl-4">
-                  <div className="font-medium text-purple-800">{role.name}</div>
-                  <div className="text-sm text-gray-600">{role.description}</div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {(role.permissions || []).map((permission, j) => (
-                      <span key={j} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                        {permission}
-                      </span>
-                    ))}
-                  </div>
+        {/* Data Entities */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Data Entities
+          </h3>
+          <div className="space-y-4">
+            {getCurrentEntities().map((entity, i) => (
+              <div key={i} className="border border-gray-200 rounded p-3">
+                <div className="font-medium text-gray-900">{entity.name}</div>
+                <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
+                <div className="space-y-1">
+                  {(entity.properties || []).map((prop, j) => (
+                    <div key={j} className="text-sm">
+                      <span className="font-medium">{prop.name}</span>
+                      <span className="text-gray-500"> ({prop.type})</span>
+                      {prop.description && (
+                        <span className="text-gray-600"> - {prop.description}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Data Entities */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Data Entities
-            </h3>
-            <div className="space-y-4">
-              {getCurrentEntities().map((entity, i) => (
-                <div key={i} className="border border-gray-200 rounded p-3">
-                  <div className="font-medium text-gray-900">{entity.name}</div>
-                  <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
-                  <div className="space-y-1">
-                    {(entity.properties || []).map((prop, j) => (
-                      <div key={j} className="text-sm">
-                        <span className="font-medium">{prop.name}</span>
-                        <span className="text-gray-500"> ({prop.type})</span>
-                        {prop.description && (
-                          <span className="text-gray-600"> - {prop.description}</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Object Lists */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="mb-8">
           {isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0 ? (
             // Dynamic entities for AI scenarios
             Object.entries(dynamicEntities).map(([entityName, entityData]) => (
-              <div key={entityName} className="bg-white border border-gray-200 rounded-lg p-6">
+              <div key={entityName} className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
                 </h3>
@@ -1329,7 +1301,7 @@ export default function Home() {
             // Legacy customers/payments for predefined personas
             <>
               {/* Customers */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Customers ({customers.length.toLocaleString()})
                 </h3>
@@ -1373,7 +1345,7 @@ export default function Home() {
               </div>
 
               {/* Payments */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Payments ({payments.length.toLocaleString()})
                 </h3>
@@ -1413,90 +1385,43 @@ export default function Home() {
           )}
         </div>
 
+        {/* Dataset URL Section */}
+        <div className="mt-8">
+          <h3 className="font-semibold text-gray-900 mb-3">
+            Dataset URL
+          </h3>
+          <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
+            <code className="flex-1 text-sm font-mono text-gray-800 break-all">
+              {sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
+            </code>
+            <button
+              onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json')}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+            >
+              <Copy className="w-4 h-4" />
+              Copy
+            </button>
+            <a
+              href={sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View
+            </a>
+          </div>
+        </div>
+
         </div>
       </div>
 
       {/* Right Panel - Integration & Sharing */}
-      <div className="w-1/2 overflow-y-auto bg-gray-50">
-        <div className="p-6">
-          {/* Header */}
+      <div className="w-7/10 overflow-y-auto bg-gray-50" style={{ padding: '40px', width: '70%' }}>
+          {/* Tab Navigation */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Dataset
-            </h2>
-          </div>
-
-
-          {/* URL Section */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Dataset URL
-            </h3>
-            <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
-              <code className="flex-1 text-sm font-mono text-gray-800 break-all">
-                {sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
-              </code>
-              <button
-                onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json')}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </button>
-              <a
-                href={sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-              >
-                <ExternalLink className="w-4 h-4" />
-                View
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Download Section */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Quick Setup Files
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Download ready-to-use files for instant integration in your prototype:
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                React Hook (.ts)
-              </button>
-              <button
-                onClick={() => downloadCursorRules(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                Cursor Rules
-              </button>
-            </div>
-            <div className="mt-3 p-3 bg-green-50 rounded-lg">
-              <p className="text-xs text-green-700">
-                <strong>Pro tip:</strong> Download both files, add the React hook to your project, 
-                and place the .cursorrules file in your project root for optimal AI assistance!
-              </p>
-            </div>
-          </div>
-
-
-          {/* Integration Examples */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-4">
-              Integration Examples
-            </h3>
-            
-            {/* Tab Navigation */}
-            <div className="flex space-x-1 mb-4 bg-gray-100 rounded-lg p-1">
-              {['cursor', 'claude', 'openai', 'react'].map((tab) => (
+            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              {['cursor', 'claude', 'codex', 'react'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveIntegrationTab(tab)}
@@ -1510,6 +1435,26 @@ export default function Home() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Quick Setup Files - Dynamic based on selected tool */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3">
+              Add this React Hook to your project root directory
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-modaic-admin-growth-12345.json', getDatasetInfo())}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+              >
+                <Download className="w-4 h-4" />
+                useSynthkitDataset.ts
+              </button>
+            </div>
+          </div>
+
+          {/* Integration Examples */}
+          <div>
 
             {/* Tab Content */}
             <div className="space-y-4">
@@ -1524,7 +1469,7 @@ export default function Home() {
                     return toolName === 'cursor';
                   } else if (activeIntegrationTab === 'claude') {
                     return toolName === 'claude';
-                  } else if (activeIntegrationTab === 'openai') {
+                  } else if (activeIntegrationTab === 'codex') {
                     return toolName === 'chatgpt';
                   } else if (activeIntegrationTab === 'react') {
                     return toolName === 'fetch api';
@@ -1532,11 +1477,56 @@ export default function Home() {
                   return false;
                 });
                 
+                if (activeIntegrationTab === 'cursor') {
+                  // For Cursor tab, show both cursor rules and prompt
+                  const cursorPromptExample = examples.find(example => example.tool === 'Cursor' && example.instructions.includes('prompt'));
+                  const cursorIntegrationExample = examples.find(example => example.tool === 'Cursor' && example.instructions.includes('React hook code'));
+                  
+                  return (
+                    <>
+                      {/* Cursor Rules Code Block */}
+                      {cursorIntegrationExample && (
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-3">
+                            Add this block to your{' '}
+                            <a 
+                              href="https://cursor.com/docs/context/rules" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              project rules
+                            </a>{' '}
+                            or ask Cursor to do it
+                          </h3>
+                          <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
+                            <code className="text-gray-800">
+                              {cursorIntegrationExample.copyText}
+                            </code>
+                          </pre>
+                        </div>
+                      )}
+                      
+                      {/* Cursor Prompt Code Block */}
+                      {cursorPromptExample && (
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-3">Integration prompt</h3>
+                          <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
+                            <code className="text-gray-800">
+                              {cursorPromptExample.copyText || cursorPromptExample.code}
+                            </code>
+                          </pre>
+                        </div>
+                      )}
+                    </>
+                  );
+                }
+                
                 return filteredExamples.map((example, index) => (
                   <div key={index}>
-                    <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
+                    <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
                       <code className="text-gray-800">
-                        {activeIntegrationTab === 'cursor' ? (example.copyText || example.code) : example.code}
+                        {example.code}
                       </code>
                     </pre>
                   </div>
@@ -1544,10 +1534,9 @@ export default function Home() {
               })()}
             </div>
           </div>
+
         </div>
       </div>
-    </div>
-
     </div>
   );
 }
