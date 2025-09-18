@@ -617,18 +617,18 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
   return invoices;
 }
 
+// Import the realistic generator
+import { generateRealisticStripeData } from './realistic-stripe-generator';
+
 // Main function to generate all Stripe data for a persona
 export function generateStripeDataForPersona(
   persona: any, 
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
-  // Import the realistic generator
-  const { generateRealisticStripeData } = require('./realistic-stripe-generator');
-  
   // Determine business type from persona
-  const businessType = persona.businessContext?.domain?.includes('saas') ? 'saas' :
-                      persona.businessContext?.domain?.includes('ecommerce') ? 'ecommerce' :
-                      persona.businessContext?.domain?.includes('marketplace') ? 'marketplace' : 'saas';
+  const businessType = persona.businessContext?.type?.toLowerCase().includes('saas') ? 'saas' :
+                      persona.businessContext?.type?.toLowerCase().includes('ecommerce') ? 'ecommerce' :
+                      persona.businessContext?.type?.toLowerCase().includes('marketplace') ? 'marketplace' : 'saas';
   
   return generateRealisticStripeData(businessType, counts);
 }
