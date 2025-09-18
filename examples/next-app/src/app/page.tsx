@@ -965,7 +965,9 @@ export default function Home() {
       // Generate full dataset for JSON files (not just sample data)
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
       const fullStripeData = generateStripeDataForPersona(persona, stage);
-      datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
+      // Filter out _metadata field for API compatibility
+      const { _metadata, ...stripeDataWithoutMetadata } = fullStripeData;
+      datasetData = { ...stripeDataWithoutMetadata, businessMetrics: businessMetrics || {} };
     }
     
     console.log('Dataset data:', isCustomCategory(selectedCategory) 
