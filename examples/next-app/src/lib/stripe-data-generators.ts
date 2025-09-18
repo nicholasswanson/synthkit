@@ -1,7 +1,7 @@
 // Stripe Data Generators for Synthkit
 // Generates realistic Stripe data objects based on Stripe Data Schema
 
-import { seededRandom } from './realistic-data-generator';
+import { seededRandom } from './realistic-data-generator.ts';
 
 // Base Stripe data interfaces
 export interface StripeCharge {
@@ -618,7 +618,7 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
 }
 
 // Import the realistic generator
-import { generateRealisticStripeData } from './realistic-stripe-generator';
+import { generateRealisticStripeData } from './realistic-stripe-generator.ts';
 
 // Main function to generate all Stripe data for a persona
 export function generateStripeDataForPersona(
