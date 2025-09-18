@@ -1372,7 +1372,7 @@ export default function Home() {
             Object.entries(dynamicEntities).map(([entityName, entityData]) => (
               <div key={entityName} className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
+                  {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData?.length?.toLocaleString() || 0})
                 </h3>
                 <div className="space-y-2">
                   {entityData.slice(0, 3).map((item: any) => (
@@ -1398,7 +1398,7 @@ export default function Home() {
                   ))}
                   {entityData.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(entityData.length - 3).toLocaleString()} more
+                      ... and {((entityData?.length || 0) - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1410,7 +1410,7 @@ export default function Home() {
               {/* Customers */}
               <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Customers ({customers.length.toLocaleString()})
+                  Customers ({(customers?.length || 0).toLocaleString()})
                 </h3>
                 <div className="space-y-2">
                   {customers.slice(0, 3).map((customer) => (
@@ -1445,7 +1445,7 @@ export default function Home() {
                   ))}
                   {customers.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(customers.length - 3).toLocaleString()} more
+                      ... and {((customers?.length || 0) - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1454,7 +1454,7 @@ export default function Home() {
               {/* Payments */}
               <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Payments ({payments.length.toLocaleString()})
+                  Payments ({(payments?.length || 0).toLocaleString()})
                 </h3>
                 <div className="space-y-2">
                   {payments.slice(0, 3).map((payment) => (
@@ -1483,7 +1483,7 @@ export default function Home() {
                   ))}
                   {payments.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(payments.length - 3).toLocaleString()} more
+                      ... and {((payments?.length || 0) - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1499,11 +1499,11 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Stripe Data ({Object.keys(stripeData).length} types)
             </h3>
-            {stripeData._metadata && (
+            {stripeData._metadata && stripeData._metadata.generatedAt && (
               <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
                 Generated: {new Date(stripeData._metadata.generatedAt).toLocaleString()} | 
-                Business: {stripeData._metadata.businessType} | 
-                Counts: {Object.entries(stripeData._metadata.counts).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                Business: {stripeData._metadata.businessType || 'Unknown'} | 
+                Counts: {stripeData._metadata.counts ? Object.entries(stripeData._metadata.counts).map(([key, value]) => `${key}: ${value}`).join(', ') : 'N/A'}
               </div>
             )}
             <div className="space-y-6">
@@ -1511,7 +1511,7 @@ export default function Home() {
               {stripeData.customers && (
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                    Customers ({stripeData.customers.length.toLocaleString()})
+                    Customers ({(stripeData.customers?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
                     {stripeData.customers.slice(0, 3).map((customer: any, index: number) => (
@@ -1529,7 +1529,7 @@ export default function Home() {
                     ))}
                     {stripeData.customers.length > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {(stripeData.customers.length - 3).toLocaleString()} more
+                        ... and {((stripeData.customers?.length || 0) - 3).toLocaleString()} more
                       </div>
                     )}
                   </div>
@@ -1542,7 +1542,7 @@ export default function Home() {
                 .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                    {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({dataArray.length.toLocaleString()})
+                    {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({(dataArray?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
                     {dataArray.slice(0, 3).map((item: any, index: number) => (
@@ -1572,7 +1572,7 @@ export default function Home() {
                     ))}
                     {dataArray.length > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {(dataArray.length - 3).toLocaleString()} more
+                        ... and {((dataArray?.length || 0) - 3).toLocaleString()} more
                       </div>
                     )}
                   </div>
