@@ -1499,7 +1499,39 @@ export default function Home() {
               Stripe Data
             </h3>
             <div className="space-y-6">
-              {Object.entries(stripeData).map(([dataType, dataArray]) => (
+              {/* Customers */}
+              {stripeData.customers && (
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Customers ({stripeData.customers.length.toLocaleString()})
+                  </h4>
+                  <div className="space-y-2">
+                    {stripeData.customers.slice(0, 3).map((customer: any, index: number) => (
+                      <div key={customer.id || index} className="p-2 bg-gray-50 rounded">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{customer.name}</div>
+                            <div className="text-sm text-gray-600">{customer.email}</div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(customer.created * 1000).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {stripeData.customers.length > 3 && (
+                      <div className="text-sm text-gray-500 text-center py-2">
+                        ... and {(stripeData.customers.length - 3).toLocaleString()} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Other Stripe Data */}
+              {Object.entries(stripeData)
+                .filter(([dataType]) => dataType !== 'customers' && dataType !== 'plans')
+                .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
                     {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({dataArray.length.toLocaleString()})
@@ -1515,7 +1547,7 @@ export default function Home() {
                               </span>
                               <span className="text-sm text-gray-900">
                                 {typeof value === 'number' && key.includes('amount') 
-                                  ? `$${(value / 100).toFixed(2)}`
+                                  ? `$${(value / 100).toFixed(0)}`
                                   : typeof value === 'number' && key.includes('created')
                                   ? new Date(value * 1000).toLocaleDateString()
                                   : typeof value === 'string' && value.length > 30

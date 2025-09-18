@@ -122,25 +122,27 @@ export function generateCursorPrompt(url: string, datasetInfo: DatasetInfo): Int
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, charges, subscriptions, invoices, stripeData } = useSynthkitDataset();
+const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
 // Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: charges, subscriptions, invoices, stripeData
+// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
 \`\`\`
 
 **Integration Steps:**
 1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, charges, subscriptions, invoices } = useSynthkitDataset();\`
+2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
 3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`charges\`, \`subscriptions\`, \`invoices\` for payment-related features
+4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
 5. Add loading states: Show loading UI when \`loading\` is true
 6. Handle errors: Display error message when \`error\` exists
 7. For uncovered features: Create data that matches the dataset's patterns and relationships
 
 **Stripe Integration Examples:**
-- Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
+- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
+- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
+- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
+- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
+- Show subscription plans: \`plans.map(plan => ...)\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -281,25 +283,27 @@ export function generateClaudeIntegration(url: string, datasetInfo: DatasetInfo)
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, charges, subscriptions, invoices, stripeData } = useSynthkitDataset();
+const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
 // Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: charges, subscriptions, invoices, stripeData
+// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
 \`\`\`
 
 **Integration Steps:**
 1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, charges, subscriptions, invoices } = useSynthkitDataset();\`
+2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
 3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`charges\`, \`subscriptions\`, \`invoices\` for payment-related features
+4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
 5. Add loading states: Show loading UI when \`loading\` is true
 6. Handle errors: Display error message when \`error\` exists
 7. For uncovered features: Create data that matches the dataset's patterns and relationships
 
 **Stripe Integration Examples:**
-- Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
+- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
+- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
+- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
+- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
+- Show subscription plans: \`plans.map(plan => ...)\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -336,25 +340,27 @@ export function generateChatGPTIntegration(url: string, datasetInfo: DatasetInfo
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, charges, subscriptions, invoices, stripeData } = useSynthkitDataset();
+const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
 // Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: charges, subscriptions, invoices, stripeData
+// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
 \`\`\`
 
 **Integration Steps:**
 1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, charges, subscriptions, invoices } = useSynthkitDataset();\`
+2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
 3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`charges\`, \`subscriptions\`, \`invoices\` for payment-related features
+4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
 5. Add loading states: Show loading UI when \`loading\` is true
 6. Handle errors: Display error message when \`error\` exists
 7. For uncovered features: Create data that matches the dataset's patterns and relationships
 
 **Stripe Integration Examples:**
-- Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
+- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
+- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
+- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
+- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
+- Show subscription plans: \`plans.map(plan => ...)\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 

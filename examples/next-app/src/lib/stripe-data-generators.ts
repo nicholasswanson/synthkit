@@ -622,20 +622,13 @@ export function generateStripeDataForPersona(
   persona: any, 
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
-  const defaultCounts = {
-    charges: 50,
-    subscriptions: 20,
-    invoices: 30,
-    ...counts
-  };
+  // Import the realistic generator
+  const { generateRealisticStripeData } = require('./realistic-stripe-generator');
   
-  // Generate customer IDs for relationships
-  const customerIds = Array.from({ length: 20 }, () => generateStripeId('cus'));
-  const subscriptionIds = Array.from({ length: defaultCounts.subscriptions }, () => generateStripeId('sub'));
+  // Determine business type from persona
+  const businessType = persona.businessContext?.domain?.includes('saas') ? 'saas' :
+                      persona.businessContext?.domain?.includes('ecommerce') ? 'ecommerce' :
+                      persona.businessContext?.domain?.includes('marketplace') ? 'marketplace' : 'saas';
   
-  return {
-    charges: generateCharges(defaultCounts.charges, customerIds),
-    subscriptions: generateSubscriptions(defaultCounts.subscriptions, customerIds),
-    invoices: generateInvoices(defaultCounts.invoices, customerIds, subscriptionIds)
-  };
+  return generateRealisticStripeData(businessType, counts);
 }

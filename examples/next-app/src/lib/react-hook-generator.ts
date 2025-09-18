@@ -4,6 +4,21 @@
 import type { DatasetInfo } from './ai-integrations';
 import type { StripeCharge, StripeSubscription, StripeInvoice } from './stripe-data-generators';
 
+interface StripeCustomer {
+  id: string;
+  name: string;
+  email: string;
+  created: number;
+}
+
+interface StripePlan {
+  id: string;
+  name: string;
+  amount: number;
+  interval: string;
+  currency: string;
+}
+
 // Business context mapping for better AI understanding
 const BUSINESS_CONTEXTS = {
   modaic: { name: 'Fashion E-commerce', domain: 'retail', complexity: 'medium' },
@@ -72,9 +87,11 @@ export interface Dataset {
 ${Object.keys(recordCounts).map(key => `  ${key}: ${key.charAt(0).toUpperCase() + key.slice(1, -1)}[];`).join('\n')}
   businessMetrics: BusinessMetrics;
   stripeData?: {
+    customers?: StripeCustomer[];
     charges?: StripeCharge[];
     subscriptions?: StripeSubscription[];
     invoices?: StripeInvoice[];
+    plans?: StripePlan[];
   };
 }`;
 }
@@ -155,9 +172,11 @@ export function useSynthkitDataset() {
 
   // Stripe data access helpers
   const stripeData = data?.stripeData;
+  const customers = stripeData?.customers || [];
   const charges = stripeData?.charges || [];
   const subscriptions = stripeData?.subscriptions || [];
   const invoices = stripeData?.invoices || [];
+  const plans = stripeData?.plans || [];
 
   return { 
     data, 
@@ -166,15 +185,17 @@ export function useSynthkitDataset() {
     source,
     // Stripe data access
     stripeData,
+    customers,
     charges,
     subscriptions,
-    invoices
+    invoices,
+    plans
   };
 }
 
 // Usage in your component:
 export function MyPrototype() {
-  const { data, loading, error, source, charges, subscriptions, invoices } = useSynthkitDataset();
+  const { data, loading, error, source, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();
 
   if (loading) return <div>Loading ${recordSummary}...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -192,6 +213,12 @@ export function MyPrototype() {
       <p>CLV: \${data.businessMetrics.customerLifetimeValue.toFixed(2)}</p>
       
       {/* Stripe Data Display */}
+      {customers.length > 0 && (
+        <div>
+          <h2>Stripe Customers</h2>
+          <p>{customers.length} customers available</p>
+        </div>
+      )}
       {charges.length > 0 && (
         <div>
           <h2>Recent Charges</h2>
@@ -208,6 +235,12 @@ export function MyPrototype() {
         <div>
           <h2>Recent Invoices</h2>
           <p>{invoices.length} invoices available</p>
+        </div>
+      )}
+      {plans.length > 0 && (
+        <div>
+          <h2>Subscription Plans</h2>
+          <p>{plans.length} plans available</p>
         </div>
       )}
     </div>
