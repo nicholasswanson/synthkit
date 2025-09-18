@@ -1067,7 +1067,7 @@ export default function Home() {
       };
       
       const fileKey = personaFileMapping[selectedCategory] || selectedCategory;
-      return `/datasets/scenario-${fileKey}-${role}-${stage}-${scenarioId}.json`;
+      return `/api/dataset/scenario-${fileKey}-${role}-${stage}-${scenarioId}`;
     }
   };
 
