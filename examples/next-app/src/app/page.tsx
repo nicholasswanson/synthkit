@@ -1397,7 +1397,7 @@ export default function Home() {
                   {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData?.length?.toLocaleString() || 0})
                 </h3>
                 <div className="space-y-2">
-                  {entityData.slice(0, 3).map((item: any) => (
+                  {(entityData || []).slice(0, 3).map((item: any) => (
                     <div key={item.id} className="p-2 bg-gray-50 rounded">
                       <div className="space-y-1">
                         {Object.entries(item).slice(0, 4).map(([key, value]) => (
@@ -1435,7 +1435,7 @@ export default function Home() {
                   Customers ({(customers?.length || 0).toLocaleString()})
                 </h3>
                 <div className="space-y-2">
-                  {customers.slice(0, 3).map((customer) => (
+                  {(customers || []).slice(0, 3).map((customer) => (
                     <div key={customer.id} className="p-2 bg-gray-50 rounded">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -1479,7 +1479,7 @@ export default function Home() {
                   Payments ({(payments?.length || 0).toLocaleString()})
                 </h3>
                 <div className="space-y-2">
-                  {payments.slice(0, 3).map((payment) => (
+                  {(payments || []).slice(0, 3).map((payment) => (
                     <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                       <div>
                         <div className="font-medium text-gray-900">
@@ -1536,7 +1536,7 @@ export default function Home() {
                     Customers ({(stripeData.customers?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
-                    {stripeData.customers.slice(0, 3).map((customer: any, index: number) => (
+                    {(stripeData.customers || []).slice(0, 3).map((customer: any, index: number) => (
                       <div key={customer.id || index} className="p-2 bg-gray-50 rounded">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -1567,7 +1567,7 @@ export default function Home() {
                     {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({(dataArray?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
-                    {dataArray.slice(0, 3).map((item: any, index: number) => (
+                    {(dataArray || []).slice(0, 3).map((item: any, index: number) => (
                       <div key={item.id || index} className="p-2 bg-gray-50 rounded">
                         <div className="space-y-1">
                           {Object.entries(item).slice(0, 6).map(([key, value]) => (
@@ -1592,7 +1592,7 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
-                    {dataArray.length > 3 && (
+                    {(dataArray?.length || 0) > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
                         ... and {((dataArray?.length || 0) - 3).toLocaleString()} more
                       </div>
