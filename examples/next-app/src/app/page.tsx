@@ -1567,14 +1567,14 @@ export default function Home() {
 
               {/* Other Stripe Data */}
               {Object.entries(stripeData)
-                .filter(([dataType]) => dataType !== 'customers' && dataType !== 'plans')
+                .filter(([dataType]) => dataType !== 'customers' && dataType !== 'plans' && dataType !== '_metadata')
                 .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
                     {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({(dataArray?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
-                    {(dataArray || []).slice(0, 3).map((item: any, index: number) => (
+                    {Array.isArray(dataArray) ? dataArray.slice(0, 3).map((item: any, index: number) => (
                       <div key={item.id || index} className="p-2 bg-gray-50 rounded">
                         <div className="space-y-1">
                           {Object.entries(item).slice(0, 6).map(([key, value]) => (
@@ -1598,8 +1598,12 @@ export default function Home() {
                           ))}
                         </div>
                       </div>
-                    ))}
-                    {(dataArray?.length || 0) > 3 && (
+                    )) : (
+                      <div className="text-sm text-gray-500 text-center py-2">
+                        No data available
+                      </div>
+                    )}
+                    {Array.isArray(dataArray) && (dataArray?.length || 0) > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
                         ... and {((dataArray?.length || 0) - 3).toLocaleString()} more
                       </div>
