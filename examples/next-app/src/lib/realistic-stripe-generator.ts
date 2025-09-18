@@ -131,45 +131,48 @@ export function generateRealisticStripeData(
   // Generate realistic volumes based on business type and stage
   const getRealisticCounts = (type: string) => {
     const baseCounts = {
-      // E-commerce: high volume, mixed payments
-      'checkout e-commerce': { customers: 2500, subscriptions: 0, charges: 5000, invoices: 2500 },
-      // B2B SaaS: moderate customers, high subscriptions
-      'b2b saas subscriptions': { customers: 1200, subscriptions: 800, charges: 2400, invoices: 1200 },
-      // Food delivery: very high volume, low subscriptions
-      'food delivery platform': { customers: 3000, subscriptions: 0, charges: 6000, invoices: 3000 },
-      // Consumer fitness: moderate volume, mixed payments
-      'consumer fitness app': { customers: 1800, subscriptions: 1200, charges: 3600, invoices: 1800 },
-      // B2B invoicing: moderate volume, high invoices
-      'b2b invoicing': { customers: 800, subscriptions: 0, charges: 1600, invoices: 1200 },
-      // Property management: low volume, high value
-      'property management platform': { customers: 400, subscriptions: 0, charges: 800, invoices: 600 },
-      // Creator platform: high volume, mixed payments
-      'creator platform': { customers: 2000, subscriptions: 0, charges: 4000, invoices: 2000 },
-      // Donation marketplace: moderate volume, mixed payments
-      'donation marketplace': { customers: 1500, subscriptions: 0, charges: 3000, invoices: 1500 },
+      // E-commerce: high volume, mixed payments (growth stage = mid-market)
+      'checkout e-commerce': { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
+      // B2B SaaS: moderate customers, high subscriptions (growth stage = mid-market)
+      'b2b saas subscriptions': { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
+      // Food delivery: very high volume, low subscriptions (growth stage = mid-market)
+      'food delivery platform': { customers: 50000, subscriptions: 0, charges: 300000, invoices: 50000 },
+      // Consumer fitness: moderate volume, mixed payments (growth stage = mid-market)
+      'consumer fitness app': { customers: 15000, subscriptions: 25000, charges: 75000, invoices: 15000 },
+      // B2B invoicing: moderate volume, high invoices (growth stage = mid-market)
+      'b2b invoicing': { customers: 3000, subscriptions: 0, charges: 15000, invoices: 12000 },
+      // Property management: low volume, high value (growth stage = mid-market)
+      'property management platform': { customers: 2000, subscriptions: 0, charges: 10000, invoices: 8000 },
+      // Creator platform: high volume, mixed payments (growth stage = mid-market)
+      'creator platform': { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 },
+      // Donation marketplace: moderate volume, mixed payments (growth stage = mid-market)
+      'donation marketplace': { customers: 20000, subscriptions: 0, charges: 120000, invoices: 20000 },
       // Legacy mappings for backward compatibility
-      saas: { customers: 1200, subscriptions: 800, charges: 2400, invoices: 1200 },
-      ecommerce: { customers: 2500, subscriptions: 0, charges: 5000, invoices: 2500 },
-      marketplace: { customers: 1800, subscriptions: 0, charges: 3600, invoices: 1800 }
+      saas: { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
+      ecommerce: { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
+      marketplace: { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 }
     };
     
     const businessCounts = baseCounts[type.toLowerCase() as keyof typeof baseCounts] || baseCounts.saas;
     
     // Apply stage multipliers for realistic scaling
     const stageMultipliers = {
-      early: 0.3,    // 30% of growth stage
-      growth: 1.0,   // Base stage
-      enterprise: 3.0 // 3x growth stage
+      early: 0.1,     // 10% of growth stage (startup phase)
+      growth: 1.0,    // Base stage (mid-market)
+      enterprise: 20.0 // 20x growth stage (enterprise scale)
     };
     
     const stageMultiplier = stageMultipliers[stage as keyof typeof stageMultipliers] || 1.0;
     
     // Add some randomness (±20%) to make it more realistic
+    // For enterprise stage, add additional variation to simulate real-world complexity
+    const enterpriseVariation = stage === 'enterprise' ? (0.7 + Math.random() * 0.6) : 1.0;
+    
     return {
-      customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4)),
-      subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4)),
-      charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4)),
-      invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4))
+      customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation)
     };
   };
   
