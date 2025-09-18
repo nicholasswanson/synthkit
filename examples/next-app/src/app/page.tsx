@@ -1537,7 +1537,7 @@ export default function Home() {
             )}
             <div className="space-y-6">
               {/* Customers */}
-              {stripeData.customers && (
+              {stripeData.customers && stripeData.customers.length > 0 && (
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
                     Customers ({(stripeData.customers?.length || 0).toLocaleString()})
@@ -1567,7 +1567,13 @@ export default function Home() {
 
               {/* Other Stripe Data */}
               {Object.entries(stripeData)
-                .filter(([dataType]) => dataType !== 'customers' && dataType !== 'plans' && dataType !== '_metadata')
+                .filter(([dataType, dataArray]) => 
+                  dataType !== 'customers' && 
+                  dataType !== 'plans' && 
+                  dataType !== '_metadata' && 
+                  Array.isArray(dataArray) && 
+                  dataArray.length > 0
+                )
                 .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
