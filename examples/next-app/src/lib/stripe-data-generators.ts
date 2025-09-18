@@ -368,16 +368,18 @@ export interface StripeInvoice {
 
 // Utility functions
 function generateStripeId(prefix: string): string {
-  return `${prefix}_${seededRandom().toString(36).substring(2, 15)}${seededRandom().toString(36).substring(2, 15)}`;
+  const seed1 = Math.random() * 1000000;
+  const seed2 = Math.random() * 1000000;
+  return `${prefix}_${seededRandom(seed1).toString(36).substring(2, 15)}${seededRandom(seed2).toString(36).substring(2, 15)}`;
 }
 
 function generateCardBrand(): string {
   const brands = ['visa', 'mastercard', 'amex', 'discover'];
-  return brands[Math.floor(seededRandom() * brands.length)];
+  return brands[Math.floor(seededRandom(Math.random() * 1000000) * brands.length)];
 }
 
 function generateCardLast4(): string {
-  return Math.floor(seededRandom() * 9000 + 1000).toString();
+  return Math.floor(seededRandom(Math.random() * 1000000) * 9000 + 1000).toString();
 }
 
 // Data generators
@@ -387,9 +389,10 @@ export function generateCharges(count: number, customerIds: string[] = []): Stri
   const currencies = ['usd', 'eur', 'gbp'];
   
   for (let i = 0; i < count; i++) {
-    const amount = Math.floor(seededRandom() * 10000 + 100); // $1.00 to $100.00
-    const status = statuses[Math.floor(seededRandom() * statuses.length)];
-    const currency = currencies[Math.floor(seededRandom() * currencies.length)];
+    const seed = i * 1000;
+    const amount = Math.floor(seededRandom(seed) * 10000 + 100); // $1.00 to $100.00
+    const status = statuses[Math.floor(seededRandom(seed + 1) * statuses.length)];
+    const currency = currencies[Math.floor(seededRandom(seed + 2) * currencies.length)];
     const brand = generateCardBrand();
     const last4 = generateCardLast4();
     
@@ -412,10 +415,10 @@ export function generateCharges(count: number, customerIds: string[] = []): Stri
         name: `Customer ${i + 1}`
       },
       captured: status === 'succeeded',
-      created: Math.floor(Date.now() / 1000) - Math.floor(seededRandom() * 86400 * 30), // Last 30 days
+      created: Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 5) * 86400 * 30), // Last 30 days
       currency,
-      customer: customerIds[Math.floor(seededRandom() * customerIds.length)] || generateStripeId('cus'),
-      description: `Payment for order #${Math.floor(seededRandom() * 10000)}`,
+      customer: customerIds[Math.floor(seededRandom(seed + 3) * customerIds.length)] || generateStripeId('cus'),
+      description: `Payment for order #${Math.floor(seededRandom(seed + 4) * 10000)}`,
       disputed: false,
       failure_code: status === 'failed' ? 'card_declined' : undefined,
       failure_message: status === 'failed' ? 'Your card was declined.' : undefined,
@@ -437,8 +440,8 @@ export function generateCharges(count: number, customerIds: string[] = []): Stri
             cvc_check: 'pass'
           },
           country: 'US',
-          exp_month: Math.floor(seededRandom() * 12) + 1,
-          exp_year: new Date().getFullYear() + Math.floor(seededRandom() * 5),
+          exp_month: Math.floor(seededRandom(seed + 6) * 12) + 1,
+          exp_year: new Date().getFullYear() + Math.floor(seededRandom(seed + 7) * 5),
           fingerprint: generateStripeId('fp'),
           funding: 'credit',
           last4,
@@ -467,10 +470,11 @@ export function generateSubscriptions(count: number, customerIds: string[] = [])
   const intervals = ['month', 'year'];
   
   for (let i = 0; i < count; i++) {
-    const status = statuses[Math.floor(seededRandom() * statuses.length)];
-    const interval = intervals[Math.floor(seededRandom() * intervals.length)];
-    const created = Math.floor(Date.now() / 1000) - Math.floor(seededRandom() * 86400 * 365); // Last year
-    const currentPeriodStart = created + Math.floor(seededRandom() * 86400 * 30);
+    const seed = i * 2000;
+    const status = statuses[Math.floor(seededRandom(seed) * statuses.length)];
+    const interval = intervals[Math.floor(seededRandom(seed + 1) * intervals.length)];
+    const created = Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 365); // Last year
+    const currentPeriodStart = created + Math.floor(seededRandom(seed + 3) * 86400 * 30);
     const currentPeriodEnd = currentPeriodStart + (interval === 'month' ? 86400 * 30 : 86400 * 365);
     
     subscriptions.push({
@@ -486,7 +490,7 @@ export function generateSubscriptions(count: number, customerIds: string[] = [])
       currency: 'usd',
       current_period_end: currentPeriodEnd,
       current_period_start: currentPeriodStart,
-      customer: customerIds[Math.floor(seededRandom() * customerIds.length)] || generateStripeId('cus'),
+      customer: customerIds[Math.floor(seededRandom(seed + 4) * customerIds.length)] || generateStripeId('cus'),
       default_tax_rates: [],
       items: {
         object: 'list',
@@ -499,12 +503,12 @@ export function generateSubscriptions(count: number, customerIds: string[] = [])
             id: generateStripeId('plan'),
             object: 'plan',
             active: true,
-            amount: Math.floor(seededRandom() * 5000 + 1000), // $10 to $50
-            amount_decimal: (Math.floor(seededRandom() * 5000 + 1000)).toString(),
+            amount: Math.floor(seededRandom(seed + 5) * 5000 + 1000), // $10 to $50
+            amount_decimal: (Math.floor(seededRandom(seed + 6) * 5000 + 1000)).toString(),
             billing_scheme: 'per_unit',
             created,
             currency: 'usd',
-            interval,
+            interval: interval as 'day' | 'week' | 'month' | 'year',
             interval_count: 1,
             livemode: false,
             metadata: {},
@@ -528,7 +532,7 @@ export function generateSubscriptions(count: number, customerIds: string[] = [])
             },
             tax_behavior: 'unspecified',
             type: 'recurring',
-            unit_amount: Math.floor(seededRandom() * 5000 + 1000)
+            unit_amount: Math.floor(seededRandom(seed + 7) * 5000 + 1000)
           },
           quantity: 1,
           subscription: generateStripeId('sub'),
@@ -556,9 +560,10 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
   const statuses = ['paid', 'open', 'draft', 'void'];
   
   for (let i = 0; i < count; i++) {
-    const status = statuses[Math.floor(seededRandom() * statuses.length)];
-    const amount = Math.floor(seededRandom() * 10000 + 1000); // $10 to $100
-    const created = Math.floor(Date.now() / 1000) - Math.floor(seededRandom() * 86400 * 30);
+    const seed = i * 3000;
+    const status = statuses[Math.floor(seededRandom(seed) * statuses.length)];
+    const amount = Math.floor(seededRandom(seed + 1) * 10000 + 1000); // $10 to $100
+    const created = Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 30);
     const periodStart = created - 86400 * 30;
     const periodEnd = created;
     
@@ -576,7 +581,7 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
       collection_method: 'charge_automatically',
       created,
       currency: 'usd',
-      customer: customerIds[Math.floor(seededRandom() * customerIds.length)] || generateStripeId('cus'),
+      customer: customerIds[Math.floor(seededRandom(seed + 3) * customerIds.length)] || generateStripeId('cus'),
       default_tax_rates: [],
       description: `Invoice for subscription ${i + 1}`,
       lines: {
@@ -600,7 +605,7 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
       starting_balance: 0,
       status: status as 'draft' | 'open' | 'paid' | 'uncollectible' | 'void',
       status_transitions: {},
-      subscription: subscriptionIds[Math.floor(seededRandom() * subscriptionIds.length)] || generateStripeId('sub'),
+      subscription: subscriptionIds[Math.floor(seededRandom(seed + 4) * subscriptionIds.length)] || generateStripeId('sub'),
       subtotal: amount,
       subtotal_excluding_tax: amount,
       total: amount,

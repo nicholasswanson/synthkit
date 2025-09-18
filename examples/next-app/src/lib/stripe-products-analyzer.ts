@@ -201,8 +201,8 @@ export function analyzeStripeProducts(persona: any): StripeAnalysisResult {
   recommendedProducts.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
   
   // Collect all data objects and schema tables
-  const allDataObjects = [...new Set(recommendedProducts.flatMap(p => p.dataObjects))];
-  const allSchemaTables = [...new Set(recommendedProducts.flatMap(p => p.schemaTables))];
+  const allDataObjects = Array.from(new Set(recommendedProducts.flatMap(p => p.dataObjects)));
+  const allSchemaTables = Array.from(new Set(recommendedProducts.flatMap(p => p.schemaTables)));
   
   return {
     recommendedProducts,
@@ -215,7 +215,13 @@ export function analyzeStripeProducts(persona: any): StripeAnalysisResult {
 
 // Function to get Stripe product details by key
 export function getStripeProductDetails(productKey: string): StripeProduct | null {
-  return STRIPE_PRODUCTS[productKey as keyof typeof STRIPE_PRODUCTS] || null;
+  const product = STRIPE_PRODUCTS[productKey as keyof typeof STRIPE_PRODUCTS];
+  if (!product) return null;
+  
+  return {
+    ...product,
+    priority: product.priority as 'essential' | 'recommended' | 'optional'
+  };
 }
 
 // Function to get all Stripe products

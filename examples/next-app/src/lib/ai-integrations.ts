@@ -140,7 +140,7 @@ const { data, loading, error, charges, subscriptions, invoices, stripeData } = u
 - Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
 - Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
 - List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`$${(charge.amount / 100).toFixed(2)}\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -299,7 +299,7 @@ const { data, loading, error, charges, subscriptions, invoices, stripeData } = u
 - Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
 - Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
 - List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`$${(charge.amount / 100).toFixed(2)}\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -354,7 +354,7 @@ const { data, loading, error, charges, subscriptions, invoices, stripeData } = u
 - Display recent charges: \`charges.slice(0, 10).map(charge => ...)\`
 - Show active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
 - List recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Format amounts: \`$${(charge.amount / 100).toFixed(2)}\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(2)}\`
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
