@@ -314,7 +314,19 @@ export function generateRealisticStripeData(
     subscriptions,
     invoices,
     charges,
-    plans
+    plans,
+    // Add metadata to help with debugging
+    _metadata: {
+      generatedAt: new Date().toISOString(),
+      businessType,
+      counts: {
+        customers: customers.length,
+        subscriptions: subscriptions.length,
+        invoices: invoices.length,
+        charges: charges.length,
+        plans: plans.length
+      }
+    }
   };
 }
 

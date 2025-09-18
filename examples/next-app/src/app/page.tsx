@@ -1499,6 +1499,13 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Stripe Data ({Object.keys(stripeData).length} types)
             </h3>
+            {stripeData._metadata && (
+              <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                Generated: {new Date(stripeData._metadata.generatedAt).toLocaleString()} | 
+                Business: {stripeData._metadata.businessType} | 
+                Counts: {Object.entries(stripeData._metadata.counts).map(([key, value]) => `${key}: ${value}`).join(', ')}
+              </div>
+            )}
             <div className="space-y-6">
               {/* Customers */}
               {stripeData.customers && (
