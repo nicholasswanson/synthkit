@@ -20,8 +20,46 @@ import {
   type Payment,
   type Address
 } from '@/lib/realistic-data-generator';
+import { analyzeStripeProducts, type StripeAnalysisResult } from '@/lib/stripe-products-analyzer';
+import { generateStripeDataForPersona } from '@/lib/stripe-data-generators';
 
 // Customer and Payment interfaces are now imported from realistic-data-generator
+
+// Enhanced persona interface with Stripe data
+interface EnhancedPersona {
+  name: string;
+  businessContext: any;
+  entities: any[];
+  keyFeatures: string[];
+  userRoles: any[];
+  stripeAnalysis?: StripeAnalysisResult;
+  stripeData?: Record<string, any[]>;
+}
+
+// Function to enhance persona with Stripe data
+function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
+  const stripeAnalysis = analyzeStripeProducts(persona);
+  const stripeData = generateStripeDataForPersona(persona);
+  
+  // Add Stripe entities to the existing entities
+  const stripeEntities = stripeAnalysis.allDataObjects.map(objectName => ({
+    name: objectName,
+    type: 'stripe_object',
+    properties: [
+      { name: 'id', type: 'string', description: `Stripe ${objectName} ID` },
+      { name: 'created', type: 'number', description: 'Unix timestamp when created' },
+      { name: 'amount', type: 'number', description: 'Amount in cents' },
+      { name: 'status', type: 'string', description: 'Current status' }
+    ]
+  }));
+  
+  return {
+    ...persona,
+    stripeAnalysis,
+    stripeData,
+    entities: [...persona.entities, ...stripeEntities]
+  };
+}
 
 interface RealisticVolume {
   min: number;
@@ -325,6 +363,14 @@ const PREDEFINED_PERSONAS = {
   }
 };
 
+// Enhanced personas with Stripe data
+const ENHANCED_PERSONAS = Object.fromEntries(
+  Object.entries(PREDEFINED_PERSONAS).map(([key, persona]) => [
+    key,
+    enhancePersonaWithStripeData(persona)
+  ])
+);
+
 // seededRandom is now imported from realistic-data-generator
 
 // Generate short hash for custom categories
@@ -603,7 +649,7 @@ export default function Home() {
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {
-    return !PREDEFINED_PERSONAS.hasOwnProperty(categoryId);
+    return !ENHANCED_PERSONAS.hasOwnProperty(categoryId);
   };
 
   const getCustomCategory = (categoryId: string): CustomCategory | undefined => {
@@ -615,7 +661,7 @@ export default function Home() {
       const customCat = getCustomCategory(selectedCategory);
       return customCat?.aiAnalysis?.businessContext;
     }
-    return PREDEFINED_PERSONAS[selectedCategory as keyof typeof PREDEFINED_PERSONAS]?.businessContext;
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.businessContext;
   };
 
   const getCurrentEntities = () => {
@@ -623,7 +669,7 @@ export default function Home() {
       const customCat = getCustomCategory(selectedCategory);
       return customCat?.aiAnalysis?.entities || [];
     }
-    return PREDEFINED_PERSONAS[selectedCategory as keyof typeof PREDEFINED_PERSONAS]?.entities || [];
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.entities || [];
   };
 
   const getCurrentKeyFeatures = () => {
@@ -631,7 +677,7 @@ export default function Home() {
       const customCat = getCustomCategory(selectedCategory);
       return customCat?.aiAnalysis?.keyFeatures || [];
     }
-    return PREDEFINED_PERSONAS[selectedCategory as keyof typeof PREDEFINED_PERSONAS]?.keyFeatures || [];
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.keyFeatures || [];
   };
 
   const getCurrentUserRoles = () => {
@@ -639,7 +685,16 @@ export default function Home() {
       const customCat = getCustomCategory(selectedCategory);
       return customCat?.aiAnalysis?.userRoles || [];
     }
-    return PREDEFINED_PERSONAS[selectedCategory as keyof typeof PREDEFINED_PERSONAS]?.userRoles || [];
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.userRoles || [];
+  };
+
+  // New function to get Stripe analysis for current persona
+  const getCurrentStripeAnalysis = () => {
+    if (isCustomCategory(selectedCategory)) {
+      // For custom categories, we'd need to analyze them too
+      return null;
+    }
+    return ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]?.stripeAnalysis;
   };
 
   // Generate realistic dynamic entity data based on AI analysis
@@ -1070,7 +1125,7 @@ export default function Home() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             >
               {/* Predefined personas */}
-              {Object.entries(PREDEFINED_PERSONAS).map(([key, persona]) => (
+              {Object.entries(ENHANCED_PERSONAS).map(([key, persona]) => (
                 <option key={key} value={key}>
                   {persona.name}
                 </option>
@@ -1221,7 +1276,7 @@ export default function Home() {
                 <div className="font-medium text-purple-800">{role.name}</div>
                 <div className="text-sm text-gray-600">{role.description}</div>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {(role.permissions || []).map((permission, j) => (
+                  {(role.permissions || []).map((permission: string, j: number) => (
                     <span key={j} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
                       {permission}
                     </span>
@@ -1231,6 +1286,39 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Stripe Products Used */}
+        {getCurrentStripeAnalysis() && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Stripe Products Used
+            </h3>
+            <div className="space-y-3">
+              {getCurrentStripeAnalysis()?.recommendedProducts.map((product, i) => (
+                <div key={i} className={`border-l-4 pl-4 ${
+                  product.priority === 'essential' ? 'border-red-500' :
+                  product.priority === 'recommended' ? 'border-yellow-500' :
+                  'border-gray-400'
+                }`}>
+                  <div className={`font-medium ${
+                    product.priority === 'essential' ? 'text-red-800' :
+                    product.priority === 'recommended' ? 'text-yellow-800' :
+                    'text-gray-800'
+                  }`}>
+                    {product.name}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-1">{product.description}</div>
+                  <div className="text-xs text-gray-500">
+                    Priority: {product.priority}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Data Objects: {product.dataObjects.join(', ')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Data Entities */}
         <div className="mb-8">
@@ -1243,7 +1331,7 @@ export default function Home() {
                 <div className="font-medium text-gray-900">{entity.name}</div>
                 <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
                 <div className="space-y-1">
-                  {(entity.properties || []).map((prop, j) => (
+                  {(entity.properties || []).map((prop: any, j: number) => (
                     <div key={j} className="text-sm">
                       <span className="font-medium">{prop.name}</span>
                       <span className="text-gray-500"> ({prop.type})</span>
