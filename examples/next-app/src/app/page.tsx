@@ -1028,8 +1028,20 @@ export default function Home() {
     if (isCustomCategory(selectedCategory)) {
       return '/datasets/ai-generated-custom-dataset.json';
     } else {
-      const categorySlug = selectedCategory.replace(/-/g, '-');
-      return `/datasets/scenario-${categorySlug}-${role}-${stage}-${scenarioId}.json`;
+      // Map new persona keys to old file names for backward compatibility
+      const personaFileMapping: Record<string, string> = {
+        'checkout-ecommerce': 'modaic',
+        'b2b-saas-subscriptions': 'stratus', 
+        'food-delivery-platform': 'forksy',
+        'consumer-fitness-app': 'pulseon',
+        'b2b-invoicing': 'procura',
+        'property-management-platform': 'keynest',
+        'creator-platform': 'fluxly',
+        'donation-marketplace': 'brightfund'
+      };
+      
+      const fileKey = personaFileMapping[selectedCategory] || selectedCategory;
+      return `/datasets/scenario-${fileKey}-${role}-${stage}-${scenarioId}.json`;
     }
   };
 
