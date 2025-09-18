@@ -1497,11 +1497,22 @@ export default function Home() {
           )}
         </div>
 
+        {/* Debug: Show stripeData state */}
+        <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug: Stripe Data State</h3>
+          <p className="text-sm text-yellow-700">
+            Keys: {Object.keys(stripeData).join(', ')} | 
+            Count: {Object.keys(stripeData).length} | 
+            Has customers: {stripeData.customers ? 'Yes' : 'No'} | 
+            Customers count: {stripeData.customers?.length || 0}
+          </p>
+        </div>
+
         {/* Stripe Data Lists */}
         {Object.keys(stripeData).length > 0 && (
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Stripe Data
+              Stripe Data ({Object.keys(stripeData).length} types)
             </h3>
             <div className="space-y-6">
               {/* Customers */}
