@@ -94,6 +94,9 @@ export function generateRealisticStripeData(
   for (let i = 0; i < counts.customers; i++) {
     customers.push(generateCustomer(i * 1000));
   }
+  
+  // Store customer IDs for easy lookup
+  const customerIds = customers.map(c => c.id);
 
   // Generate subscription plans
   const plans = [];
@@ -196,14 +199,17 @@ export function generateRealisticStripeData(
 
   // Generate charges linked to invoices and customers
   const charges = [];
+  const usedInvoices = new Set();
   
-  for (let i = 0; i < counts.charges; i++) {
+  // First, generate charges for all invoices (1:1 relationship)
+  for (let i = 0; i < Math.min(counts.charges, invoices.length); i++) {
     const seed = i * 5000;
-    const invoice = invoices[Math.floor(seededRandom(seed) * invoices.length)];
+    const invoice = invoices[i];
     const customer = customers.find(c => c.id === invoice.customer);
+    usedInvoices.add(invoice.id);
     
     const chargeId = `ch_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
-    const invoiceAmount = invoice?.amount || 0;
+    const invoiceAmount = invoice?.total || 0;
     const created = invoice?.created || Math.floor(Date.now() / 1000);
     
     const statuses = ['succeeded', 'pending', 'failed'];
@@ -213,7 +219,7 @@ export function generateRealisticStripeData(
     const isOneTime = Math.random() < 0.3; // 30% one-time payments
     const oneTimeAmount = isOneTime ? generateRealisticAmount(businessType, 'oneTime', seed + 4) : 0;
     
-    // Ensure amount is valid
+    // Ensure amount is valid - charges should match invoice amounts
     const validAmount = isOneTime ? oneTimeAmount : (isNaN(invoiceAmount) || invoiceAmount <= 0 ? generateRealisticAmount(businessType, 'subscription', seed + 5) : invoiceAmount);
     
     charges.push({
@@ -234,6 +240,49 @@ export function generateRealisticStripeData(
       metadata: {
         customer_name: customer!.name,
         payment_type: isOneTime ? 'one_time' : 'subscription'
+      },
+      payment_method_details: {
+        type: 'card',
+        card: {
+          brand: ['visa', 'mastercard', 'amex'][Math.floor(seededRandom(seed + 5) * 3)],
+          last4: Math.floor(seededRandom(seed + 6) * 9000 + 1000).toString(),
+          exp_month: Math.floor(seededRandom(seed + 7) * 12) + 1,
+          exp_year: new Date().getFullYear() + Math.floor(seededRandom(seed + 8) * 3)
+        }
+      }
+    });
+  }
+  
+  // Generate additional one-time charges if needed
+  for (let i = invoices.length; i < counts.charges; i++) {
+    const seed = i * 5000;
+    const customer = customers[Math.floor(seededRandom(seed) * customers.length)];
+    
+    const chargeId = `ch_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
+    const oneTimeAmount = generateRealisticAmount(businessType, 'oneTime', seed + 4);
+    const created = Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 2) * 86400 * 30); // Last month
+    
+    const statuses = ['succeeded', 'pending', 'failed'];
+    const status = statuses[Math.floor(seededRandom(seed + 3) * statuses.length)];
+    
+    charges.push({
+      id: chargeId,
+      object: 'charge',
+      amount: oneTimeAmount,
+      amount_captured: status === 'succeeded' ? oneTimeAmount : 0,
+      amount_refunded: 0,
+      currency: 'usd',
+      customer: customer.id,
+      invoice: undefined, // One-time payment
+      description: `One-time payment from ${customer.name}`,
+      status,
+      created,
+      paid: status === 'succeeded',
+      captured: status === 'succeeded',
+      livemode: false,
+      metadata: {
+        customer_name: customer.name,
+        payment_type: 'one_time'
       },
       payment_method_details: {
         type: 'card',

@@ -544,11 +544,6 @@ export default function Home() {
   // Stripe data
   const [stripeData, setStripeData] = useState<Record<string, any[]>>({});
   
-  // Debug: Log stripeData changes
-  useEffect(() => {
-    console.log('Stripe data state changed:', Object.keys(stripeData), Object.fromEntries(Object.entries(stripeData).map(([key, value]) => [key, value.length])));
-  }, [stripeData]);
-  
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -616,28 +611,16 @@ export default function Home() {
 
   // Generate Stripe data when persona changes
   useEffect(() => {
-    console.log('=== Stripe Data useEffect Running ===');
-    console.log('Selected category:', selectedCategory);
-    console.log('Is custom category:', isCustomCategory(selectedCategory));
-    
     if (!isCustomCategory(selectedCategory)) {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-      console.log('Persona found:', !!persona);
-      console.log('Persona name:', persona?.name);
-      console.log('Persona has stripeData:', !!persona?.stripeData);
-      
       if (persona?.stripeData) {
-        console.log('Using existing stripeData');
         setStripeData(persona.stripeData);
       } else {
-        console.log('Generating new stripeData');
         // Generate Stripe data for the persona
         const generatedStripeData = generateStripeDataForPersona(persona);
-        console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
         setStripeData(generatedStripeData);
       }
     } else {
-      console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
   }, [selectedCategory]);
@@ -1509,16 +1492,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Debug: Show stripeData state */}
-        <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Debug: Stripe Data State</h3>
-          <p className="text-sm text-yellow-700">
-            Keys: {Object.keys(stripeData).join(', ')} | 
-            Count: {Object.keys(stripeData).length} | 
-            Has customers: {stripeData.customers ? 'Yes' : 'No'} | 
-            Customers count: {stripeData.customers?.length || 0}
-          </p>
-        </div>
 
         {/* Stripe Data Lists */}
         {Object.keys(stripeData).length > 0 && (
