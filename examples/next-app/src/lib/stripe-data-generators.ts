@@ -623,10 +623,11 @@ import { generateRealisticStripeData } from './realistic-stripe-generator.ts';
 // Main function to generate all Stripe data for a persona
 export function generateStripeDataForPersona(
   persona: any, 
+  stage: string = 'growth',
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
   // Use persona name directly for business type mapping
   const personaName = persona.name || '';
   
-  return generateRealisticStripeData(personaName, counts);
+  return generateRealisticStripeData(personaName, stage, counts);
 }

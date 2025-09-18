@@ -37,9 +37,9 @@ interface EnhancedPersona {
 }
 
 // Function to enhance persona with Stripe data
-function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
+function enhancePersonaWithStripeData(persona: any, stage: string = 'growth'): EnhancedPersona {
   const stripeAnalysis = analyzeStripeProducts(persona);
-  const stripeData = generateStripeDataForPersona(persona);
+  const stripeData = generateStripeDataForPersona(persona, stage);
   
   // Add Stripe entities to the existing entities
   const stripeEntities = stripeAnalysis.allDataObjects.map(objectName => ({
@@ -335,11 +335,15 @@ const PREDEFINED_PERSONAS = {
   }
 };
 
-// Enhanced personas with Stripe data
+// Base personas without Stripe data (generated dynamically)
 const ENHANCED_PERSONAS = Object.fromEntries(
   Object.entries(PREDEFINED_PERSONAS).map(([key, persona]) => [
     key,
-    enhancePersonaWithStripeData(persona)
+    {
+      ...persona,
+      stripeAnalysis: analyzeStripeProducts(persona),
+      // Stripe data will be generated dynamically based on stage
+    }
   ])
 );
 
@@ -585,16 +589,17 @@ export default function Home() {
     }
   }, [selectedCategory, stage, scenarioId, stripeData]);
 
-  // Generate Stripe data when persona changes
+  // Generate Stripe data when persona or stage changes
   useEffect(() => {
     console.log('=== Stripe Data useEffect Running ===');
     console.log('Selected category:', selectedCategory);
+    console.log('Stage:', stage);
     console.log('Is custom category:', isCustomCategory(selectedCategory));
     
     // Add a visible debug indicator
     const debugDiv = document.createElement('div');
     debugDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999; font-size: 12px;';
-    debugDiv.textContent = `Stripe useEffect running for: ${selectedCategory}`;
+    debugDiv.textContent = `Stripe useEffect running for: ${selectedCategory} (${stage})`;
     document.body.appendChild(debugDiv);
     setTimeout(() => debugDiv.remove(), 3000);
     
@@ -602,24 +607,14 @@ export default function Home() {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
       console.log('Persona found:', !!persona);
       console.log('Persona name:', persona?.name);
-      console.log('Persona has stripeData:', !!persona?.stripeData);
       
       try {
-        if (persona?.stripeData) {
-          console.log('Using existing stripeData');
-          setStripeData(persona.stripeData);
-        } else {
-          console.log('Generating new stripeData');
-          // Generate Stripe data for the persona
-          const generatedStripeData = generateStripeDataForPersona(persona);
-          console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
-          console.log('Generated stripeData sample:', {
-            customers: generatedStripeData.customers?.slice(0, 2),
-            subscriptions: generatedStripeData.subscriptions?.slice(0, 2),
-            charges: generatedStripeData.charges?.slice(0, 2)
-          });
-          setStripeData(generatedStripeData);
-        }
+        console.log('Generating new stripeData for stage:', stage);
+        // Generate Stripe data for the persona with current stage
+        const generatedStripeData = generateStripeDataForPersona(persona, stage);
+        console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
+        console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
+        setStripeData(generatedStripeData);
       } catch (error) {
         console.error('Error generating Stripe data:', error);
         setStripeData({});
@@ -628,7 +623,7 @@ export default function Home() {
       console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, stage]);
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {

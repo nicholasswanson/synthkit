@@ -120,6 +120,7 @@ function generatePlan(seed: number, businessType: string): any {
 // Generate interconnected Stripe data
 export function generateRealisticStripeData(
   businessType: string = 'saas',
+  stage: string = 'growth',
   options: {
     customers?: number;
     subscriptions?: number;
@@ -154,12 +155,21 @@ export function generateRealisticStripeData(
     
     const businessCounts = baseCounts[type.toLowerCase() as keyof typeof baseCounts] || baseCounts.saas;
     
+    // Apply stage multipliers for realistic scaling
+    const stageMultipliers = {
+      early: 0.3,    // 30% of growth stage
+      growth: 1.0,   // Base stage
+      enterprise: 3.0 // 3x growth stage
+    };
+    
+    const stageMultiplier = stageMultipliers[stage as keyof typeof stageMultipliers] || 1.0;
+    
     // Add some randomness (±20%) to make it more realistic
     return {
-      customers: Math.floor(businessCounts.customers * (0.8 + Math.random() * 0.4)),
-      subscriptions: Math.floor(businessCounts.subscriptions * (0.8 + Math.random() * 0.4)),
-      charges: Math.floor(businessCounts.charges * (0.8 + Math.random() * 0.4)),
-      invoices: Math.floor(businessCounts.invoices * (0.8 + Math.random() * 0.4))
+      customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4)),
+      subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4)),
+      charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4)),
+      invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4))
     };
   };
   
