@@ -38,27 +38,40 @@ function generateRealisticAmount(businessType: string, type: 'subscription' | 'o
 
 // Generate realistic customer data
 function generateCustomer(seed: number): { id: string; name: string; email: string; created: number } {
-  const names = ['John Smith', 'Sarah Johnson', 'Mike Chen', 'Emily Davis', 'David Wilson', 'Lisa Brown', 'Chris Taylor', 'Amy Garcia'];
-  const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'company.com', 'startup.io'];
+  const firstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Sage', 'River', 'Phoenix', 'Blake', 'Drew', 'Cameron', 'Hayden', 'Parker', 'Reese', 'Skyler', 'Finley', 'Rowan'];
+  const lastNames = ['Anderson', 'Martinez', 'Thompson', 'Garcia', 'Wilson', 'Rodriguez', 'Lee', 'White', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen'];
+  const domains = ['gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com', 'icloud.com', 'protonmail.com'];
   
-  const name = names[Math.floor(seededRandom(seed) * names.length)];
-  const domain = domains[Math.floor(seededRandom(seed + 1) * domains.length)];
-  const email = `${name.toLowerCase().replace(' ', '.')}@${domain}`;
+  const firstName = firstNames[Math.floor(seededRandom(seed) * firstNames.length)];
+  const lastName = lastNames[Math.floor(seededRandom(seed + 1) * lastNames.length)];
+  const name = `${firstName} ${lastName}`;
+  const domain = domains[Math.floor(seededRandom(seed + 2) * domains.length)];
+  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}`;
+  
+  // Generate realistic creation date (last 2 years, weighted towards recent)
+  const daysAgo = Math.floor(Math.pow(seededRandom(seed + 3), 2) * 730); // Weighted towards recent
+  const created = Math.floor(Date.now() / 1000) - (daysAgo * 86400);
   
   return {
-    id: `cus_${seededRandom(seed + 2).toString(36).substring(2, 15)}`,
+    id: `cus_${seededRandom(seed + 4).toString(36).substring(2, 15)}`,
     name,
     email,
-    created: Math.floor(Date.now() / 1000) - Math.floor(seededRandom(seed + 3) * 86400 * 365) // Last year
+    created
   };
 }
 
 // Generate realistic subscription plans
 function generatePlan(seed: number, businessType: string): any {
-  const planNames = ['Basic', 'Pro', 'Enterprise', 'Starter', 'Growth', 'Premium'];
+  const planNames = {
+    saas: ['Starter', 'Professional', 'Business', 'Enterprise', 'Team', 'Individual'],
+    ecommerce: ['Basic', 'Standard', 'Premium', 'Pro', 'Growth', 'Scale'],
+    marketplace: ['Seller', 'Vendor', 'Merchant', 'Partner', 'Pro', 'Enterprise']
+  };
   
-  const name = planNames[Math.floor(seededRandom(seed) * planNames.length)];
-  // Most SaaS plans are monthly, with occasional yearly plans
+  const businessPlans = planNames[businessType as keyof typeof planNames] || planNames.saas;
+  const name = businessPlans[Math.floor(seededRandom(seed) * businessPlans.length)];
+  
+  // Most plans are monthly, with occasional yearly plans
   const interval = seededRandom(seed + 1) < 0.8 ? 'month' : 'year';
   const amount = generateRealisticAmount(businessType, 'subscription', seed + 2);
   
