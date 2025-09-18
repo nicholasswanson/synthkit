@@ -21,7 +21,7 @@ import {
   type Address
 } from '@/lib/realistic-data-generator';
 import { analyzeStripeProducts, type StripeAnalysisResult } from '@/lib/stripe-products-analyzer';
-import { generateStripeDataForPersona } from '@/lib/stripe-data-generators';
+import { generateStripeDataForPersona, generateStripeMetadataForPersona } from '@/lib/stripe-data-generators';
 
 // Customer and Payment interfaces are now imported from realistic-data-generator
 
@@ -609,9 +609,9 @@ export default function Home() {
       console.log('Persona name:', persona?.name);
       
       try {
-        console.log('Generating new stripeData for stage:', stage);
-        // Generate Stripe data for the persona with current stage
-        const generatedStripeData = generateStripeDataForPersona(persona, stage);
+        console.log('Generating metadata and sample data for stage:', stage);
+        // Generate metadata and sample data only (performance optimized)
+        const generatedStripeData = generateStripeMetadataForPersona(persona, stage);
         console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
         console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
         setStripeData(generatedStripeData);
@@ -1347,7 +1347,7 @@ export default function Home() {
               {stripeData.customers && stripeData.customers.length > 0 && (
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                    Customers ({(stripeData.customers?.length || 0).toLocaleString()})
+                    Customers ({((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
                     {(stripeData.customers || []).slice(0, 3).map((customer: any, index: number) => (
@@ -1363,9 +1363,9 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
-                    {stripeData.customers.length > 3 && (
+                    {((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0) > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {((stripeData.customers?.length || 0) - 3).toLocaleString()} more
+                        ... and {(((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0) - 3).toLocaleString()} more
                       </div>
                     )}
                   </div>
@@ -1384,7 +1384,7 @@ export default function Home() {
                 .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                    {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({(dataArray?.length || 0).toLocaleString()})
+                    {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0).toLocaleString()})
                   </h4>
                   <div className="space-y-2">
                     {Array.isArray(dataArray) ? dataArray.slice(0, 3).map((item: any, index: number) => (
@@ -1416,9 +1416,9 @@ export default function Home() {
                         No data available
                       </div>
                     )}
-                    {Array.isArray(dataArray) && (dataArray?.length || 0) > 3 && (
+                    {Array.isArray(dataArray) && ((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0) > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {((dataArray?.length || 0) - 3).toLocaleString()} more
+                        ... and {(((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0) - 3).toLocaleString()} more
                       </div>
                     )}
                   </div>

@@ -617,8 +617,8 @@ export function generateInvoices(count: number, customerIds: string[] = [], subs
   return invoices;
 }
 
-// Import the realistic generator
-import { generateRealisticStripeData } from './realistic-stripe-generator.ts';
+// Import the realistic generators
+import { generateRealisticStripeData, generateStripeMetadata } from './realistic-stripe-generator.ts';
 
 // Main function to generate all Stripe data for a persona
 export function generateStripeDataForPersona(
@@ -630,4 +630,16 @@ export function generateStripeDataForPersona(
   const personaName = persona.name || '';
   
   return generateRealisticStripeData(personaName, stage, counts);
+}
+
+// Function to generate metadata and sample data for UI display (performance optimized)
+export function generateStripeMetadataForPersona(
+  persona: any, 
+  stage: string = 'growth',
+  counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
+): Record<string, any[]> {
+  // Use persona name directly for business type mapping
+  const personaName = persona.name || '';
+  
+  return generateStripeMetadata(personaName, stage, counts);
 }

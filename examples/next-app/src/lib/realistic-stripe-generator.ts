@@ -1,7 +1,7 @@
 // Realistic Stripe Data Generator with Proper Relationships
 // Generates interconnected Stripe data that mirrors real business patterns
 
-import { seededRandom } from './realistic-data-generator.ts';
+import { seededRandom, generateRealisticName, generateRealisticEmail } from './realistic-data-generator.ts';
 
 // Realistic amount ranges for different business types
 const AMOUNT_RANGES = {
@@ -117,7 +117,152 @@ function generatePlan(seed: number, businessType: string): any {
   };
 }
 
-// Generate interconnected Stripe data
+// Generate metadata and sample data only (for UI display)
+export function generateStripeMetadata(
+  businessType: string = 'saas',
+  stage: string = 'growth',
+  options: {
+    customers?: number;
+    subscriptions?: number;
+    charges?: number;
+    invoices?: number;
+  } = {}
+): Record<string, any[]> {
+  // Generate realistic volumes based on business type and stage
+  const getRealisticCounts = (type: string) => {
+    const baseCounts = {
+      // E-commerce: high volume, mixed payments (growth stage = mid-market)
+      'checkout e-commerce': { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
+      // B2B SaaS: moderate customers, high subscriptions (growth stage = mid-market)
+      'b2b saas subscriptions': { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
+      // Food delivery: very high volume, low subscriptions (growth stage = mid-market)
+      'food delivery platform': { customers: 50000, subscriptions: 0, charges: 300000, invoices: 50000 },
+      // Consumer fitness: moderate volume, mixed payments (growth stage = mid-market)
+      'consumer fitness app': { customers: 15000, subscriptions: 25000, charges: 75000, invoices: 15000 },
+      // B2B invoicing: moderate volume, high invoices (growth stage = mid-market)
+      'b2b invoicing': { customers: 3000, subscriptions: 0, charges: 15000, invoices: 12000 },
+      // Property management: low volume, high value (growth stage = mid-market)
+      'property management platform': { customers: 2000, subscriptions: 0, charges: 10000, invoices: 8000 },
+      // Creator platform: high volume, mixed payments (growth stage = mid-market)
+      'creator platform': { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 },
+      // Donation marketplace: moderate volume, mixed payments (growth stage = mid-market)
+      'donation marketplace': { customers: 20000, subscriptions: 0, charges: 120000, invoices: 20000 },
+      // Legacy mappings for backward compatibility
+      saas: { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
+      ecommerce: { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
+      marketplace: { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 }
+    };
+    
+    const businessCounts = baseCounts[type.toLowerCase() as keyof typeof baseCounts] || baseCounts.saas;
+    
+    // Apply stage multipliers for realistic scaling
+    const stageMultipliers = {
+      early: 0.1,     // 10% of growth stage (startup phase)
+      growth: 1.0,    // Base stage (mid-market)
+      enterprise: 20.0 // 20x growth stage (enterprise scale)
+    };
+    
+    const stageMultiplier = stageMultipliers[stage as keyof typeof stageMultipliers] || 1.0;
+    
+    // Add some randomness (±20%) to make it more realistic
+    // For enterprise stage, add additional variation to simulate real-world complexity
+    const enterpriseVariation = stage === 'enterprise' ? (0.7 + Math.random() * 0.6) : 1.0;
+    
+    return {
+      customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+      invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation)
+    };
+  };
+  
+  const realisticCounts = getRealisticCounts(businessType);
+  const counts = {
+    ...realisticCounts,
+    ...options
+  };
+
+  // Generate only sample data (3-5 records) for UI display
+  const generateSampleData = (type: string, count: number) => {
+    if (count === 0) return [];
+    
+    const sampleSize = Math.min(3, count);
+    const samples = [];
+    
+    for (let i = 0; i < sampleSize; i++) {
+      const seed = i + 1000;
+      const nameData = generateRealisticName(seed);
+      
+      if (type === 'customers') {
+        samples.push({
+          id: `cus_${seed}`,
+          name: nameData.fullName,
+          email: generateRealisticEmail(nameData.firstName, nameData.lastName, seed),
+          created: Math.floor((Date.now() - seededRandom(seed) * 365 * 24 * 60 * 60 * 1000) / 1000)
+        });
+      } else if (type === 'charges') {
+        samples.push({
+          id: `ch_${seed}`,
+          amount: Math.floor(seededRandom(seed) * 100000) + 1000,
+          status: seededRandom(seed) > 0.1 ? 'succeeded' : 'failed',
+          created: Math.floor((Date.now() - seededRandom(seed) * 30 * 24 * 60 * 60 * 1000) / 1000),
+          description: `Sample ${type} ${i + 1}`
+        });
+      } else if (type === 'subscriptions') {
+        samples.push({
+          id: `sub_${seed}`,
+          status: seededRandom(seed) > 0.2 ? 'active' : 'canceled',
+          created: Math.floor((Date.now() - seededRandom(seed) * 90 * 24 * 60 * 60 * 1000) / 1000),
+          current_period_start: Math.floor((Date.now() - seededRandom(seed) * 30 * 24 * 60 * 60 * 1000) / 1000)
+        });
+      } else if (type === 'invoices') {
+        samples.push({
+          id: `in_${seed}`,
+          amount_paid: Math.floor(seededRandom(seed) * 50000) + 5000,
+          status: seededRandom(seed) > 0.15 ? 'paid' : 'open',
+          created: Math.floor((Date.now() - seededRandom(seed) * 60 * 24 * 60 * 60 * 1000) / 1000)
+        });
+      } else {
+        samples.push({
+          id: `${type}_${seed}`,
+          name: `Sample ${type} ${i + 1}`,
+          created: Math.floor((Date.now() - seededRandom(seed) * 30 * 24 * 60 * 60 * 1000) / 1000)
+        });
+      }
+    }
+    
+    return samples;
+  };
+
+  // Generate sample data for each type
+  const customers = generateSampleData('customers', counts.customers);
+  const subscriptions = generateSampleData('subscriptions', counts.subscriptions);
+  const charges = generateSampleData('charges', counts.charges);
+  const invoices = generateSampleData('invoices', counts.invoices);
+  const plans = generateSampleData('plans', 5); // Always show 5 plans
+
+  return {
+    customers,
+    subscriptions,
+    charges,
+    invoices,
+    plans,
+    _metadata: {
+      generatedAt: Date.now(),
+      businessType,
+      stage,
+      counts: {
+        customers: counts.customers,
+        subscriptions: counts.subscriptions,
+        charges: counts.charges,
+        invoices: counts.invoices,
+        plans: 5
+      }
+    }
+  };
+}
+
+// Generate interconnected Stripe data (for actual dataset generation)
 export function generateRealisticStripeData(
   businessType: string = 'saas',
   stage: string = 'growth',
