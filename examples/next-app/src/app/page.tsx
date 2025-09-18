@@ -544,6 +544,11 @@ export default function Home() {
   // Stripe data
   const [stripeData, setStripeData] = useState<Record<string, any[]>>({});
   
+  // Debug: Log stripeData changes
+  useEffect(() => {
+    console.log('Stripe data state changed:', Object.keys(stripeData), Object.fromEntries(Object.entries(stripeData).map(([key, value]) => [key, value.length])));
+  }, [stripeData]);
+  
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -611,27 +616,16 @@ export default function Home() {
 
   // Generate Stripe data when persona changes
   useEffect(() => {
-    console.log('=== Stripe Data Generation useEffect ===');
-    console.log('Selected category:', selectedCategory);
-    console.log('Is custom category:', isCustomCategory(selectedCategory));
-    
     if (!isCustomCategory(selectedCategory)) {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-      console.log('Persona found:', !!persona);
-      console.log('Persona has stripeData:', !!persona?.stripeData);
-      
       if (persona?.stripeData) {
-        console.log('Using existing stripeData');
         setStripeData(persona.stripeData);
       } else {
-        console.log('Generating new stripeData');
         // Generate Stripe data for the persona
         const generatedStripeData = generateStripeDataForPersona(persona);
-        console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
         setStripeData(generatedStripeData);
       }
     } else {
-      console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
   }, [selectedCategory]);
