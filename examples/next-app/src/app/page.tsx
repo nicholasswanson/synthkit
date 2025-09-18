@@ -611,16 +611,38 @@ export default function Home() {
 
   // Generate Stripe data when persona changes
   useEffect(() => {
+    console.log('=== Stripe Data useEffect Running ===');
+    console.log('Selected category:', selectedCategory);
+    console.log('Is custom category:', isCustomCategory(selectedCategory));
+    
     if (!isCustomCategory(selectedCategory)) {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-      if (persona?.stripeData) {
-        setStripeData(persona.stripeData);
-      } else {
-        // Generate Stripe data for the persona
-        const generatedStripeData = generateStripeDataForPersona(persona);
-        setStripeData(generatedStripeData);
+      console.log('Persona found:', !!persona);
+      console.log('Persona name:', persona?.name);
+      console.log('Persona has stripeData:', !!persona?.stripeData);
+      
+      try {
+        if (persona?.stripeData) {
+          console.log('Using existing stripeData');
+          setStripeData(persona.stripeData);
+        } else {
+          console.log('Generating new stripeData');
+          // Generate Stripe data for the persona
+          const generatedStripeData = generateStripeDataForPersona(persona);
+          console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
+          console.log('Generated stripeData sample:', {
+            customers: generatedStripeData.customers?.slice(0, 2),
+            subscriptions: generatedStripeData.subscriptions?.slice(0, 2),
+            charges: generatedStripeData.charges?.slice(0, 2)
+          });
+          setStripeData(generatedStripeData);
+        }
+      } catch (error) {
+        console.error('Error generating Stripe data:', error);
+        setStripeData({});
       }
     } else {
+      console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
   }, [selectedCategory]);
