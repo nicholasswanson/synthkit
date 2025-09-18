@@ -47,7 +47,7 @@ function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
   
   const stripeData = generateStripeDataForPersona(persona);
   console.log('Generated Stripe data keys:', Object.keys(stripeData));
-  console.log('Stripe data counts:', Object.fromEntries(Object.entries(stripeData).map(([key, value]) => [key, value.length])));
+  console.log('Stripe data counts:', Object.fromEntries(Object.entries(stripeData).map(([key, value]) => [key, (value as any[]).length])));
   
   // Add Stripe entities to the existing entities
   const stripeEntities = stripeAnalysis.allDataObjects.map(objectName => ({
@@ -69,7 +69,7 @@ function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
   };
   
   console.log('Enhanced persona stripeData keys:', Object.keys(enhanced.stripeData));
-  console.log('Enhanced persona stripeData counts:', Object.fromEntries(Object.entries(enhanced.stripeData).map(([key, value]) => [key, value.length])));
+  console.log('Enhanced persona stripeData counts:', Object.fromEntries(Object.entries(enhanced.stripeData).map(([key, value]) => [key, (value as any[]).length])));
   
   return enhanced;
 }
