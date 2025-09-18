@@ -631,10 +631,5 @@ export function generateStripeDataForPersona(
                       (typeLower.includes('ecommerce') || typeLower.includes('e-commerce')) ? 'ecommerce' :
                       typeLower.includes('marketplace') ? 'marketplace' : 'saas';
   
-  console.log('Generating Stripe data for persona:', persona.name, 'Business type:', businessType);
-  
-  const result = generateRealisticStripeData(businessType, counts);
-  console.log('Generated Stripe data:', Object.keys(result), 'Counts:', Object.values(result).map(arr => arr.length));
-  
-  return result;
+  return generateRealisticStripeData(businessType, counts);
 }
