@@ -79,7 +79,7 @@ export function generateChecksum(data: any): string {
 }
 
 export function getDatasetUrl(id: string): string {
-  return `/datasets/${id}.json`;
+  return `/api/dataset/${id}`;
 }
 
 export function getDatasetFilePath(id: string): string {

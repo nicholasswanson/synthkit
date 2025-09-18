@@ -603,7 +603,7 @@ export default function Home() {
 
   // Generate Stripe data when persona or stage changes
   useEffect(() => {
-    console.log('=== Stripe Data useEffect Running ===');
+    const generateDataset = async () => {    console.log('=== Stripe Data useEffect Running ===');
     console.log('Selected category:', selectedCategory);
     console.log('Stage:', stage);
     console.log('Is custom category:', isCustomCategory(selectedCategory));
@@ -628,31 +628,14 @@ export default function Home() {
         console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
         setStripeData(generatedStripeData);
         
-        // Also generate the full dataset and save it to the JSON file
+        // Also generate the full dataset and save it via API
         console.log('Generating full dataset for JSON file...');
-        const fullStripeData = generateStripeDataForPersona(persona, stage);
-        const datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
-        
-        // Create the dataset file content
-        const datasetContent = {
-          id: `scenario-${PERSONA_FILE_MAPPING[selectedCategory] || selectedCategory}-${role}-${stage}-${scenarioId}`,
-          type: 'scenario',
-          data: datasetData,
-          metadata: {
-            scenario: {
-              category: selectedCategory,
-              role,
-              stage,
-              id: scenarioId
-            },
-            updatedAt: new Date().toISOString()
-          }
-        };
-        
-        // Save to public directory (this would normally be done server-side)
-        console.log('Dataset generated with', Object.keys(datasetData).length, 'data types');
-        console.log('Sample counts:', Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length])));
-        
+        try {
+          await handleCreateDataset();
+          console.log('Full dataset created and saved via API');
+        } catch (error) {
+          console.error('Error creating full dataset:', error);
+        }        
       } catch (error) {
         console.error('Error generating Stripe data:', error);
         setStripeData({});
@@ -660,7 +643,9 @@ export default function Home() {
       console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
-  }, [selectedCategory, stage]);
+    };
+    
+    generateDataset();  }, [selectedCategory, stage]);
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
