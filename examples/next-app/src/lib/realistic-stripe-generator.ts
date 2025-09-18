@@ -1,7 +1,7 @@
 // Realistic Stripe Data Generator with Proper Relationships
 // Generates interconnected Stripe data that mirrors real business patterns
 
-import { seededRandom } from './realistic-data-generator';
+import { seededRandom } from './realistic-data-generator.ts';
 
 // Realistic amount ranges for different business types
 const AMOUNT_RANGES = {
