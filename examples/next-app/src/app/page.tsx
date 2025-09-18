@@ -541,6 +541,9 @@ export default function Home() {
   const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics | null>(null);
   const [metricsLoaded, setMetricsLoaded] = useState(false);
   
+  // Stripe data
+  const [stripeData, setStripeData] = useState<Record<string, any[]>>({});
+  
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -605,6 +608,22 @@ export default function Home() {
       setMetricsLoaded(true);
     }
   }, [selectedCategory, stage, scenarioId, customers, payments]);
+
+  // Generate Stripe data when persona changes
+  useEffect(() => {
+    if (!isCustomCategory(selectedCategory)) {
+      const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
+      if (persona?.stripeData) {
+        setStripeData(persona.stripeData);
+      } else {
+        // Generate Stripe data for the persona
+        const generatedStripeData = generateStripeDataForPersona(persona);
+        setStripeData(generatedStripeData);
+      }
+    } else {
+      setStripeData({});
+    }
+  }, [selectedCategory]);
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
@@ -1472,6 +1491,56 @@ export default function Home() {
             </>
           )}
         </div>
+
+        {/* Stripe Data Lists */}
+        {Object.keys(stripeData).length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Stripe Data
+            </h3>
+            <div className="space-y-6">
+              {Object.entries(stripeData).map(([dataType, dataArray]) => (
+                <div key={dataType} className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({dataArray.length.toLocaleString()})
+                  </h4>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {dataArray.slice(0, 10).map((item: any, index: number) => (
+                      <div key={item.id || index} className="p-2 bg-gray-50 rounded">
+                        <div className="space-y-1">
+                          {Object.entries(item).slice(0, 6).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-center">
+                              <span className="text-sm font-medium text-gray-600 capitalize">
+                                {key}:
+                              </span>
+                              <span className="text-sm text-gray-900">
+                                {typeof value === 'number' && key.includes('amount') 
+                                  ? `$${(value / 100).toFixed(2)}`
+                                  : typeof value === 'number' && key.includes('created')
+                                  ? new Date(value * 1000).toLocaleDateString()
+                                  : typeof value === 'string' && value.length > 30
+                                  ? `${value.substring(0, 30)}...`
+                                  : typeof value === 'object' && value !== null
+                                  ? JSON.stringify(value).substring(0, 30) + '...'
+                                  : String(value)
+                                }
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {dataArray.length > 10 && (
+                      <div className="text-sm text-gray-500 text-center py-2">
+                        ... and {(dataArray.length - 10).toLocaleString()} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Dataset URL Section */}
         <div className="mt-8">

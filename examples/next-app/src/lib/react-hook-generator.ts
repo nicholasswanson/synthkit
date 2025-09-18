@@ -2,6 +2,7 @@
 // Generates ready-to-use React hooks and TypeScript interfaces
 
 import type { DatasetInfo } from './ai-integrations';
+import type { StripeCharge, StripeSubscription, StripeInvoice } from './stripe-data-generators';
 
 // Business context mapping for better AI understanding
 const BUSINESS_CONTEXTS = {
@@ -70,6 +71,11 @@ export interface BusinessMetrics {
 export interface Dataset {
 ${Object.keys(recordCounts).map(key => `  ${key}: ${key.charAt(0).toUpperCase() + key.slice(1, -1)}[];`).join('\n')}
   businessMetrics: BusinessMetrics;
+  stripeData?: {
+    charges?: StripeCharge[];
+    subscriptions?: StripeSubscription[];
+    invoices?: StripeInvoice[];
+  };
 }`;
 }
 
@@ -147,12 +153,28 @@ export function useSynthkitDataset() {
     loadData();
   }, []); // Empty dependency array - fetch only once
 
-  return { data, loading, error, source };
+  // Stripe data access helpers
+  const stripeData = data?.stripeData;
+  const charges = stripeData?.charges || [];
+  const subscriptions = stripeData?.subscriptions || [];
+  const invoices = stripeData?.invoices || [];
+
+  return { 
+    data, 
+    loading, 
+    error, 
+    source,
+    // Stripe data access
+    stripeData,
+    charges,
+    subscriptions,
+    invoices
+  };
 }
 
 // Usage in your component:
 export function MyPrototype() {
-  const { data, loading, error, source } = useSynthkitDataset();
+  const { data, loading, error, source, charges, subscriptions, invoices } = useSynthkitDataset();
 
   if (loading) return <div>Loading ${recordSummary}...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -168,6 +190,26 @@ export function MyPrototype() {
         `<p>{data.${key}?.length || 0} ${key}</p>`
       ).join('\n      ')}
       <p>CLV: \${data.businessMetrics.customerLifetimeValue.toFixed(2)}</p>
+      
+      {/* Stripe Data Display */}
+      {charges.length > 0 && (
+        <div>
+          <h2>Recent Charges</h2>
+          <p>{charges.length} charges available</p>
+        </div>
+      )}
+      {subscriptions.length > 0 && (
+        <div>
+          <h2>Active Subscriptions</h2>
+          <p>{subscriptions.length} subscriptions available</p>
+        </div>
+      )}
+      {invoices.length > 0 && (
+        <div>
+          <h2>Recent Invoices</h2>
+          <p>{invoices.length} invoices available</p>
+        </div>
+      )}
     </div>
   );
 }`;
