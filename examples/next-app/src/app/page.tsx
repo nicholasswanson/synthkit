@@ -1349,13 +1349,13 @@ export default function Home() {
               <div key={i} className="border border-gray-200 rounded p-3">
                 <div className="font-medium text-gray-900">{entity.name}</div>
                 <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {(entity.properties || []).map((prop: any, j: number) => (
-                    <div key={j} className="text-sm">
-                      <span className="font-medium">{prop.name}</span>
-                      <span className="text-gray-500"> ({prop.type})</span>
+                    <div key={j} className="flex items-start gap-2">
+                      <span className="font-medium text-gray-900 min-w-0 flex-shrink-0">{prop.name}</span>
+                      <span className="text-gray-500 text-sm">({prop.type})</span>
                       {prop.description && (
-                        <span className="text-gray-600"> - {prop.description}</span>
+                        <span className="text-gray-600 text-sm flex-1">- {prop.description}</span>
                       )}
                     </div>
                   ))}
@@ -1374,8 +1374,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   {entityName.charAt(0).toUpperCase() + entityName.slice(1)} ({entityData.length.toLocaleString()})
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {entityData.slice(0, 10).map((item: any) => (
+                <div className="space-y-2">
+                  {entityData.slice(0, 3).map((item: any) => (
                     <div key={item.id} className="p-2 bg-gray-50 rounded">
                       <div className="space-y-1">
                         {Object.entries(item).slice(0, 4).map(([key, value]) => (
@@ -1396,9 +1396,9 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  {entityData.length > 10 && (
+                  {entityData.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(entityData.length - 10).toLocaleString()} more
+                      ... and {(entityData.length - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1412,8 +1412,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Customers ({customers.length.toLocaleString()})
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {customers.slice(0, 10).map((customer) => (
+                <div className="space-y-2">
+                  {customers.slice(0, 3).map((customer) => (
                     <div key={customer.id} className="p-2 bg-gray-50 rounded">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -1443,9 +1443,9 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  {customers.length > 10 && (
+                  {customers.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(customers.length - 10).toLocaleString()} more
+                      ... and {(customers.length - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1456,8 +1456,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Payments ({payments.length.toLocaleString()})
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {payments.slice(0, 10).map((payment) => (
+                <div className="space-y-2">
+                  {payments.slice(0, 3).map((payment) => (
                     <div key={payment.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                       <div>
                         <div className="font-medium text-gray-900">
@@ -1481,9 +1481,9 @@ export default function Home() {
                       </span>
                     </div>
                   ))}
-                  {payments.length > 10 && (
+                  {payments.length > 3 && (
                     <div className="text-sm text-gray-500 text-center py-2">
-                      ... and {(payments.length - 10).toLocaleString()} more
+                      ... and {(payments.length - 3).toLocaleString()} more
                     </div>
                   )}
                 </div>
@@ -1504,8 +1504,8 @@ export default function Home() {
                   <h4 className="text-lg font-semibold text-gray-900 mb-3">
                     {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({dataArray.length.toLocaleString()})
                   </h4>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {dataArray.slice(0, 10).map((item: any, index: number) => (
+                  <div className="space-y-2">
+                    {dataArray.slice(0, 3).map((item: any, index: number) => (
                       <div key={item.id || index} className="p-2 bg-gray-50 rounded">
                         <div className="space-y-1">
                           {Object.entries(item).slice(0, 6).map(([key, value]) => (
@@ -1530,9 +1530,9 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
-                    {dataArray.length > 10 && (
+                    {dataArray.length > 3 && (
                       <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {(dataArray.length - 10).toLocaleString()} more
+                        ... and {(dataArray.length - 3).toLocaleString()} more
                       </div>
                     )}
                   </div>
@@ -1681,6 +1681,7 @@ export default function Home() {
                 
                 return filteredExamples.map((example, index) => (
                   <div key={index}>
+                    <h3 className="font-semibold text-gray-900 mb-3">Integration prompt</h3>
                     <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
                       <code className="text-gray-800">
                         {example.code}
