@@ -639,8 +639,8 @@ export default function Home() {
         scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
         aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
         recordCounts: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-          ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-          : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length])),
+          ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
+          : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0)),
         updatedAt: new Date().toISOString()
       };
       
@@ -949,8 +949,8 @@ export default function Home() {
     );
     
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]));
+      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
+      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
     
     let metadata;
     if (isCustomCategory(selectedCategory)) {
@@ -993,8 +993,8 @@ export default function Home() {
 
   const getDatasetInfo = () => {
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]))
-      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]));
+      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
+      : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
     
     if (isCustomCategory(selectedCategory)) {
       return {
@@ -1016,6 +1016,19 @@ export default function Home() {
           id: scenarioId
         }
       };
+    }
+  };
+
+  const getCurrentDatasetUrl = () => {
+    if (sharedDatasetUrl) {
+      return sharedDatasetUrl;
+    }
+    
+    if (isCustomCategory(selectedCategory)) {
+      return '/datasets/ai-generated-custom-dataset.json';
+    } else {
+      const categorySlug = selectedCategory.replace(/-/g, '-');
+      return `/datasets/scenario-${categorySlug}-${role}-${stage}-${scenarioId}.json`;
     }
   };
 
@@ -1427,17 +1440,17 @@ export default function Home() {
           </h3>
           <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
             <code className="flex-1 text-sm font-mono text-gray-800 break-all">
-              {sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json'}
+              {getCurrentDatasetUrl()}
             </code>
             <button
-              onClick={() => navigator.clipboard.writeText(sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json')}
+              onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrl())}
               className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
             >
               <Copy className="w-4 h-4" />
               Copy
             </button>
             <a
-              href={sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json'}
+              href={getCurrentDatasetUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
@@ -1479,7 +1492,7 @@ export default function Home() {
             </h3>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => downloadReactHook(sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json', getDatasetInfo())}
+                onClick={() => downloadReactHook(getCurrentDatasetUrl(), getDatasetInfo())}
                 className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
               >
                 <Download className="w-4 h-4" />
@@ -1495,7 +1508,7 @@ export default function Home() {
             <div className="space-y-4">
               {(() => {
                 const examples = generateAllIntegrations(
-                  sharedDatasetUrl || '/datasets/scenario-checkout-ecommerce-admin-growth-12345.json', 
+                  getCurrentDatasetUrl(),
                   getDatasetInfo()
                 );
                 const filteredExamples = examples.filter(example => {
