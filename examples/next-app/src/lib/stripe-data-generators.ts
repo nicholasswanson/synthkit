@@ -626,9 +626,10 @@ export function generateStripeDataForPersona(
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
   // Determine business type from persona
-  const businessType = persona.businessContext?.type?.toLowerCase().includes('saas') ? 'saas' :
-                      persona.businessContext?.type?.toLowerCase().includes('ecommerce') ? 'ecommerce' :
-                      persona.businessContext?.type?.toLowerCase().includes('marketplace') ? 'marketplace' : 'saas';
+  const typeLower = persona.businessContext?.type?.toLowerCase() || '';
+  const businessType = typeLower.includes('saas') ? 'saas' :
+                      (typeLower.includes('ecommerce') || typeLower.includes('e-commerce')) ? 'ecommerce' :
+                      typeLower.includes('marketplace') ? 'marketplace' : 'saas';
   
   console.log('Generating Stripe data for persona:', persona.name, 'Business type:', businessType);
   
