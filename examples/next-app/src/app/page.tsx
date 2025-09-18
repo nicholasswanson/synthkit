@@ -616,16 +616,28 @@ export default function Home() {
 
   // Generate Stripe data when persona changes
   useEffect(() => {
+    console.log('=== Stripe Data useEffect Running ===');
+    console.log('Selected category:', selectedCategory);
+    console.log('Is custom category:', isCustomCategory(selectedCategory));
+    
     if (!isCustomCategory(selectedCategory)) {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
+      console.log('Persona found:', !!persona);
+      console.log('Persona name:', persona?.name);
+      console.log('Persona has stripeData:', !!persona?.stripeData);
+      
       if (persona?.stripeData) {
+        console.log('Using existing stripeData');
         setStripeData(persona.stripeData);
       } else {
+        console.log('Generating new stripeData');
         // Generate Stripe data for the persona
         const generatedStripeData = generateStripeDataForPersona(persona);
+        console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
         setStripeData(generatedStripeData);
       }
     } else {
+      console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
   }, [selectedCategory]);
