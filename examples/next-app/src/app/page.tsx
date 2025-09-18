@@ -933,23 +933,27 @@ export default function Home() {
     console.log('handleCreateDataset called');
     const currentBusinessContext = getCurrentBusinessContext();
     
-    const datasetData = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? { 
-          ...dynamicEntities, 
-          businessMetrics: businessMetrics || {} 
-        }
-      : { ...stripeData, businessMetrics: businessMetrics || {} };
+    let datasetData;
+    if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+      datasetData = { 
+        ...dynamicEntities, 
+        businessMetrics: businessMetrics || {} 
+      };
+    } else {
+      // Generate full dataset for JSON files (not just sample data)
+      const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
+      const fullStripeData = generateStripeDataForPersona(persona, stage);
+      datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
+    }
     
     console.log('Dataset data:', isCustomCategory(selectedCategory) 
       ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
-      : { stripeDataKeys: Object.keys(stripeData), stripeDataCounts: Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length])), hasBusinessMetrics: !!businessMetrics }
+      : { datasetDataKeys: Object.keys(datasetData), datasetDataCounts: Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length])), hasBusinessMetrics: !!businessMetrics }
     );
     
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
       ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
-      : (stripeData._metadata as any)?.counts 
-        ? Object.fromEntries(Object.entries((stripeData._metadata as any).counts).filter(([key, count]) => (count as number) > 0))
-        : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
+      : Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
     
     let metadata;
     if (isCustomCategory(selectedCategory)) {
