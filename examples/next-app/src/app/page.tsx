@@ -117,7 +117,7 @@ const PREDEFINED_PERSONAS = {
   modaic: {
     name: 'Checkout e-commerce',
     businessContext: {
-      type: 'Fashion E-commerce',
+      type: 'Checkout e-commerce',
       stage: 'growth',
       primaryFeatures: ['Product Catalog', 'Shopping Cart', 'Payment Processing', 'User Reviews'],
       targetAudience: ['Fashion Enthusiasts', 'Online Shoppers', 'Trend Followers'],
@@ -144,7 +144,7 @@ const PREDEFINED_PERSONAS = {
   stratus: {
     name: 'B2B SaaS subscriptions',
     businessContext: {
-      type: 'B2B SaaS Platform',
+      type: 'B2B SaaS subscriptions',
       stage: 'growth',
       primaryFeatures: ['Subscription Management', 'Usage Analytics', 'API Access', 'Team Collaboration'],
       targetAudience: ['Business Teams', 'Enterprise Clients', 'Technical Users'],
@@ -171,7 +171,7 @@ const PREDEFINED_PERSONAS = {
   forksy: {
     name: 'Food delivery platform',
     businessContext: {
-      type: 'Food Delivery Marketplace',
+      type: 'Food delivery platform',
       stage: 'growth',
       primaryFeatures: ['Restaurant Discovery', 'Order Management', 'Delivery Tracking', 'Payment Processing'],
       targetAudience: ['Food Lovers', 'Busy Professionals', 'Families'],
@@ -198,7 +198,7 @@ const PREDEFINED_PERSONAS = {
   pulseon: {
     name: 'Consumer fitness app',
     businessContext: {
-      type: 'Fitness Streaming Platform',
+      type: 'Consumer fitness app',
       stage: 'growth',
       primaryFeatures: ['Workout Streaming', 'Trainer Profiles', 'Health Tracking', 'Subscription Management'],
       targetAudience: ['Fitness Enthusiasts', 'Home Workout Users', 'Health-Conscious Individuals'],
@@ -226,7 +226,7 @@ const PREDEFINED_PERSONAS = {
   procura: {
     name: 'B2B invoicing',
     businessContext: {
-      type: 'B2B Procurement Platform',
+      type: 'B2B invoicing',
       stage: 'growth',
       primaryFeatures: ['Vendor Management', 'Purchase Orders', 'Invoice Processing', 'Spend Analytics'],
       targetAudience: ['Procurement Teams', 'Finance Departments', 'Suppliers'],
@@ -253,7 +253,7 @@ const PREDEFINED_PERSONAS = {
   keynest: {
     name: 'Property management platform',
     businessContext: {
-      type: 'Real Estate Property Management',
+      type: 'Property management platform',
       stage: 'growth',
       primaryFeatures: ['Property Listings', 'Tenant Management', 'Lease Tracking', 'Maintenance Requests'],
       targetAudience: ['Property Owners', 'Tenants', 'Property Managers'],
@@ -281,7 +281,7 @@ const PREDEFINED_PERSONAS = {
   fluxly: {
     name: 'Creator platform',
     businessContext: {
-      type: 'Supply Chain Management Platform',
+      type: 'Creator platform',
       stage: 'growth',
       primaryFeatures: ['Inventory Tracking', 'Supplier Management', 'Logistics Coordination', 'Demand Forecasting'],
       targetAudience: ['Supply Chain Managers', 'Procurement Teams', 'Logistics Coordinators'],
@@ -308,7 +308,7 @@ const PREDEFINED_PERSONAS = {
   brightfund: {
     name: 'Donation marketplace',
     businessContext: {
-      type: 'Nonprofit Impact Platform',
+      type: 'Donation marketplace',
       stage: 'growth',
       primaryFeatures: ['Donor Management', 'Campaign Creation', 'Impact Tracking', 'Volunteer Coordination'],
       targetAudience: ['Nonprofit Organizations', 'Donors', 'Volunteers'],

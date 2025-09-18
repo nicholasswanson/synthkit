@@ -3,11 +3,11 @@ import { generateStripeDataForPersona } from '@/lib/stripe-data-generators';
 
 export async function GET() {
   try {
-    // Test with modaic persona (Fashion E-commerce)
+    // Test with modaic persona (Checkout e-commerce)
     const modaicPersona = {
-      name: 'Modaic (Fashion E-commerce)',
+      name: 'Checkout e-commerce',
       businessContext: {
-        type: 'Fashion E-commerce',
+        type: 'Checkout e-commerce',
         stage: 'growth'
       }
     };

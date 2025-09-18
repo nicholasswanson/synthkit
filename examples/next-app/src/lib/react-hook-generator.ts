@@ -21,15 +21,14 @@ interface StripePlan {
 
 // Business context mapping for better AI understanding
 const BUSINESS_CONTEXTS = {
-  modaic: { name: 'Fashion E-commerce', domain: 'retail', complexity: 'medium' },
-  stratus: { name: 'B2B SaaS Platform', domain: 'software', complexity: 'high' },
-  forksy: { name: 'Food Delivery Marketplace', domain: 'marketplace', complexity: 'high' },
-  fluxly: { name: 'Creator Economy Platform', domain: 'social', complexity: 'medium' },
-  mindora: { name: 'Online Learning Platform', domain: 'education', complexity: 'medium' },
-  pulseon: { name: 'Fitness & Wellness App', domain: 'health', complexity: 'medium' },
-  procura: { name: 'Healthcare Supply Chain', domain: 'healthcare', complexity: 'high' },
-  brightfund: { name: 'Impact Investment Platform', domain: 'finance', complexity: 'high' },
-  keynest: { name: 'Real Estate Management', domain: 'real-estate', complexity: 'high' }
+  modaic: { name: 'Checkout e-commerce', domain: 'retail', complexity: 'medium' },
+  stratus: { name: 'B2B SaaS subscriptions', domain: 'software', complexity: 'high' },
+  forksy: { name: 'Food delivery platform', domain: 'marketplace', complexity: 'high' },
+  fluxly: { name: 'Creator platform', domain: 'social', complexity: 'medium' },
+  pulseon: { name: 'Consumer fitness app', domain: 'health', complexity: 'medium' },
+  procura: { name: 'B2B invoicing', domain: 'healthcare', complexity: 'high' },
+  brightfund: { name: 'Donation marketplace', domain: 'finance', complexity: 'high' },
+  keynest: { name: 'Property management platform', domain: 'real-estate', complexity: 'high' }
 };
 
 function getBusinessContext(category: string) {
