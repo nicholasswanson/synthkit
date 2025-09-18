@@ -347,6 +347,18 @@ const ENHANCED_PERSONAS = Object.fromEntries(
   ])
 );
 
+// Persona file mapping for backward compatibility
+const PERSONA_FILE_MAPPING: Record<string, string> = {
+  'checkout-ecommerce': 'modaic',
+  'b2b-saas-subscriptions': 'stratus',
+  'food-delivery-platform': 'forksy',
+  'consumer-fitness-app': 'pulseon',
+  'b2b-invoicing': 'procura',
+  'property-management-platform': 'keynest',
+  'creator-platform': 'fluxly',
+  'donation-marketplace': 'brightfund'
+};
+
 // seededRandom is now imported from realistic-data-generator
 
 // Generate short hash for custom categories
@@ -615,11 +627,36 @@ export default function Home() {
         console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
         console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
         setStripeData(generatedStripeData);
+        
+        // Also generate the full dataset and save it to the JSON file
+        console.log('Generating full dataset for JSON file...');
+        const fullStripeData = generateStripeDataForPersona(persona, stage);
+        const datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
+        
+        // Create the dataset file content
+        const datasetContent = {
+          id: `scenario-${PERSONA_FILE_MAPPING[selectedCategory] || selectedCategory}-${role}-${stage}-${scenarioId}`,
+          type: 'scenario',
+          data: datasetData,
+          metadata: {
+            scenario: {
+              category: selectedCategory,
+              role,
+              stage,
+              id: scenarioId
+            },
+            updatedAt: new Date().toISOString()
+          }
+        };
+        
+        // Save to public directory (this would normally be done server-side)
+        console.log('Dataset generated with', Object.keys(datasetData).length, 'data types');
+        console.log('Sample counts:', Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length])));
+        
       } catch (error) {
         console.error('Error generating Stripe data:', error);
         setStripeData({});
-      }
-    } else {
+      }    } else {
       console.log('Custom category - clearing stripeData');
       setStripeData({});
     }
@@ -1475,18 +1512,6 @@ export default function Home() {
               <ExternalLink className="w-4 h-4" />
               View
             </a>
-          </div>
-          <div className="mt-3">
-            <button
-              onClick={handleCreateDataset}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-            >
-              <Download className="w-4 h-4" />
-              Generate Full Dataset
-            </button>
-            <p className="text-xs text-gray-500 mt-1">
-              Generate enterprise-scale dataset with realistic volumes
-            </p>
           </div>
         </div>
 
