@@ -115,7 +115,7 @@ interface CustomCategory {
 // Predefined personas with business context
 const PREDEFINED_PERSONAS = {
   modaic: {
-    name: 'Modaic (Fashion E-commerce)',
+    name: 'Checkout e-commerce',
     businessContext: {
       type: 'Fashion E-commerce',
       stage: 'growth',
@@ -142,7 +142,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   stratus: {
-    name: 'Stratus (B2B SaaS Platform)',
+    name: 'B2B SaaS subscriptions',
     businessContext: {
       type: 'B2B SaaS Platform',
       stage: 'growth',
@@ -169,7 +169,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   forksy: {
-    name: 'Forksy (Food Delivery)',
+    name: 'Food delivery platform',
     businessContext: {
       type: 'Food Delivery Marketplace',
       stage: 'growth',
@@ -196,7 +196,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   pulseon: {
-    name: 'Pulseon (Fitness Platform)',
+    name: 'Consumer fitness app',
     businessContext: {
       type: 'Fitness Streaming Platform',
       stage: 'growth',
@@ -224,7 +224,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   procura: {
-    name: 'Procura (Procurement Platform)',
+    name: 'B2B invoicing',
     businessContext: {
       type: 'B2B Procurement Platform',
       stage: 'growth',
@@ -250,36 +250,8 @@ const PREDEFINED_PERSONAS = {
       { name: 'Support', permissions: ['User Support', 'Order Tracking'], description: 'Customer support access' }
     ]
   },
-  mindora: {
-    name: 'Mindora (Mental Health Platform)',
-    businessContext: {
-      type: 'Mental Health & Wellness Platform',
-      stage: 'growth',
-      primaryFeatures: ['Therapy Sessions', 'Wellness Programs', 'Progress Tracking', 'Resource Library'],
-      targetAudience: ['Individuals Seeking Therapy', 'Mental Health Professionals', 'Wellness Coaches'],
-      monetizationModel: 'Session Fees + Subscription Plans'
-    },
-    entities: [
-      { name: 'Customer', type: 'person', properties: [
-        { name: 'name', type: 'string', description: 'Client full name' },
-        { name: 'email', type: 'string', description: 'Client email address' },
-        { name: 'therapyType', type: 'string', description: 'Type of therapy or wellness program' },
-        { name: 'sessionCount', type: 'number', description: 'Number of completed sessions' }
-      ]},
-      { name: 'Payment', type: 'session', properties: [
-        { name: 'amount', type: 'number', description: 'Session or subscription fee' },
-        { name: 'sessionType', type: 'string', description: 'Individual, group, or subscription' },
-        { name: 'status', type: 'string', description: 'Payment status' }
-      ]}
-    ],
-    keyFeatures: ['Video Therapy', 'Mood Tracking', 'Crisis Support', 'Therapist Matching'],
-    userRoles: [
-      { name: 'Admin', permissions: ['Full Access', 'Provider Management', 'Clinical Oversight'], description: 'Platform administration' },
-      { name: 'Support', permissions: ['Client Support', 'Session Coordination'], description: 'Client support access' }
-    ]
-  },
   keynest: {
-    name: 'Keynest (Property Management)',
+    name: 'Property management platform',
     businessContext: {
       type: 'Real Estate Property Management',
       stage: 'growth',
@@ -307,7 +279,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   fluxly: {
-    name: 'Fluxly (Supply Chain Platform)',
+    name: 'Creator platform',
     businessContext: {
       type: 'Supply Chain Management Platform',
       stage: 'growth',
@@ -334,7 +306,7 @@ const PREDEFINED_PERSONAS = {
     ]
   },
   brightfund: {
-    name: 'Brightfund (Nonprofit Platform)',
+    name: 'Donation marketplace',
     businessContext: {
       type: 'Nonprofit Impact Platform',
       stage: 'growth',
@@ -443,7 +415,6 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
     forksy: 2.143,    // Food delivery (high volume)
     pulseon: 0.867,   // Fitness (moderate volume)
     procura: 0.234,   // Healthcare (fewer, high-value)
-    mindora: 0.423,   // Online learning (moderate volume)
     keynest: 0.056,   // Real estate (very few, very high-value)
     fluxly: 0.534,    // Creator economy (moderate volume)
     brightfund: 0.123 // Non-profit (very few, high-value donors)
@@ -888,7 +859,6 @@ export default function Home() {
         forksy: 4.7,      // Food delivery (high frequency)
         pulseon: 1.2,     // Fitness (monthly subscriptions)
         procura: 3.1,     // Healthcare (regular supplies)
-        mindora: 0.9,     // Online learning (course purchases)
         keynest: 12.5,    // Real estate (rent payments)
         fluxly: 2.8,      // Creator economy (content purchases)
         brightfund: 4.2   // Non-profit (donations)
@@ -1528,11 +1498,11 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Stripe Data ({Object.keys(stripeData).length} types)
             </h3>
-            {stripeData._metadata && stripeData._metadata.generatedAt && (
+            {stripeData._metadata && (stripeData._metadata as any).generatedAt && (
               <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                Generated: {new Date(stripeData._metadata.generatedAt).toLocaleString()} | 
-                Business: {stripeData._metadata.businessType || 'Unknown'} | 
-                Counts: {stripeData._metadata.counts ? Object.entries(stripeData._metadata.counts).map(([key, value]) => `${key}: ${value}`).join(', ') : 'N/A'}
+                Generated: {new Date((stripeData._metadata as any).generatedAt).toLocaleString()} | 
+                Business: {(stripeData._metadata as any).businessType || 'Unknown'} | 
+                Counts: {(stripeData._metadata as any).counts ? Object.entries((stripeData._metadata as any).counts).map(([key, value]) => `${key}: ${value}`).join(', ') : 'N/A'}
               </div>
             )}
             <div className="space-y-6">

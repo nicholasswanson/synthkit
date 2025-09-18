@@ -5,6 +5,39 @@ import { seededRandom } from './realistic-data-generator.ts';
 
 // Realistic amount ranges for different business types
 const AMOUNT_RANGES = {
+  'checkout e-commerce': {
+    subscription: { min: 2000, max: 20000 }, // $20-$200/month
+    oneTime: { min: 1000, max: 50000 }, // $10-$500
+  },
+  'b2b saas subscriptions': {
+    subscription: { min: 1000, max: 50000 }, // $10-$500/month
+    oneTime: { min: 500, max: 10000 }, // $5-$100
+  },
+  'food delivery platform': {
+    subscription: { min: 500, max: 10000 }, // $5-$100/month
+    oneTime: { min: 200, max: 20000 }, // $2-$200
+  },
+  'consumer fitness app': {
+    subscription: { min: 2000, max: 20000 }, // $20-$200/month
+    oneTime: { min: 1000, max: 30000 }, // $10-$300
+  },
+  'b2b invoicing': {
+    subscription: { min: 0, max: 0 }, // No subscriptions
+    oneTime: { min: 5000, max: 100000 }, // $50-$1000
+  },
+  'property management platform': {
+    subscription: { min: 0, max: 0 }, // No subscriptions
+    oneTime: { min: 10000, max: 200000 }, // $100-$2000
+  },
+  'creator platform': {
+    subscription: { min: 500, max: 10000 }, // $5-$100/month
+    oneTime: { min: 200, max: 20000 }, // $2-$200
+  },
+  'donation marketplace': {
+    subscription: { min: 0, max: 0 }, // No subscriptions
+    oneTime: { min: 500, max: 50000 }, // $5-$500
+  },
+  // Legacy mappings for backward compatibility
   saas: {
     subscription: { min: 1000, max: 50000 }, // $10-$500/month
     oneTime: { min: 500, max: 10000 }, // $5-$100
@@ -97,12 +130,29 @@ export function generateRealisticStripeData(
   // Generate realistic volumes based on business type and stage
   const getRealisticCounts = (type: string) => {
     const baseCounts = {
+      // E-commerce: high volume, mixed payments
+      'checkout e-commerce': { customers: 2500, subscriptions: 0, charges: 5000, invoices: 2500 },
+      // B2B SaaS: moderate customers, high subscriptions
+      'b2b saas subscriptions': { customers: 1200, subscriptions: 800, charges: 2400, invoices: 1200 },
+      // Food delivery: very high volume, low subscriptions
+      'food delivery platform': { customers: 3000, subscriptions: 0, charges: 6000, invoices: 3000 },
+      // Consumer fitness: moderate volume, mixed payments
+      'consumer fitness app': { customers: 1800, subscriptions: 1200, charges: 3600, invoices: 1800 },
+      // B2B invoicing: moderate volume, high invoices
+      'b2b invoicing': { customers: 800, subscriptions: 0, charges: 1600, invoices: 1200 },
+      // Property management: low volume, high value
+      'property management platform': { customers: 400, subscriptions: 0, charges: 800, invoices: 600 },
+      // Creator platform: high volume, mixed payments
+      'creator platform': { customers: 2000, subscriptions: 0, charges: 4000, invoices: 2000 },
+      // Donation marketplace: moderate volume, mixed payments
+      'donation marketplace': { customers: 1500, subscriptions: 0, charges: 3000, invoices: 1500 },
+      // Legacy mappings for backward compatibility
       saas: { customers: 1200, subscriptions: 800, charges: 2400, invoices: 1200 },
       ecommerce: { customers: 2500, subscriptions: 0, charges: 5000, invoices: 2500 },
       marketplace: { customers: 1800, subscriptions: 0, charges: 3600, invoices: 1800 }
     };
     
-    const businessCounts = baseCounts[type as keyof typeof baseCounts] || baseCounts.saas;
+    const businessCounts = baseCounts[type.toLowerCase() as keyof typeof baseCounts] || baseCounts.saas;
     
     // Add some randomness (±20%) to make it more realistic
     return {

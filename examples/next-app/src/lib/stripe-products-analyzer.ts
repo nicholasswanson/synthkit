@@ -152,39 +152,92 @@ export function analyzeStripeProducts(persona: any): StripeAnalysisResult {
     triggers: STRIPE_PRODUCTS.payments.triggers
   });
   
-  // Analyze each Stripe product
+  // Analyze each Stripe product based on persona-specific requirements
   Object.entries(STRIPE_PRODUCTS).forEach(([key, product]) => {
     if (key === 'payments') return; // Already added
     
-    // Check triggers
-    const hasTrigger = product.triggers.some(trigger => 
-      analysisText.includes(trigger.toLowerCase())
-    );
+    let shouldInclude = false;
+    let priority: 'essential' | 'recommended' | 'optional' = 'optional';
     
-    if (hasTrigger) {
-      // Determine priority based on business characteristics
-      let priority: 'essential' | 'recommended' | 'optional' = 'optional';
-      
-      if (key === 'billing' && (analysisText.includes('subscription') || analysisText.includes('recurring'))) {
-        priority = 'essential';
-      } else if (key === 'connect' && (analysisText.includes('marketplace') || analysisText.includes('platform'))) {
-        priority = 'essential';
-      } else if (key === 'tax' && (analysisText.includes('e-commerce') || analysisText.includes('retail'))) {
+    // Persona-specific analysis
+    if (persona.name === 'Checkout e-commerce') {
+      // E-commerce: payments + tax + radar
+      if (key === 'tax') {
+        shouldInclude = true;
         priority = 'recommended';
-      } else if (key === 'radar' && (analysisText.includes('high-value') || analysisText.includes('b2b') || analysisText.includes('marketplace'))) {
+      } else if (key === 'radar') {
+        shouldInclude = true;
         priority = 'recommended';
-      } else if (key === 'identity' && (analysisText.includes('financial') || analysisText.includes('kyc') || analysisText.includes('compliance'))) {
-        priority = 'recommended';
-      } else if (key === 'terminal' && (analysisText.includes('retail') || analysisText.includes('physical'))) {
-        priority = 'optional';
-      } else if (key === 'financial_connections' && (analysisText.includes('banking') || analysisText.includes('p2p'))) {
-        priority = 'optional';
-      } else if (key === 'issuing' && (analysisText.includes('corporate') || analysisText.includes('expense'))) {
-        priority = 'optional';
-      } else if (key === 'treasury' && (analysisText.includes('banking') || analysisText.includes('fintech'))) {
-        priority = 'optional';
       }
-      
+    } else if (persona.name === 'B2B SaaS subscriptions') {
+      // B2B SaaS: payments + billing + radar
+      if (key === 'billing') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'radar') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'Food delivery platform') {
+      // Marketplace: payments + connect + tax
+      if (key === 'connect') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'tax') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'Consumer fitness app') {
+      // Consumer app: payments + billing + tax + elements
+      if (key === 'billing') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'tax') {
+        shouldInclude = true;
+        priority = 'recommended';
+      } else if (key === 'elements') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'B2B invoicing') {
+      // B2B invoicing: payments + billing + tax
+      if (key === 'billing') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'tax') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'Property management platform') {
+      // Property management: payments + billing + tax
+      if (key === 'billing') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'tax') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'Creator platform') {
+      // Creator platform: payments + connect + billing
+      if (key === 'connect') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'billing') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    } else if (persona.name === 'Donation marketplace') {
+      // Nonprofit: payments + connect + tax
+      if (key === 'connect') {
+        shouldInclude = true;
+        priority = 'essential';
+      } else if (key === 'tax') {
+        shouldInclude = true;
+        priority = 'recommended';
+      }
+    }
+    
+    if (shouldInclude) {
       recommendedProducts.push({
         name: product.name,
         description: product.description,

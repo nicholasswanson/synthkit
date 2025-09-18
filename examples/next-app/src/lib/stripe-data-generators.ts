@@ -625,11 +625,8 @@ export function generateStripeDataForPersona(
   persona: any, 
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
-  // Determine business type from persona
-  const typeLower = persona.businessContext?.type?.toLowerCase() || '';
-  const businessType = typeLower.includes('saas') ? 'saas' :
-                      (typeLower.includes('ecommerce') || typeLower.includes('e-commerce')) ? 'ecommerce' :
-                      typeLower.includes('marketplace') ? 'marketplace' : 'saas';
+  // Use persona name directly for business type mapping
+  const personaName = persona.name || '';
   
-  return generateRealisticStripeData(businessType, counts);
+  return generateRealisticStripeData(personaName, counts);
 }
