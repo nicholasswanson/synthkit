@@ -56,10 +56,10 @@ function generateCustomer(seed: number): { id: string; name: string; email: stri
 // Generate realistic subscription plans
 function generatePlan(seed: number, businessType: string): any {
   const planNames = ['Basic', 'Pro', 'Enterprise', 'Starter', 'Growth', 'Premium'];
-  const intervals = ['month', 'year'];
   
   const name = planNames[Math.floor(seededRandom(seed) * planNames.length)];
-  const interval = intervals[Math.floor(seededRandom(seed + 1) * intervals.length)];
+  // Most SaaS plans are monthly, with occasional yearly plans
+  const interval = seededRandom(seed + 1) < 0.8 ? 'month' : 'year';
   const amount = generateRealisticAmount(businessType, 'subscription', seed + 2);
   
   return {
@@ -130,6 +130,7 @@ export function generateRealisticStripeData(
       current_period_end: currentPeriodEnd,
       plan: plan,
       amount: plan.amount,
+      interval: plan.interval,
       currency: 'usd',
       billing_cycle_anchor: currentPeriodStart,
       cancel_at_period_end: false,
@@ -156,21 +157,24 @@ export function generateRealisticStripeData(
     const invoiceId = `in_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
     invoiceIds.push(invoiceId);
     
-    const amount = subscription.amount;
+    const amount = subscription.amount || 0;
     const created = subscription.current_period_start + Math.floor(seededRandom(seed + 2) * 86400 * 30);
     const statuses = ['paid', 'open', 'draft'];
     const status = statuses[Math.floor(seededRandom(seed + 3) * statuses.length)];
+    
+    // Ensure amount is valid
+    const validAmount = isNaN(amount) || amount <= 0 ? generateRealisticAmount('ecommerce', 'subscription', seed + 4) : amount;
     
     invoices.push({
       id: invoiceId,
       object: 'invoice',
       customer: customer!.id,
       subscription: subscription.id,
-      amount_due: status === 'paid' ? 0 : amount,
-      amount_paid: status === 'paid' ? amount : 0,
-      amount_remaining: status === 'paid' ? 0 : amount,
-      total: amount,
-      subtotal: amount,
+      amount_due: status === 'paid' ? 0 : validAmount,
+      amount_paid: status === 'paid' ? validAmount : 0,
+      amount_remaining: status === 'paid' ? 0 : validAmount,
+      total: validAmount,
+      subtotal: validAmount,
       currency: 'usd',
       status,
       created,
@@ -199,26 +203,29 @@ export function generateRealisticStripeData(
     const customer = customers.find(c => c.id === invoice.customer);
     
     const chargeId = `ch_${seededRandom(seed + 1).toString(36).substring(2, 15)}`;
-    const amount = invoice.amount;
-    const created = invoice.created + Math.floor(seededRandom(seed + 2) * 86400 * 7); // Within a week of invoice
+    const invoiceAmount = invoice?.amount || 0;
+    const created = invoice?.created || Math.floor(Date.now() / 1000);
     
     const statuses = ['succeeded', 'pending', 'failed'];
     const status = statuses[Math.floor(seededRandom(seed + 3) * statuses.length)];
     
     // Some charges are one-time payments (not from subscriptions)
     const isOneTime = Math.random() < 0.3; // 30% one-time payments
-    const oneTimeAmount = isOneTime ? generateRealisticAmount(businessType, 'oneTime', seed + 4) : amount;
+    const oneTimeAmount = isOneTime ? generateRealisticAmount(businessType, 'oneTime', seed + 4) : 0;
+    
+    // Ensure amount is valid
+    const validAmount = isOneTime ? oneTimeAmount : (isNaN(invoiceAmount) || invoiceAmount <= 0 ? generateRealisticAmount(businessType, 'subscription', seed + 5) : invoiceAmount);
     
     charges.push({
       id: chargeId,
       object: 'charge',
-      amount: isOneTime ? oneTimeAmount : amount,
-      amount_captured: status === 'succeeded' ? (isOneTime ? oneTimeAmount : amount) : 0,
+      amount: validAmount,
+      amount_captured: status === 'succeeded' ? validAmount : 0,
       amount_refunded: 0,
       currency: 'usd',
       customer: customer!.id,
-      invoice: isOneTime ? undefined : invoice.id,
-      description: isOneTime ? `One-time payment from ${customer!.name}` : `Payment for ${invoice.id}`,
+      invoice: isOneTime ? undefined : invoice?.id,
+      description: isOneTime ? `One-time payment from ${customer!.name}` : `Payment for ${invoice?.id || 'invoice'}`,
       status,
       created,
       paid: status === 'succeeded',
