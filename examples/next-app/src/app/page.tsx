@@ -38,8 +38,16 @@ interface EnhancedPersona {
 
 // Function to enhance persona with Stripe data
 function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
+  console.log('=== Enhancing persona with Stripe data ===');
+  console.log('Persona name:', persona.name);
+  console.log('Persona business context:', persona.businessContext);
+  
   const stripeAnalysis = analyzeStripeProducts(persona);
+  console.log('Stripe analysis:', stripeAnalysis);
+  
   const stripeData = generateStripeDataForPersona(persona);
+  console.log('Generated Stripe data keys:', Object.keys(stripeData));
+  console.log('Stripe data counts:', Object.fromEntries(Object.entries(stripeData).map(([key, value]) => [key, value.length])));
   
   // Add Stripe entities to the existing entities
   const stripeEntities = stripeAnalysis.allDataObjects.map(objectName => ({
@@ -53,12 +61,17 @@ function enhancePersonaWithStripeData(persona: any): EnhancedPersona {
     ]
   }));
   
-  return {
+  const enhanced = {
     ...persona,
     stripeAnalysis,
     stripeData,
     entities: [...persona.entities, ...stripeEntities]
   };
+  
+  console.log('Enhanced persona stripeData keys:', Object.keys(enhanced.stripeData));
+  console.log('Enhanced persona stripeData counts:', Object.fromEntries(Object.entries(enhanced.stripeData).map(([key, value]) => [key, value.length])));
+  
+  return enhanced;
 }
 
 interface RealisticVolume {
