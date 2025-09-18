@@ -615,6 +615,13 @@ export default function Home() {
     console.log('Selected category:', selectedCategory);
     console.log('Is custom category:', isCustomCategory(selectedCategory));
     
+    // Add a visible debug indicator
+    const debugDiv = document.createElement('div');
+    debugDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999; font-size: 12px;';
+    debugDiv.textContent = `Stripe useEffect running for: ${selectedCategory}`;
+    document.body.appendChild(debugDiv);
+    setTimeout(() => debugDiv.remove(), 3000);
+    
     if (!isCustomCategory(selectedCategory)) {
       const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
       console.log('Persona found:', !!persona);
