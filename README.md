@@ -43,11 +43,6 @@ cd examples/next-app
 pnpm dev      # Starts Synthkit at http://localhost:3001
 ```
 
-### **Prerequisites**
-
-- **Node.js**: 20.11.0 or higher (see `.nvmrc`)
-- **pnpm**: 9.0.0 or higher (will be auto-installed if missing)
-
 ### **Installation**
 
 ```bash
@@ -81,6 +76,11 @@ nvm use        # Switches to project's Node version
 # If using volta
 volta install node@20.11.0
 ```
+
+### **Prerequisites**
+
+- **Node.js**: 20.11.0 or higher (see `.nvmrc`)
+- **pnpm**: 9.0.0 or higher (will be auto-installed if missing)
 
 **�� Interactive Demo**: The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!
 
