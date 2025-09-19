@@ -626,10 +626,22 @@ export function generateStripeDataForPersona(
   stage: string = 'growth',
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
-  // Use persona name directly for business type mapping
+  // Map persona name to business type key
   const personaName = persona.name || '';
+  const businessTypeMap: Record<string, string> = {
+    'Checkout e-commerce': 'checkout-ecommerce',
+    'B2B SaaS subscriptions': 'b2b-saas-subscriptions',
+    'Food delivery platform': 'food-delivery-platform',
+    'Consumer fitness app': 'consumer-fitness-app',
+    'B2B invoicing': 'b2b-invoicing',
+    'Property management platform': 'property-management-platform',
+    'Creator platform': 'creator-platform',
+    'Donation marketplace': 'donation-marketplace'
+  };
   
-  return generateRealisticStripeData(personaName, stage, counts);
+  const businessType = businessTypeMap[personaName] || 'b2b-saas-subscriptions';
+  
+  return generateRealisticStripeData(businessType, stage, counts);
 }
 
 // Function to generate metadata and sample data for UI display (performance optimized)
@@ -638,8 +650,20 @@ export function generateStripeMetadataForPersona(
   stage: string = 'growth',
   counts: { charges?: number; subscriptions?: number; invoices?: number } = {}
 ): Record<string, any[]> {
-  // Use persona name directly for business type mapping
+  // Map persona name to business type key
   const personaName = persona.name || '';
+  const businessTypeMap: Record<string, string> = {
+    'Checkout e-commerce': 'checkout-ecommerce',
+    'B2B SaaS subscriptions': 'b2b-saas-subscriptions',
+    'Food delivery platform': 'food-delivery-platform',
+    'Consumer fitness app': 'consumer-fitness-app',
+    'B2B invoicing': 'b2b-invoicing',
+    'Property management platform': 'property-management-platform',
+    'Creator platform': 'creator-platform',
+    'Donation marketplace': 'donation-marketplace'
+  };
   
-  return generateStripeMetadata(personaName, stage, counts);
+  const businessType = businessTypeMap[personaName] || 'b2b-saas-subscriptions';
+  
+  return generateStripeMetadata(businessType, stage, counts);
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
 // Dataset creation is now automatic - no hook needed
-import { Copy, Download, ExternalLink } from 'lucide-react';
+import { Copy, Download, ExternalLink, Info } from 'lucide-react';
 import { generateAllIntegrations } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
 import { downloadReactHook } from '@/lib/react-hook-generator';
@@ -543,7 +543,7 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
-  const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('cursor');
+  const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('javascript');
   
   // Dataset creation is now automatic - no hook needed
 
@@ -553,16 +553,16 @@ export default function Home() {
       // Clear old sessionStorage data to prevent quota issues
       sessionStorage.removeItem('synthkit-current-dataset');
       
-      const stored = localStorage.getItem('synthkit-custom-categories');
-      if (stored) {
+    const stored = localStorage.getItem('synthkit-custom-categories');
+    if (stored) {
         const parsed = JSON.parse(stored);
         setCustomCategories(parsed.map((cat: any) => ({
           ...cat,
           createdAt: new Date(cat.createdAt)
         })));
       }
-    } catch (error) {
-      console.error('Failed to load custom categories:', error);
+      } catch (error) {
+        console.error('Failed to load custom categories:', error);
       // Clear corrupted data
       localStorage.removeItem('synthkit-custom-categories');
     }
@@ -571,7 +571,7 @@ export default function Home() {
   // Save custom categories to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
+    localStorage.setItem('synthkit-custom-categories', JSON.stringify(customCategories));
     } catch (error) {
       console.warn('Failed to save custom categories to localStorage:', error);
       // If storage is full, try to clear old data and save again
@@ -605,57 +605,42 @@ export default function Home() {
 
   // Generate Stripe data when persona or stage changes
   useEffect(() => {
-    const generateDataset = async () => {    console.log('=== Stripe Data useEffect Running ===');
-    console.log('Selected category:', selectedCategory);
-    console.log('Stage:', stage);
-    console.log('Is custom category:', isCustomCategory(selectedCategory));
-    
-    // Add a visible debug indicator
-    const debugDiv = document.createElement('div');
-    debugDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999; font-size: 12px;';
-    debugDiv.textContent = `Stripe useEffect running for: ${selectedCategory} (${stage})`;
-    document.body.appendChild(debugDiv);
-    setTimeout(() => debugDiv.remove(), 3000);
-    
-    if (!isCustomCategory(selectedCategory)) {
-      const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-      console.log('Persona found:', !!persona);
-      console.log('Persona name:', persona?.name);
-      
-      try {
-        console.log('Generating metadata and sample data for stage:', stage);
-        // Generate metadata and sample data only (performance optimized)
-        const generatedStripeData = generateStripeMetadataForPersona(persona, stage);
-        console.log('Generated stripeData keys:', Object.keys(generatedStripeData));
-        console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
-        setStripeData(generatedStripeData);
+    const generateDataset = async () => {
+      if (!isCustomCategory(selectedCategory)) {
+        const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
         
-        // Full dataset generation is now handled automatically by useEffect        
-      } catch (error) {
-        console.error('Error generating Stripe data:', error);
+        try {
+          // Generate metadata and sample data only (performance optimized)
+          const generatedStripeData = generateStripeMetadataForPersona(persona, stage);
+          setStripeData(generatedStripeData);
+          
+          // Full dataset generation is now handled automatically by useEffect        
+        } catch (error) {
+          console.error('Error generating Stripe data:', error);
+          setStripeData({});
+        }
+      } else {
         setStripeData({});
-      }    } else {
-      console.log('Custom category - clearing stripeData');
-      setStripeData({});
-    }
+      }
     };
     
-    generateDataset();  }, [selectedCategory, stage]);
+    generateDataset();
+  }, [selectedCategory, stage]);
 
   // Save current dataset metadata to sessionStorage and API for live integration
   useEffect(() => {
     if (metricsLoaded && (Object.keys(stripeData).length > 0 || Object.keys(dynamicEntities).length > 0)) {
       // Only store metadata, not the full dataset to avoid storage quota issues
       const datasetMetadata = {
-        type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
-        scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
-        aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
+          type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
+          scenario: isCustomCategory(selectedCategory) ? undefined : { category: selectedCategory, role, stage, id: scenarioId },
+          aiAnalysis: isCustomCategory(selectedCategory) ? { prompt: aiPrompt, analysis: getCustomCategory(selectedCategory)?.aiAnalysis } : undefined,
         recordCounts: isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
           ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
           : (stripeData._metadata as any)?.counts 
             ? Object.fromEntries(Object.entries((stripeData._metadata as any).counts).filter(([key, count]) => (count as number) > 0))
             : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0)),
-        updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString()
       };
       
       try {
@@ -724,6 +709,27 @@ export default function Home() {
       }).catch(err => {
         console.log('Failed to update current dataset API:', err.message);
       });
+
+      // Send metrics data to API
+      if ((datasetData as any).metrics && (datasetData as any)._metadata) {
+        fetch('/api/metrics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            dataset: datasetData,
+            businessType: (datasetData as any)._metadata.businessType,
+            stage: (datasetData as any)._metadata.stage
+          })
+        }).then(response => {
+          if (response.ok) {
+            console.log('Metrics sent to API successfully');
+          } else {
+            console.error('Failed to send metrics to API:', response.status);
+          }
+        }).catch(err => {
+          console.error('Error sending metrics to API:', err);
+        });
+      }
     }
   }, [selectedCategory, stage, role, scenarioId, stripeData, dynamicEntities, businessMetrics, metricsLoaded]);
 
@@ -1026,8 +1032,17 @@ export default function Home() {
       return sharedDatasetUrl;
     }
     
-    // Always use the current dataset endpoint for live integration
-    return '/api/dataset/current';
+    // Use full dataset endpoint for integrations to ensure complete access
+    return '/api/dataset/current?full=true';
+  };
+
+  const getCurrentDatasetUrlForDisplay = () => {
+    if (sharedDatasetUrl) {
+      return sharedDatasetUrl;
+    }
+    
+    // Use paginated endpoint for browser display to prevent crashes
+    return '/api/dataset/current?limit=1000';
   };
 
   return (
@@ -1047,25 +1062,31 @@ export default function Home() {
                 />
               </div>
               <p className="text-lg text-gray-600">
-                Generate realistic synthetic data for your applications
+                Prototype with realistic, synthetic datasets
               </p>
             </div>
 
-        {/* Business Configuration Section */}
+        {/* Configuration Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Business Configuration
-          </h2>
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Configuration
+          </h3>
           
           {/* Category Selection */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category
+              Pre-built scenarios
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em'
+              }}
             >
               {/* Predefined personas */}
               {Object.entries(ENHANCED_PERSONAS).map(([key, persona]) => (
@@ -1091,7 +1112,7 @@ export default function Home() {
                     {category.displayName}
                     <button
                       onClick={() => handleDeleteCustomCategory(category.id)}
-                      className="ml-1 text-red-500 hover:text-red-700"
+                      className="ml-1" style={{ color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#B83D08'} onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#DB4F0B'}
                       title="Delete custom category"
                     >
                       ×
@@ -1102,36 +1123,34 @@ export default function Home() {
             )}
           </div>
 
-          {/* AI Prompt Input */}
+          {/* Custom Scenario Input */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              AI Business Prompt
+              Custom scenario
             </label>
-            <div className="flex gap-2">
               <textarea
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Describe your business idea (e.g., 'A growth stage platform for food delivery with real-time tracking and restaurant partnerships')"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900"
+              placeholder="e.g. birdwatching app with subscriptions"
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-gray-900 mb-2"
                 rows={3}
               />
               <button
                 onClick={handleAnalyzeBusiness}
                 disabled={!aiPrompt.trim() || isAnalyzing}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
               >
-                {isAnalyzing ? 'Analyzing...' : 'Analyze Business'}
+              {isAnalyzing ? 'Generating...' : 'Generate'}
               </button>
-            </div>
           </div>
 
           {/* AI Analysis Reasoning (only for AI-generated) */}
           {isCustomCategory(selectedCategory) && aiAnalysis && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-md">
-              <h4 className="text-sm font-medium text-blue-900 mb-2">
+            <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: '#FFF4F0' }}>
+              <h4 className="text-sm font-medium mb-2" style={{ color: '#DB4F0B' }}>
                 Analysis Reasoning
               </h4>
-              <p className="text-sm text-blue-800">
+              <p className="text-sm" style={{ color: '#B83D08' }}>
                 This appears to be a <strong>{aiAnalysis.businessContext.type}</strong> in the{' '}
                 <strong>{aiAnalysis.businessContext.stage}</strong> stage. Key features include{' '}
                 {aiAnalysis.keyFeatures.slice(0, 3).join(', ')}, targeting{' '}
@@ -1143,11 +1162,7 @@ export default function Home() {
 
         {/* Scenario Configuration Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Scenario Configuration
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
             {/* Role Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1156,7 +1171,13 @@ export default function Home() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'admin' | 'support')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em'
+                }}
               >
                 <option value="admin">Admin</option>
                 <option value="support">Support</option>
@@ -1171,7 +1192,13 @@ export default function Home() {
               <select
                 value={stage}
                 onChange={(e) => setStage(e.target.value as 'early' | 'growth' | 'enterprise')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em'
+                }}
               >
                 <option value="early">Early</option>
                 <option value="growth">Growth</option>
@@ -1184,78 +1211,138 @@ export default function Home() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 ID
               </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Change this number to generate different datasets with unique URLs
+              </p>
               <input
                 type="number"
                 value={scenarioId}
                 onChange={(e) => setScenarioId(parseInt(e.target.value) || 12345)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Key Features */}
+        {/* Dataset URLs Section */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Key Features
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {getCurrentKeyFeatures().map((feature, i) => (
-              <span key={i} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                {feature}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* User Roles */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            User Roles
-          </h3>
-          <div className="space-y-3">
-            {getCurrentUserRoles().map((role, i) => (
-              <div key={i} className="border-l-4 border-purple-500 pl-4">
-                <div className="font-medium text-purple-800">{role.name}</div>
-                <div className="text-sm text-gray-600">{role.description}</div>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {(role.permissions || []).map((permission: string, j: number) => (
-                    <span key={j} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
-                      {permission}
-                    </span>
-                  ))}
+          <h3 className="font-semibold text-gray-900 mb-3">
+            Dataset URLs
+            </h3>
+          
+          {/* Full Dataset URL */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Full dataset (for integrations)
+            </h4>
+            <div className="p-3 bg-gray-100 rounded-xl mb-2">
+              <code className="text-sm font-mono text-gray-800 break-all">
+                {getCurrentDatasetUrl()}
+              </code>
+                  </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrl())}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <Copy className="w-4 h-4" />
+                Copy
+              </button>
+              <a
+                href={getCurrentDatasetUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <ExternalLink className="w-4 h-4" />
+                View
+              </a>
                 </div>
-              </div>
-            ))}
           </div>
-        </div>
 
-        {/* Stripe Products Used */}
+          {/* Paginated Dataset URL */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Browser-friendly (paginated)
+            </h4>
+            <div className="p-3 bg-gray-100 rounded-xl mb-2">
+              <code className="text-sm font-mono text-gray-800 break-all">
+                {getCurrentDatasetUrlForDisplay()}
+              </code>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrlForDisplay())}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <Copy className="w-4 h-4" />
+                Copy
+              </button>
+              <a
+                href={getCurrentDatasetUrlForDisplay()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <ExternalLink className="w-4 h-4" />
+                View
+              </a>
+            </div>
+          </div>
+
+          {/* Metrics Dataset URL */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Metrics API (business intelligence)
+            </h4>
+            <div className="p-3 bg-gray-100 rounded-xl mb-2">
+              <code className="text-sm font-mono text-gray-800 break-all">
+                /api/metrics?granularity=monthly
+              </code>
+                  </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText('/api/metrics?granularity=monthly')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <Copy className="w-4 h-4" />
+                Copy
+              </button>
+              <a
+                href="/api/metrics?granularity=monthly"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+              >
+                <ExternalLink className="w-4 h-4" />
+                View
+              </a>
+                </div>
+            </div>
+          </div>
+
+        {/* Stripe Products */}
         {getCurrentStripeAnalysis() && (
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Stripe Products Used
+              Stripe products
             </h3>
             <div className="space-y-3">
               {getCurrentStripeAnalysis()?.recommendedProducts.map((product, i) => (
-                <div key={i} className={`border-l-4 pl-4 ${
-                  product.priority === 'essential' ? 'border-red-500' :
-                  product.priority === 'recommended' ? 'border-yellow-500' :
-                  'border-gray-400'
-                }`}>
-                  <div className={`font-medium ${
-                    product.priority === 'essential' ? 'text-red-800' :
-                    product.priority === 'recommended' ? 'text-yellow-800' :
-                    'text-gray-800'
-                  }`}>
+                <div key={i} className="border-l-4 pl-4" style={{ borderLeftColor: '#DB4F0B' }}>
+                  <div className="font-medium text-gray-900">
                     {product.name}
-                  </div>
+                      </div>
                   <div className="text-sm text-gray-600 mb-1">{product.description}</div>
-                  <div className="text-xs text-gray-500">
-                    Priority: {product.priority}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Data Objects: {product.dataObjects.join(', ')}
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">
+                      Priority: {product.priority}
+                    </span>
+                    {product.dataObjects.map((obj: string, j: number) => (
+                      <span key={j} className="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">
+                        {obj}
+                      </span>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -1263,31 +1350,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Data Entities */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Data Entities
-          </h3>
-          <div className="space-y-4">
-            {getCurrentEntities().map((entity, i) => (
-              <div key={i} className="border border-gray-200 rounded p-3">
-                <div className="font-medium text-gray-900">{entity.name}</div>
-                <div className="text-sm text-gray-500 capitalize mb-2">{entity.type}</div>
-                <div className="space-y-2">
-                  {(entity.properties || []).map((prop: any, j: number) => (
-                    <div key={j} className="flex items-start gap-2">
-                      <span className="font-medium text-gray-900 min-w-0 flex-shrink-0">{prop.name}</span>
-                      <span className="text-gray-500 text-sm">({prop.type})</span>
-                      {prop.description && (
-                        <span className="text-gray-600 text-sm flex-1">- {prop.description}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Object Lists */}
         <div className="mb-8">
@@ -1332,153 +1394,148 @@ export default function Home() {
         </div>
 
 
-        {/* Stripe Data Lists */}
+        {/* Dataset Structure */}
         {Object.keys(stripeData).length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Stripe Data ({Object.keys(stripeData).length} types)
-            </h3>
-            {stripeData._metadata && (stripeData._metadata as any).generatedAt && (
-              <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                Generated: {new Date((stripeData._metadata as any).generatedAt).toLocaleString()} | 
-                Business: {(stripeData._metadata as any).businessType || 'Unknown'} | 
-                Counts: {(stripeData._metadata as any).counts ? Object.entries((stripeData._metadata as any).counts).map(([key, value]) => `${key}: ${value}`).join(', ') : 'N/A'}
-              </div>
-            )}
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Dataset structure
+                </h3>
+            <div className="mb-6">
+              <a 
+                href="https://docs.stripe.com/stripe-data/schema" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm underline flex items-center gap-1" style={{ color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#B83D08'} onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#DB4F0B'}
+              >
+                Open data schema
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
             <div className="space-y-6">
-              {/* Customers */}
-              {stripeData.customers && stripeData.customers.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                    Customers ({((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0).toLocaleString()})
-                  </h4>
-                  <div className="space-y-2">
-                    {(stripeData.customers || []).slice(0, 3).map((customer: any, index: number) => (
-                      <div key={customer.id || index} className="p-2 bg-gray-50 rounded">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{customer.name}</div>
-                            <div className="text-sm text-gray-600">{customer.email}</div>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(customer.created * 1000).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0) > 3 && (
-                      <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {(((stripeData._metadata as any)?.counts?.customers || stripeData.customers?.length || 0) - 3).toLocaleString()} more
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Other Stripe Data */}
+              {/* All Data Types */}
               {Object.entries(stripeData)
                 .filter(([dataType, dataArray]) => 
-                  dataType !== 'customers' && 
-                  dataType !== 'plans' && 
                   dataType !== '_metadata' && 
                   Array.isArray(dataArray) && 
                   dataArray.length > 0
                 )
                 .map(([dataType, dataArray]) => (
                 <div key={dataType} className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                  <h4 className="font-semibold text-gray-900 mb-3">
                     {dataType.charAt(0).toUpperCase() + dataType.slice(1)} ({((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0).toLocaleString()})
                   </h4>
-                  <div className="space-y-2">
+                  <div className="space-y-0">
                     {Array.isArray(dataArray) ? dataArray.slice(0, 3).map((item: any, index: number) => (
-                      <div key={item.id || index} className="p-2 bg-gray-50 rounded">
-                        <div className="space-y-1">
-                          {Object.entries(item).slice(0, 6).map(([key, value]) => (
-                            <div key={key} className="flex justify-between items-center">
-                              <span className="text-sm font-medium text-gray-600 capitalize">
-                                {key}:
-                              </span>
-                              <span className="text-sm text-gray-900">
-                                {typeof value === 'number' && key.includes('amount') 
-                                  ? `$${(value / 100).toFixed(0)}`
-                                  : typeof value === 'number' && key.includes('created')
-                                  ? new Date(value * 1000).toLocaleDateString()
-                                  : typeof value === 'string' && value.length > 30
-                                  ? `${value.substring(0, 30)}...`
-                                  : typeof value === 'object' && value !== null
-                                  ? JSON.stringify(value).substring(0, 30) + '...'
-                                  : String(value)
-                                }
-                              </span>
+                      <div key={item.id || index} className="py-3 border-b border-gray-200 last:border-b-0">
+                        {dataType === 'customers' ? (
+                          // Special layout for customers
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                              <div className="font-medium text-gray-900">{item.name}</div>
+                              <div className="text-sm text-gray-600">{item.email}</div>
                             </div>
-                          ))}
+                            <div className="text-xs text-gray-500">
+                              {new Date(item.created * 1000).toLocaleDateString()}
                         </div>
-                      </div>
+                          </div>
+                        ) : (
+                          // Generic layout for other data types
+                          <div className="space-y-1">
+                            {Object.entries(item).slice(0, 6).map(([key, value]) => (
+                              <div key={key} className="flex items-center">
+                                <span className="text-sm font-medium text-gray-600 capitalize">
+                                  {key}:
+                            </span>
+                                <span className="text-sm text-gray-900 ml-2">
+                                  {typeof value === 'number' && key.includes('amount') 
+                                    ? `$${(value / 100).toFixed(2)}`
+                                    : typeof value === 'number' && key.includes('created')
+                                    ? new Date(value * 1000).toLocaleDateString()
+                                    : typeof value === 'string' && value.length > 30
+                                    ? `${value.substring(0, 30)}...`
+                                    : typeof value === 'object' && value !== null
+                                    ? JSON.stringify(value).substring(0, 30) + '...'
+                                    : String(value)
+                                  }
+                            </span>
+                    </div>
+                  ))}
+                    </div>
+                  )}
+                </div>
                     )) : (
                       <div className="text-sm text-gray-500 text-center py-2">
                         No data available
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {Array.isArray(dataArray) && ((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0) > 3 && (
-                      <div className="text-sm text-gray-500 text-center py-2">
-                        ... and {(((stripeData._metadata as any)?.counts?.[dataType] || dataArray?.length || 0) - 3).toLocaleString()} more
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
+                    </div>
                 </div>
-              ))}
-            </div>
-          </div>
         )}
 
-        {/* Dataset URL Section */}
-        <div className="mt-8">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Dataset URL
-          </h3>
-          <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg">
-            <code className="flex-1 text-sm font-mono text-gray-800 break-all">
-              {getCurrentDatasetUrl()}
-            </code>
-            <button
-              onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrl())}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-            >
-              <Copy className="w-4 h-4" />
-              Copy
-            </button>
-            <a
-              href={getCurrentDatasetUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
-            >
-              <ExternalLink className="w-4 h-4" />
-              View
-            </a>
-          </div>
+        {/* Included Metrics */}
+        {(stripeData._metadata as any)?.includedMetrics && (stripeData._metadata as any).includedMetrics.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Included metrics
+            </h3>
+            <div className="space-y-3">
+              {(stripeData._metadata as any).includedMetrics.map((metric: string, index: number) => (
+                <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
+                  <span className="text-sm font-medium text-gray-900">{metric}</span>
+                  <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-lg">
+                    Available
+                  </span>
         </div>
-
-        </div>
+              ))}
       </div>
+        </div>
+        )}
+
+        {/* User Roles */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            User roles
+            </h3>
+          <div className="space-y-3">
+            {getCurrentUserRoles().map((role, i) => (
+              <div key={i} className="border-l-4 pl-4" style={{ borderLeftColor: '#DB4F0B' }}>
+                <div className="font-medium text-gray-900">{role.name}</div>
+                <div className="text-sm text-gray-600">{role.description}</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {(role.permissions || []).map((permission: string, j: number) => (
+                    <span key={j} className="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">
+                      {permission}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+                  </div>
+                </div>
+
+            </div>
+          </div>
 
       {/* Right Panel - Integration & Sharing */}
       <div className="w-7/10 overflow-y-auto bg-gray-50" style={{ padding: '40px', width: '70%' }}>
           {/* Tab Navigation */}
           <div className="mb-6">
-            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-              {['cursor', 'claude', 'codex', 'react'].map((tab) => (
-                <button
+            <div className="flex space-x-1 bg-gray-100 rounded-xl p-1">
+              {['cursor', 'v0', 'claude', 'codex', 'javascript'].map((tab) => (
+                  <button
                   key={tab}
                   onClick={() => setActiveIntegrationTab(tab)}
-                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors ${
                     activeIntegrationTab === tab
                       ? 'bg-white text-gray-900 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
+                  </button>
               ))}
             </div>
           </div>
@@ -1491,7 +1548,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => downloadReactHook(getCurrentDatasetUrl(), getDatasetInfo())}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
               >
                 <Download className="w-4 h-4" />
                 useSynthkitDataset.ts
@@ -1517,8 +1574,10 @@ export default function Home() {
                     return toolName === 'claude';
                   } else if (activeIntegrationTab === 'codex') {
                     return toolName === 'chatgpt';
-                  } else if (activeIntegrationTab === 'react') {
+                  } else if (activeIntegrationTab === 'javascript') {
                     return toolName === 'fetch api';
+                  } else if (activeIntegrationTab === 'v0') {
+                    return toolName === 'v0';
                   }
                   return false;
                 });
@@ -1532,46 +1591,66 @@ export default function Home() {
                     <>
                       {/* Cursor Rules Code Block */}
                       {cursorIntegrationExample && (
-                        <div>
+                    <div>
                           <h3 className="font-semibold text-gray-900 mb-3">
                             Add this block to your{' '}
                             <a 
                               href="https://cursor.com/docs/context/rules" 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 underline"
+                              className="underline"
+                              style={{ color: '#DB4F0B' }}
+                              onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#B83D08'}
+                              onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#DB4F0B'}
                             >
                               project rules
                             </a>{' '}
                             or ask Cursor to do it
                           </h3>
-                          <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
+                          <pre className="bg-gray-100 p-5 rounded-xl text-sm overflow-x-auto">
                             <code className="text-gray-800">
                               {cursorIntegrationExample.copyText}
                             </code>
                           </pre>
-                        </div>
+                  </div>
                       )}
                       
                       {/* Cursor Prompt Code Block */}
                       {cursorPromptExample && (
                         <div>
                           <h3 className="font-semibold text-gray-900 mb-3">Integration prompt</h3>
-                          <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
+                          <pre className="bg-gray-100 p-5 rounded-xl text-sm overflow-x-auto">
                             <code className="text-gray-800">
                               {cursorPromptExample.copyText || cursorPromptExample.code}
-                            </code>
-                          </pre>
+                    </code>
+                  </pre>
                         </div>
                       )}
                     </>
                   );
                 }
                 
+                
                 return filteredExamples.map((example, index) => (
                   <div key={index}>
-                    <h3 className="font-semibold text-gray-900 mb-3">Integration prompt</h3>
-                    <pre className="bg-gray-100 p-5 rounded-lg text-sm overflow-x-auto">
+                    <h3 className="font-semibold text-gray-900 mb-3">
+                      {activeIntegrationTab === 'javascript' ? 'JavaScript Class for Vanilla JS Projects' : 'Integration prompt'}
+                    </h3>
+                    {activeIntegrationTab === 'javascript' && (
+                      <div className="mb-4 p-4 bg-blue-50 rounded-xl">
+                        <p className="text-sm text-blue-800 mb-2">
+                          <strong>How to use this code:</strong>
+                        </p>
+                        <ul className="text-sm text-blue-700 space-y-1 ml-4">
+                          <li>• Copy the entire class code below</li>
+                          <li>• Save it as a JavaScript file (e.g., <code className="bg-blue-100 px-1 rounded">synthkit.js</code>)</li>
+                          <li>• Import and use in your vanilla JS project</li>
+                          <li>• Includes caching, error handling, and utility methods</li>
+                          <li>• Works with any framework or vanilla JavaScript</li>
+                        </ul>
+                </div>
+              )}
+                    <pre className="bg-gray-100 p-5 rounded-xl text-sm overflow-x-auto">
                       <code className="text-gray-800">
                         {example.code}
                       </code>

@@ -180,8 +180,7 @@ export function generateCursorIntegration(url: string, datasetInfo: DatasetInfo)
   const cursorRules = `Synthkit Dataset Integration
 Dataset: ${businessContext.name} (${businessContext.domain})
 Contains: ${recordSummary}
-Dataset URL: ${url}
-Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')}
+URL: ${url}
 
 ${datasetInfo.scenario ? `Scenario Configuration:
 - Category: ${businessContext.name}
@@ -199,39 +198,14 @@ Dataset Characteristics:
 - Deterministic: same URL = identical data every time
 - No authentication required, publicly accessible
 
-Metrics API Characteristics:
-- 60+ business metrics with time series data
-- Granularities: daily (365 values), weekly (52 values), monthly (12 values)
-- Categories: Payments, Subscriptions, Customers, Revenue, Fraud & Risk, Authentication
-- Realistic business intelligence for dashboards and analytics
-
 Integration Pattern:
-1. Fetch dataset once on component mount or user selection change
-2. Fetch metrics separately for analytics and charts
-3. Cache both results for performance
-4. Use TypeScript interfaces for type safety
-5. Handle loading and error states properly
+1. Fetch once on component mount or user selection change
+2. Cache the result for performance
+3. Use TypeScript interfaces for type safety
+4. Handle loading and error states properly
 
-// Dataset fetching
 const dataset = await fetch('${url}').then(r => r.json());
-const { ${Object.keys(datasetInfo.recordCounts).join(', ')}, businessMetrics } = dataset.data;
-
-// Metrics fetching
-const metrics = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly').then(r => r.json());
-const mrrData = metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue');
-const successRate = metrics.metrics.find(m => m.name === 'Payment Success Rate');
-
-// Common metrics for dashboards:
-- Monthly Recurring Revenue (MRR)
-- Payment Success Rate
-- Active Subscribers
-- Customer Lifetime Value
-- Churn Rate
-- Gross Payment Volume
-- Failed Payment Rate
-- Average Revenue Per User (ARPU)
-- Net Volume
-- Dispute Rate`;
+const { ${Object.keys(datasetInfo.recordCounts).join(', ')}, businessMetrics } = dataset.data;`;
 
   const integrationCode = `// Synthkit Dataset Integration for ${businessContext.name}
 import { useState, useEffect } from 'react';
@@ -449,66 +423,69 @@ export function generateV0Integration(url: string, datasetInfo: DatasetInfo): In
 
   const entityList = Object.keys(datasetInfo.recordCounts).join(', ');
 
-  const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
+  const prompt = `Create a modern, professional dashboard component for a ${businessContext.name.toLowerCase()} prototype that integrates with a static Synthkit dataset.
 
-**Dataset Information:**
+**Dataset Integration:**
 - URL: ${url}
-- Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
-- Business Metrics: CLV, AOV, MRR, DAU, conversion rate
-- Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - Provides 60+ business metrics with time series data (daily, weekly, monthly)
+- Contains: ${recordSummary}
+- Static JSON file (reliable, fast, cached)
+- Production-ready with realistic business relationships
+- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - 60+ business metrics with time series data
 
-**Technical Integration:**
-1. **Use the provided hook** - Import and use the useSynthkitDataset() hook from './useSynthkitDataset.ts'
-2. **Replace all mock data** - Update components to use data from the hook instead of hardcoded values
-3. **Handle missing data** - For any prototype features not covered by the dataset, create mock data that closely matches the dataset's patterns and relationships
-4. **Maintain data consistency** - Ensure all data follows the same formatting (currency in cents, percentages to hundredths, etc.)
-5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Integrate Stripe data** - Use the included Stripe objects for payment processing, subscription management, and financial data
+**Component Requirements:**
+1. **Data Fetching**: Fetch the static dataset on component mount with proper error handling
+2. **Loading State**: Show skeleton loaders while data loads
+3. **Metrics Cards**: Display key business metrics (CLV, AOV, MRR, DAU, conversion rate) in attractive cards
+4. **Advanced Metrics**: Fetch additional metrics from the Metrics API for charts and analytics
+5. **Data Tables**: Show ${entityList} in clean, paginated tables (10 items per page)
+6. **Responsive Design**: Works on desktop and mobile
+7. **Error Handling**: Graceful error states with retry options
+8. **Professional Styling**: Modern ${businessContext.domain} application aesthetic
 
-**Data Structure to Use:**
-\`\`\`javascript
-const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
-
-// Metrics API (fetch separately for business intelligence):
-const metricsResponse = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly');
-const metrics = await metricsResponse.json();
-// Available: metrics.metrics[] - Array of 60+ business metrics with time series data
+**Data Structure to Expect:**
+\`\`\`typescript
+{
+  data: {
+    ${Object.keys(datasetInfo.recordCounts).map(key => {
+      if (key === 'customers') return `${key}: Array<{id: string, name: string, email: string, loyaltyTier: string}>`;
+      if (key === 'payments') return `${key}: Array<{id: string, amount: number, status: string, paymentMethod: string}>`;
+      return `${key}: Array<{id: string, [key: string]: any}>`;
+    }).join(',\n    ')}
+    businessMetrics: {
+      customerLifetimeValue: number,
+      averageOrderValue: number, 
+      monthlyRecurringRevenue: number,
+      dailyActiveUsers: number,
+      conversionRate: number
+    }
+  }
+}
 \`\`\`
 
-**Integration Steps:**
-1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
-3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
-5. Add loading states: Show loading UI when \`loading\` is true
-6. Handle errors: Display error message when \`error\` exists
-7. For uncovered features: Create data that matches the dataset's patterns and relationships
+**Design Guidelines:**
+- Use a clean, modern card-based layout
+- Implement proper spacing and typography
+- Add subtle shadows and borders
+- Use appropriate colors for ${businessContext.domain} (professional, trustworthy)
+- Include icons for different data types
+- Make tables sortable and searchable
+- Format currency values properly ($123.45)
+- Format percentages properly (12.34%)
 
-**Stripe Integration Examples:**
-- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
-- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Show subscription plans: \`plans.map(plan => ...)\`
-- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
+**Technical Notes:**
+- The dataset URL is static and deterministic (same URL = same data)
+- No authentication required
+- Cache the data after first fetch
+- Handle network errors gracefully
+- Use React hooks for state management
 
-**Metrics API Examples:**
-- Get all metrics: \`fetch('/api/metrics?granularity=monthly')\`
-- Get specific metric: \`fetch('/api/metrics?metric=Monthly Recurring Revenue&granularity=daily')\`
-- Display MRR chart: \`metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue').timeSeries.monthly\`
-- Show payment success rate: \`metrics.metrics.find(m => m.name === 'Payment Success Rate').currentValue\`
-- Available granularities: daily (365 values), weekly (52 values), monthly (12 values)
-
-Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
+Generate a complete, production-ready component that I can copy-paste into my React project.`;
 
   return {
     tool: 'v0',
     description: 'AI component generator by Vercel',
     code: prompt,
-    instructions: 'Use this detailed prompt in v0.dev for comprehensive integration guidance with explanations, best practices, and complete code examples.',
+    instructions: 'Paste this detailed prompt in v0.dev to generate a complete, professional dashboard component with proper Synthkit dataset integration.',
     copyText: prompt
   };
 }
@@ -709,9 +686,7 @@ class SynthkitDataset {
   getInfo() {
     return {
       url: this.url,
-      metricsUrl: this.metricsUrl,
       cached: !!this.cache,
-      metricsCached: !!this.metricsCache,
       lastFetch: this.lastFetch,
       entities: this.cache ? Object.keys(this.cache).filter(key => Array.isArray(this.cache[key])) : []
     };
