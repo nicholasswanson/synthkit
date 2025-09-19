@@ -86,8 +86,6 @@ volta install node@20.11.0
 
 The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!
 
-![Synthkit Demo Interface](https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-demo-screenshot.png)
-
 ### **🤖 Zero-Config AI Features**
 
 Synthkit includes AI-powered scenario generation that works immediately without any setup:
