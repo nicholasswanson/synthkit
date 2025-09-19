@@ -26,7 +26,7 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 
 ## 🚀 **Quick Start**
 
-## 🚀 **Up and running in <30s**
+### **Up and running in <30s**
 
 While in your project directory, open a fresh terminal and paste the following.
 
@@ -43,7 +43,7 @@ cd examples/next-app
 pnpm dev      # Starts Synthkit at http://localhost:3001
 ```
 
-### **Installation**
+### **More installation paths**
 
 ```bash
 # Clone the repository
@@ -82,7 +82,11 @@ volta install node@20.11.0
 - **Node.js**: 20.11.0 or higher (see `.nvmrc`)
 - **pnpm**: 9.0.0 or higher (will be auto-installed if missing)
 
-**�� Interactive Demo**: The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!
+### **Interactive Demo**
+
+The Next.js example includes integrated AI analysis with zero configuration - describe your business idea directly in the demo to see intelligent scenario recommendations. AI features work out-of-the-box with no API key setup required!
+
+![Synthkit Demo Interface](https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-demo-screenshot.png)
 
 ### **🤖 Zero-Config AI Features**
 
