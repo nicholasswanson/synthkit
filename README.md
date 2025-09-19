@@ -13,7 +13,7 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 
 - 🎯 **Deterministic Generation** - Same ID = identical data across runs
 - 📋 **Schema-Driven** - JSON Schema definitions ensure type safety
-- 🏢 **Business Categories** - 9 realistic business contexts (Modaic, Stratus, Forksy, etc.)
+- 🏢 **Business Categories** - 9 realistic business contexts (Checkout e-commerce, B2B SaaS, Food delivery, etc.)
 - 👥 **Role-Based Access** - Admin/Support roles with data masking capabilities
 - 📈 **Stage-Aware** - Early/Growth/Enterprise complexity levels
 - 🤖 **AI-Powered Analysis** - Describe your business and get intelligent scenario recommendations
@@ -25,6 +25,23 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 - 🛠️ **Developer Tools** - CLI, MCP server, and visual components
 
 ## 🚀 **Quick Start**
+
+## 🚀 **Up and running in <30s**
+
+While in your project directory, open a fresh terminal and paste the following.
+
+```bash
+# Step 1
+git clone https://github.com/nicholasswanson/synthkit.git      # Clones the repo locally
+cd synthkit
+
+# Step 2
+./scripts/setup-dev-auto.sh      # Runs the setup script
+
+# Step 3
+cd examples/next-app
+pnpm dev      # Starts Synthkit at http://localhost:3001
+```
 
 ### **Prerequisites**
 
@@ -108,10 +125,10 @@ console.log(customer);
 ```typescript
 // Define a complete business scenario
 const scenario = {
-  category: 'modaic',          // Business type (fashion e-commerce)
-  role: 'admin',              // Access level (full financial data)
-  stage: 'growth',            // Business maturity (scaling)
-  id: 12345                   // Deterministic generation ID
+  category: 'checkout-ecommerce',  // Business type (fashion e-commerce)
+  role: 'admin',                  // Access level (full financial data)
+  stage: 'growth',                // Business maturity (scaling)
+  id: 12345                       // Deterministic generation ID
 };
 ```
 
@@ -139,8 +156,8 @@ const { withSynth } = require('@synthkit/client');
 module.exports = withSynth({
   // your Next.js config
 }, {
-  packs: ['packs/modaic', 'packs/stratus'],
-  defaultCategory: 'modaic'
+  packs: ['packs/checkout-ecommerce', 'packs/b2b-saas'],
+  defaultCategory: 'checkout-ecommerce'
 });
 ```
 
@@ -188,23 +205,23 @@ synthkit ai generate "A nonprofit platform for donations" --save-to-file
 Inspired by [Stripe's synthetic-dataset](https://github.com/swanson-stripe/synthetic-dataset), Synthkit includes **9 comprehensive business models** with realistic data patterns:
 
 ### **E-commerce & Retail**
-- **Modaic** - Fashion E-commerce with products, customers, orders, and payments
-- **Keynest** - Real estate management with properties, tenants, leases, and rent payments
+- **Checkout e-commerce** - Fashion E-commerce with products, customers, orders, and payments
+- **Real estate** - Real estate management with properties, tenants, leases, and rent payments
 
 ### **SaaS & Technology**  
-- **Stratus** - B2B SaaS platform with subscriptions, billing, usage, and churn analytics
-- **Mindora** - Online learning platform with courses, students, enrollments, and instructors
+- **B2B SaaS** - B2B SaaS platform with subscriptions, billing, usage, and churn analytics
+- **Online learning** - Online learning platform with courses, students, enrollments, and instructors
 
 ### **Marketplaces & Platforms**
-- **Forksy** - Food delivery marketplace with restaurants, drivers, orders, and payouts
-- **Fluxly** - Creator economy platform with creators, subscriptions, content, and earnings
+- **Food delivery** - Food delivery marketplace with restaurants, drivers, orders, and payouts
+- **Creator economy** - Creator economy platform with creators, subscriptions, content, and earnings
 
 ### **Health & Wellness**
-- **Pulseon** - Fitness streaming platform with members, trainers, workouts, and sessions
-- **Procura** - Healthcare supply chain with providers, products, orders, and compliance
+- **Fitness streaming** - Fitness streaming platform with members, trainers, workouts, and sessions
+- **Healthcare supply** - Healthcare supply chain with providers, products, orders, and compliance
 
 ### **Social Impact**
-- **Brightfund** - Impact platform with donors, campaigns, donations, and program metrics
+- **Impact platform** - Impact platform with donors, campaigns, donations, and program metrics
 
 Each category includes:
 - **Realistic Schemas**: JSON Schema definitions with faker.js integration
@@ -213,7 +230,7 @@ Each category includes:
 - **Role-Based Access**: Admin vs Support data visibility controls
 
 ```json
-// Example: Modaic Fashion E-commerce
+// Example: Checkout e-commerce Fashion E-commerce
 {
   "categories": {
     "early": { "customers": 500, "products": 150, "orders": 800 },
@@ -277,7 +294,7 @@ Aligned with [synthetic-dataset](https://github.com/swanson-stripe/synthetic-dat
 ```typescript
 // Early stage fashion startup with admin access
 const earlyFashion = {
-  category: 'modaic',
+  category: 'checkout-ecommerce',
   role: 'admin', 
   stage: 'early',
   id: 12345
@@ -285,7 +302,7 @@ const earlyFashion = {
 
 // Enterprise SaaS with support role (masked financials)
 const enterpriseSaaS = {
-  category: 'stratus',
+  category: 'b2b-saas',
   role: 'support',
   stage: 'enterprise', 
   id: 54321
@@ -293,7 +310,7 @@ const enterpriseSaaS = {
 
 // Growth marketplace with full admin visibility
 const growthMarketplace = {
-  category: 'forksy',
+  category: 'food-delivery',
   role: 'admin',
   stage: 'growth',
   id: 98765
@@ -312,16 +329,16 @@ synthkit ai match "An e-commerce marketplace"
 synthkit ai generate "A SaaS project management tool" --save-to-file
 
 # Generate mock data
-synthkit generate --category modaic --role admin --stage growth --count 100
+synthkit generate --category checkout-ecommerce --role admin --stage growth --count 100
 
 # Dataset sharing and integration
-synthkit dataset url --category modaic --stage growth --copy
-synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json"
+synthkit dataset url --category checkout-ecommerce --stage growth --copy
+synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json"
 synthkit dataset integrate "<url>" --tool cursor --rules
 
 # Scenario management
 synthkit scenario list
-synthkit scenario activate modaic-growth-admin
+synthkit scenario activate checkout-ecommerce-growth-admin
 
 # Create snapshots
 synthkit snapshot create "pre-demo-state"
@@ -336,16 +353,16 @@ Synthkit provides a complete ecosystem for sharing realistic datasets with AI de
 
 ```bash
 # 1. Generate a shareable dataset URL
-synthkit dataset url --category modaic --stage growth --copy
-# ✅ Dataset URL generated: https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json
+synthkit dataset url --category checkout-ecommerce --stage growth --copy
+# ✅ Dataset URL generated: https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json
 # 📋 URL copied to clipboard
 
 # 2. Preview the dataset
-synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" --preview 5
+synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json" --preview 5
 # 📊 Shows: 5,561 customers, 12,790 payments, business metrics
 
 # 3. Generate AI tool integration
-synthkit dataset integrate "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" --tool cursor --rules
+synthkit dataset integrate "https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json" --tool cursor --rules
 # ✅ .cursorrules saved to current directory
 # 💡 Restart Cursor for optimized AI assistance
 ```
@@ -422,15 +439,15 @@ All integrations include business domain intelligence:
 
 | Category | Business Type | Domain | AI Assistance Focus |
 |----------|---------------|---------|-------------------|
-| modaic | Fashion E-commerce | retail | Product catalogs, customer segments |
-| stratus | B2B SaaS Platform | software | Subscriptions, usage analytics |
-| forksy | Food Delivery | marketplace | Orders, driver logistics |
-| fluxly | Creator Economy | social | Content, creator earnings |
-| mindora | Online Learning | education | Courses, student progress |
-| pulseon | Fitness Platform | health | Workouts, member tracking |
-| procura | Healthcare Supply | healthcare | Compliance, supply chain |
-| brightfund | Impact Investment | finance | Donations, impact metrics |
-| keynest | Real Estate | real-estate | Properties, lease management |
+| checkout-ecommerce | Fashion E-commerce | retail | Product catalogs, customer segments |
+| b2b-saas | B2B SaaS Platform | software | Subscriptions, usage analytics |
+| food-delivery | Food Delivery | marketplace | Orders, driver logistics |
+| creator-economy | Creator Economy | social | Content, creator earnings |
+| online-learning | Online Learning | education | Courses, student progress |
+| fitness-streaming | Fitness Platform | health | Workouts, member tracking |
+| healthcare-supply | Healthcare Supply | healthcare | Compliance, supply chain |
+| impact-platform | Impact Investment | finance | Donations, impact metrics |
+| real-estate | Real Estate | real-estate | Properties, lease management |
 
 ### **🔗 API Endpoints**
 
@@ -450,6 +467,9 @@ GET /api/dataset/[id]
 
 # Get dataset info
 GET /api/dataset/[id]/info
+
+# Fetch metrics
+GET /api/metrics?granularity=monthly
 
 # Generate integration code
 GET /api/dataset/[id]/integrate?tool=cursor&format=rules
@@ -475,8 +495,8 @@ All values use realistic, non-rounded numbers (e.g., 5,561 customers, $350.75 CL
 Same parameters always generate identical datasets:
 ```bash
 # These will always produce the same data
-synthkit dataset url --category modaic --stage growth --id 12345
-synthkit dataset url --category modaic --stage growth --id 12345
+synthkit dataset url --category checkout-ecommerce --stage growth --id 12345
+synthkit dataset url --category checkout-ecommerce --stage growth --id 12345
 ```
 
 Perfect for:
@@ -508,8 +528,8 @@ const customRole = {
 import { setupWorker } from 'msw/browser';
 import { createPackHandlers } from '@synthkit/client';
 
-const handlers = createPackHandlers(['modaic', 'stratus'], {
-  category: 'modaic',
+const handlers = createPackHandlers(['checkout-ecommerce', 'b2b-saas'], {
+  category: 'checkout-ecommerce',
   role: 'support',    // Financial data will be masked
   stage: 'growth',
   id: 12345
@@ -526,7 +546,7 @@ import { synthStore } from '@synthkit/sdk';
 
 // Set complete scenario
 await synthStore.setScenario({
-  category: 'stratus',
+  category: 'b2b-saas',
   role: 'admin',
   stage: 'enterprise',
   id: 12345
@@ -671,38 +691,9 @@ pnpm cli generate --category my-pack --role admin --stage growth --count 10
 - [**Framework Integrations**](docs/integrations.md)
 - [**Governance & Standards**](GOVERNANCE.md)
 
-## 🔗 **Ecosystem**
-
-| Tool | Purpose | Status |
-|------|---------|--------|
-| [Synthkit Studio](https://studio.synthkit.dev) | Visual pack editor | 🚧 Coming Soon |
-| [Pack Registry](https://packs.synthkit.dev) | Community pack library | 🚧 Coming Soon |
-| [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=synthkit.synthkit) | IDE integration | 🚧 Coming Soon |
-
-## 📈 **Roadmap**
-
-- [x] **v1.0**: AI-powered scenario analysis and generation ✅
-- [ ] **v1.1**: Visual scenario builder and pack registry
-- [ ] **v1.2**: Advanced relationship modeling
-- [ ] **v1.3**: Real-time collaboration features
-- [ ] **v2.0**: Enhanced AI with custom persona generation
 
 ## 📄 **License**
 
 MIT © [Synthkit Team](https://synthkit.dev)
 
 ---
-
-## 🙏 **Acknowledgments**
-
-Inspired by the excellent work of:
-- [Stripe's synthetic-dataset](https://github.com/swanson-stripe/synthetic-dataset) for realistic business patterns
-- [Mock Service Worker](https://mswjs.io/) for API mocking
-- [Faker.js](https://fakerjs.dev/) for realistic data generation
-- [JSON Schema](https://json-schema.org/) for schema validation
-
----
-
-**Ready to generate realistic mock data with proper access controls in minutes, not hours.** 🚀
-
-[Get Started](docs/getting-started.md) • [Examples](examples/) • [Community](https://discord.gg/synthkit)
