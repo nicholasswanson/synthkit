@@ -1,59 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiErrorResponse } from '@/lib/api-errors';
-import { logger } from '@/lib/logger';
 
-// Simple in-memory storage for current dataset (for demo purposes)
-// In production, this could be Redis, database, or file-based
+// In-memory storage for the current dataset
 let currentDataset: any = null;
 
-export async function GET(request: NextRequest) {
-  try {
-    if (!currentDataset) {
-      return ApiErrorResponse.notFound('No current dataset available. Generate data in the demo app first.');
-    }
-    
-    // Return dataset in same format as static datasets
-    return NextResponse.json({
-      id: currentDataset.id || '_current',
-      type: currentDataset.type || 'live',
-      data: currentDataset.data,
-      metadata: {
-        ...currentDataset.metadata,
-        source: 'live-demo',
-        updatedAt: new Date().toISOString()
-      }
-    });
-    
-  } catch (error) {
-    logger.error('Error loading current dataset:', error);
-    return ApiErrorResponse.internalError('Failed to load current dataset');
+export async function GET() {
+  if (!currentDataset) {
+    return NextResponse.json(
+      { error: 'No dataset available' },
+      { status: 404 }
+    );
   }
+
+  return NextResponse.json(currentDataset, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Allow demo app to update current dataset
     const body = await request.json();
     
-    currentDataset = {
-      id: '_current',
-      type: body.type || 'live',
-      data: body.data,
-      metadata: {
-        ...body.metadata,
-        updatedAt: new Date().toISOString(),
-        source: 'live-demo'
-      }
-    };
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Current dataset updated',
-      updatedAt: currentDataset.metadata.updatedAt
-    });
-    
+    if (body.dataset) {
+      // Store the full dataset
+      currentDataset = body.dataset;
+      return NextResponse.json({ success: true });
+    } else if (body.metadata) {
+      // Just store metadata (legacy support)
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
   } catch (error) {
-    logger.error('Error updating current dataset:', error);
-    return ApiErrorResponse.badRequest('Invalid dataset data');
+    return NextResponse.json(
+      { error: 'Invalid JSON' },
+      { status: 400 }
+    );
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

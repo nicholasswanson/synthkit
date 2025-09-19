@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
-import { useDatasetCreation } from '@/hooks/useDatasetCreation';
+// Dataset creation is now automatic - no hook needed
 import { Copy, Download, ExternalLink } from 'lucide-react';
 import { generateAllIntegrations } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
@@ -536,14 +536,16 @@ export default function Home() {
   // Stripe data
   const [stripeData, setStripeData] = useState<Record<string, any[]>>({});
   
+  // Full dataset for integration URLs
+  const [fullDataset, setFullDataset] = useState<Record<string, any>>({});
+  
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
   const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('cursor');
   
-  // Dataset creation hook
-  const { createDataset, isCreating, error, clearError } = useDatasetCreation();
+  // Dataset creation is now automatic - no hook needed
 
   // Load custom categories from localStorage on mount
   useEffect(() => {
@@ -628,14 +630,7 @@ export default function Home() {
         console.log('Generated stripeData counts:', Object.fromEntries(Object.entries(generatedStripeData).map(([key, value]) => [key, (value as any[]).length])));
         setStripeData(generatedStripeData);
         
-        // Also generate the full dataset and save it via API
-        console.log('Generating full dataset for JSON file...');
-        try {
-          await handleCreateDataset();
-          console.log('Full dataset created and saved via API');
-        } catch (error) {
-          console.error('Error creating full dataset:', error);
-        }        
+        // Full dataset generation is now handled automatically by useEffect        
       } catch (error) {
         console.error('Error generating Stripe data:', error);
         setStripeData({});
@@ -689,6 +684,48 @@ export default function Home() {
       });
     }
   }, [stripeData, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
+
+  // Automatically generate full dataset for integration URLs
+  useEffect(() => {
+    if (metricsLoaded && Object.keys(stripeData).length > 0) {
+      console.log('=== Generating Full Dataset ===');
+      
+      let datasetData;
+      if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+        datasetData = { 
+          ...dynamicEntities, 
+          businessMetrics: businessMetrics || {} 
+        };
+      } else {
+        // Generate full dataset for JSON files (not just sample data)
+        const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
+        if (persona) {
+          const fullStripeData = generateStripeDataForPersona(persona, stage);
+          datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
+        } else {
+          datasetData = { ...stripeData, businessMetrics: businessMetrics || {} };
+        }
+      }
+      
+      console.log('Full dataset generated with keys:', Object.keys(datasetData));
+      console.log('Full dataset counts:', Object.fromEntries(
+        Object.entries(datasetData)
+          .filter(([key]) => key !== '_metadata' && key !== 'businessMetrics')
+          .map(([key, value]) => [key, Array.isArray(value) ? value.length : 0])
+      ));
+      
+      setFullDataset(datasetData);
+      
+      // Send full dataset to API for integration URLs
+      fetch('/api/dataset/current', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataset: datasetData })
+      }).catch(err => {
+        console.log('Failed to update current dataset API:', err.message);
+      });
+    }
+  }, [selectedCategory, stage, role, scenarioId, stripeData, dynamicEntities, businessMetrics, metricsLoaded]);
 
   // Helper functions
   const isCustomCategory = (categoryId: string): boolean => {
@@ -951,72 +988,8 @@ export default function Home() {
   };
 
   // Handle dataset sharing
-  const handleCreateDataset = async () => {
-    console.log('handleCreateDataset called');
-    const currentBusinessContext = getCurrentBusinessContext();
-    
-    let datasetData;
-    if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
-      datasetData = { 
-        ...dynamicEntities, 
-        businessMetrics: businessMetrics || {} 
-      };
-    } else {
-      // Generate full dataset for JSON files (not just sample data)
-      const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-      const fullStripeData = generateStripeDataForPersona(persona, stage);
-      // Filter out _metadata field for API compatibility
-      const { _metadata, ...stripeDataWithoutMetadata } = fullStripeData;
-      datasetData = { ...stripeDataWithoutMetadata, businessMetrics: businessMetrics || {} };
-    }
-    
-    console.log('Dataset data:', isCustomCategory(selectedCategory) 
-      ? { dynamicEntities: Object.keys(dynamicEntities), entityCounts: Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length])), hasBusinessMetrics: !!businessMetrics }
-      : { datasetDataKeys: Object.keys(datasetData), datasetDataCounts: Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length])), hasBusinessMetrics: !!businessMetrics }
-    );
-    
-    const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
-      : Object.fromEntries(Object.entries(datasetData).filter(([key]) => key !== '_metadata' && key !== 'businessMetrics').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
-    
-    let metadata;
-    if (isCustomCategory(selectedCategory)) {
-      metadata = {
-        aiAnalysis: {
-          prompt: aiPrompt,
-          analysis: getCustomCategory(selectedCategory)?.aiAnalysis
-        }
-      };
-    } else {
-      metadata = {
-        scenario: {
-          category: selectedCategory,
-          role,
-          stage,
-          id: scenarioId
-        }
-      };
-    }
-    
-    try {
-      const url = await createDataset({
-        type: isCustomCategory(selectedCategory) ? 'ai-generated' : 'scenario',
-        data: datasetData,
-        metadata
-      });
-      
-      if (url) {
-        setSharedDatasetUrl(url);
-        setShareModalOpen(true);
-      } else {
-        console.error('Dataset creation returned null URL');
-        alert('Failed to create dataset. Please check the console for details.');
-      }
-    } catch (error) {
-      console.error('Failed to create dataset:', error);
-      alert(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
+  // Dataset creation is now handled automatically by the useEffect above
+  // No manual creation needed - full datasets are always available via /api/dataset/current
 
   const getDatasetInfo = () => {
     const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
@@ -1053,24 +1026,8 @@ export default function Home() {
       return sharedDatasetUrl;
     }
     
-    if (isCustomCategory(selectedCategory)) {
-      return '/datasets/ai-generated-custom-dataset.json';
-    } else {
-      // Map new persona keys to old file names for backward compatibility
-      const personaFileMapping: Record<string, string> = {
-        'checkout-ecommerce': 'modaic',
-        'b2b-saas-subscriptions': 'stratus', 
-        'food-delivery-platform': 'forksy',
-        'consumer-fitness-app': 'pulseon',
-        'b2b-invoicing': 'procura',
-        'property-management-platform': 'keynest',
-        'creator-platform': 'fluxly',
-        'donation-marketplace': 'brightfund'
-      };
-      
-      const fileKey = personaFileMapping[selectedCategory] || selectedCategory;
-      return `/api/dataset/scenario-${fileKey}-${role}-${stage}-${scenarioId}`;
-    }
+    // Always use the current dataset endpoint for live integration
+    return '/api/dataset/current';
   };
 
   return (
