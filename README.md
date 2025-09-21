@@ -1,4 +1,13 @@
-<h1 style="display: flex; align-items: center;"><img src="https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-logo-md.png" alt="Synthkit" width="48" height="48" style="margin-right: 12px;"> <span style="transform: translateY(-2px);">Synthkit</span></h1>
+<table>
+<tr>
+<td style="vertical-align: middle; padding-right: 12px;">
+<img src="https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-logo-md.png" alt="Synthkit" width="48" height="48">
+</td>
+<td style="vertical-align: middle;">
+<h1 style="margin: 0; display: inline;">Synthkit</h1>
+</td>
+</tr>
+</table>
 
 > **A comprehensive mocking and scenario generation toolkit for modern applications**
 
