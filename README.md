@@ -1,17 +1,17 @@
-<table>
+<table style="border: none; border-collapse: collapse;">
 <tr>
-<td style="vertical-align: middle; padding-right: 12px;">
+<td style="vertical-align: middle; padding-right: 12px; border: none;">
 <img src="https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-logo-md.png" alt="Synthkit" width="48" height="48">
 </td>
-<td style="vertical-align: middle;">
+<td style="vertical-align: middle; border: none;">
 <h1 style="margin: 0; display: inline;">Synthkit</h1>
 </td>
 </tr>
 </table>
 
-> **A comprehensive mocking and scenario generation toolkit for modern applications**
+**A comprehensive mocking and scenario generation toolkit for modern applications**
 
-Synthkit provides deterministic, schema-driven mock data generation with realistic business patterns, role-based access controls, and seamless framework integrations. Inspired by [Stripe's synthetic-dataset](https://github.com/swanson-stripe/synthetic-dataset).
+Synthkit provides deterministic, schema-driven mock data generation with realistic business patterns, role-based access controls, and seamless framework integrations.
 
 [![GitHub](https://img.shields.io/github/stars/nicholasswanson/synthkit?style=social)](https://github.com/nicholasswanson/synthkit)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
