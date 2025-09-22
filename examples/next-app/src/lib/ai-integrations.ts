@@ -474,66 +474,61 @@ export function generateV0Integration(url: string, datasetInfo: DatasetInfo): In
 
   const entityList = Object.keys(datasetInfo.recordCounts).join(', ');
 
-  const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
+  const prompt = `Create a modern dashboard component for ${businessContext.name} that displays realistic business data.
 
-**Dataset Information:**
-- Zero Configuration: Works with \`getData()\` - no URLs needed!
-- Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
-- Business Metrics: CLV, AOV, MRR, DAU, conversion rate
-- Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Smart Caching: Automatic data caching with invalidation
+**Component Requirements:**
+- Clean, modern UI with Tailwind CSS
+- Responsive design that works on mobile and desktop
+- Loading and error states
+- Data visualization (charts, tables, cards)
+- Professional styling with good UX
 
-**Technical Integration:**
-1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
-2. **Simple data access** - Use \`const result = await getData();\` for instant data
-3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
-4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
-5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Zero configuration** - No setup, no URLs, no environment variables needed
+**Data to Display:**
+- ${recordSummary}
+- Business metrics: CLV, AOV, MRR, conversion rate
+- Recent activity and trends
+- Key performance indicators
 
-**Data Structure to Use:**
+**Technical Notes:**
+- Use React hooks for state management
+- Include proper TypeScript types
+- Add hover effects and animations
+- Make it look production-ready
+- Use realistic sample data that matches the business context
+
+**Sample Data Structure:**
 \`\`\`javascript
-// Simple one-line data fetching
-const result = await getData();
-const { customers, charges, subscriptions, invoices, plans } = result.data;
-
-// Or use React hook
-const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans
+const sampleData = {
+  customers: [
+    { id: 1, name: "Sarah Johnson", email: "sarah@example.com", totalSpent: 1250, status: "active" },
+    { id: 2, name: "Mike Chen", email: "mike@example.com", totalSpent: 890, status: "active" }
+  ],
+  charges: [
+    { id: 1, amount: 2500, status: "succeeded", created: "2024-01-15" },
+    { id: 2, amount: 1200, status: "succeeded", created: "2024-01-14" }
+  ],
+  businessMetrics: {
+    customerLifetimeValue: 1250,
+    averageOrderValue: 89.50,
+    monthlyRecurringRevenue: 45000,
+    conversionRate: 3.2
+  }
+};
 \`\`\`
 
-**Integration Steps:**
-1. Install Enhanced: \`npm install @synthkit/enhanced\`
-2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
-3. Get data: \`const result = await getData();\`
-4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
-5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
-6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
-7. Handle states: Show loading/error UI as needed
+**After generating this component in v0:**
+1. Copy the generated code to your local project
+2. Run: \`npm install @synthkit/enhanced\`
+3. Replace sample data with: \`const { data, loading, error } = useSynthkit();\`
+4. Add the import: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
 
-**Stripe Integration Examples:**
-- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
-- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Show subscription plans: \`plans.map(plan => ...)\`
-- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
-
-**Enhanced Features:**
-- Zero dependencies - works everywhere
-- Smart caching - automatic data caching
-- Environment detection - works in browser, Node, Deno, Bun
-- Always returns data - never breaks
-- Universal compatibility - any JavaScript environment
-
-Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
+Focus on creating a **beautiful, functional component** that showcases the data effectively.`;
 
   return {
     tool: 'v0',
     description: 'AI component generator by Vercel',
     code: prompt,
-    instructions: 'Use this detailed prompt in v0.dev for comprehensive integration guidance with explanations, best practices, and complete code examples.',
+    instructions: 'Use this prompt in v0.dev to generate a beautiful dashboard component. After generation, copy to your local project and follow the setup steps.',
     copyText: prompt
   };
 }
