@@ -18,7 +18,7 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 Configure your dataset using the interactive demo:
 
 ```bash
-# Clone and setup
+# Clone and setup (only needed to run the demo)
 git clone https://github.com/nicholasswanson/synthkit.git
 cd synthkit
 ./scripts/setup-dev-auto.sh
@@ -38,19 +38,15 @@ Use the interactive demo interface to configure your dataset:
 2. **Set Role & Stage** - Admin/Support roles with Early/Growth/Enterprise stages
 3. **AI Analysis** (Optional) - Describe your business for intelligent recommendations
 4. **Generate Data** - Click refresh to see realistic mock data
-5. **Share Dataset** - Click "Share Dataset" to get integration code
+5. **Share Dataset** - Click "Share Dataset" to get integration code for your tool
 
-### Step 3: Use in Your Project
-Copy the integration code and use in your prototype:
-
-```bash
-npm install @synthkit/enhanced
-```
-
-```javascript
-import { getData } from '@synthkit/enhanced';
-const result = await getData();
-```
+### Step 3: Get Integration Code
+The integration panel will provide tool-specific instructions:
+- **Cursor**: Copy the integration code and `.cursorrules` file
+- **React**: Copy the hook code and install `@synthkit/enhanced`
+- **v0**: Copy the component prompt
+- **Claude/ChatGPT**: Copy the integration prompt
+- **Vanilla JS**: Copy the JavaScript code
 
 ## Synthkit Enhanced - Zero Configuration Data
 
@@ -201,49 +197,47 @@ Aligned with [synthetic-dataset](https://github.com/swanson-stripe/synthetic-dat
 
 ## AI Tool Integrations
 
-Synthkit generates optimized integration code for popular AI development tools:
+Synthkit generates optimized integration code for popular AI development tools. Each integration includes complete "use in your project" instructions:
 
 ### Cursor Integration
 ```bash
 synthkit dataset integrate "<url>" --tool cursor --rules
 ```
-- Generates Enhanced integration code with `getData()` and `useSynthkit()`
-- Creates `.cursorrules` file for context-aware AI assistance
-- Includes business domain knowledge for better suggestions
-- Zero-configuration approach with universal compatibility
+- **Complete setup instructions** - Install `@synthkit/enhanced` and copy code
+- **`.cursorrules` file** - Context-aware AI assistance with business domain knowledge
+- **Zero-configuration** - Works with `getData()` and `useSynthkit()` out of the box
 
 ### Claude Integration  
 ```bash
 synthkit dataset integrate "<url>" --tool claude --output claude-prompt.txt
 ```
-- Comprehensive prompts with Enhanced integration approach
-- Detailed integration requirements and best practices
-- Domain-specific guidance (e.g., fashion e-commerce patterns)
-- Zero-configuration data access with `getData()`
+- **Step-by-step integration guide** - Detailed requirements and best practices
+- **Domain-specific guidance** - Industry patterns (e.g., fashion e-commerce)
+- **Complete code examples** - Ready-to-use `getData()` implementations
 
 ### ChatGPT Integration
 ```bash
 synthkit dataset integrate "<url>" --tool chatgpt --output chatgpt-prompt.txt  
 ```
-- Concise, practical prompts for quick solutions
-- Ready-to-paste integration requests with Enhanced approach
-- Simple `getData()` and `useSynthkit()` examples
+- **Quick setup prompts** - Concise, practical integration requests
+- **Copy-paste ready** - Complete code with installation instructions
+- **Simple examples** - `getData()` and `useSynthkit()` usage patterns
 
 ### v0 Integration
 ```bash
 synthkit dataset integrate "<url>" --tool v0 --output component-prompt.txt
 ```
-- Component-focused prompts with styling requirements
-- Modern dashboard templates with Enhanced data integration
-- Zero-configuration data access
+- **Component generation** - Modern dashboard templates with styling
+- **Data integration** - Zero-configuration data access built-in
+- **Complete implementation** - Ready-to-use React components
 
 ### Vanilla JavaScript
 ```bash
 synthkit dataset integrate "<url>" --tool fetch --output data-manager.js
 ```
-- Enhanced integration with `getData()` function
-- Universal compatibility (browser, Node, Deno, Bun)
-- Zero dependencies and smart caching
+- **Universal compatibility** - Works in browser, Node, Deno, Bun
+- **Zero dependencies** - Smart caching and environment detection
+- **Complete setup** - Installation and usage instructions included
 
 ## Prerequisites
 
