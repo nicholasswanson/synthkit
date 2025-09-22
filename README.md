@@ -29,6 +29,51 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 - 📦 **Modular Packs** - Extensible library of domain-specific schemas
 - 🛠️ **Developer Tools** - CLI, MCP server, and visual components
 
+## 🚀 **Synthkit Enhanced - Zero Configuration Data**
+
+The easiest way to get realistic data for your prototypes:
+
+```bash
+# Install Enhanced
+npm install @synthkit/enhanced
+```
+
+```javascript
+// One line to get data - works everywhere!
+import { getData } from '@synthkit/enhanced';
+
+const result = await getData();
+console.log(`Got ${result.data.customers.length} customers!`);
+// { data: { customers: [...], charges: [...], businessMetrics: {...} }, status: 'success' }
+```
+
+```jsx
+// React integration
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function Dashboard() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Customers: {customers.length}</p>
+      <p>Charges: {charges.length}</p>
+    </div>
+  );
+}
+```
+
+**Features:**
+- ✅ **Zero Configuration** - No setup, no URLs, no environment variables
+- ✅ **Universal Compatibility** - Works in browser, Node, Deno, Bun
+- ✅ **Always Returns Data** - Never breaks, always provides realistic data
+- ✅ **Smart Caching** - Automatic data caching with invalidation
+- ✅ **Environment Detection** - Automatically detects platform and capabilities
+
 ## 🚀 **Quick Start**
 
 ### **Up and running in <30s**
@@ -108,50 +153,6 @@ Synthkit includes AI-powered scenario generation that works immediately without 
 cd examples/next-app
 pnpm dev  # AI analysis available at http://localhost:3001
 ```
-### **🚀 Synthkit Enhanced - Zero Configuration Data**
-
-The easiest way to get realistic data for your prototypes:
-
-```bash
-# Install Enhanced
-npm install @synthkit/enhanced
-```
-
-```javascript
-// One line to get data - works everywhere!
-import { getData } from '@synthkit/enhanced';
-
-const result = await getData();
-console.log(`Got ${result.data.customers.length} customers!`);
-// { data: { customers: [...], charges: [...], businessMetrics: {...} }, status: 'success' }
-```
-
-```jsx
-// React integration
-import { useSynthkit } from '@synthkit/enhanced/react';
-
-function Dashboard() {
-  const { data, loading, error, customers, charges } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Customers: {customers.length}</p>
-      <p>Charges: {charges.length}</p>
-    </div>
-  );
-}
-```
-
-**Features:**
-- ✅ **Zero Configuration** - No setup, no URLs, no environment variables
-- ✅ **Universal Compatibility** - Works in browser, Node, Deno, Bun
-- ✅ **Always Returns Data** - Never breaks, always provides realistic data
-- ✅ **Smart Caching** - Automatic data caching with invalidation
-- ✅ **Environment Detection** - Automatically detects platform and capabilities
 
 ### **Basic Usage (Advanced)**
 
