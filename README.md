@@ -26,8 +26,33 @@ pnpm dev
 # Opens at http://localhost:3001
 ```
 
-Configure your business scenario, generate realistic data, and click "Share Dataset" to get integration code for your preferred tool (Cursor, React, v0, Claude, ChatGPT, or Vanilla JS).
+## CLI Usage
 
+```bash
+# Initialize new project
+synthkit init my-project --template next-js
+
+# AI-powered scenario building
+synthkit ai analyze "A fitness app for tracking workouts"
+synthkit ai match "An e-commerce marketplace"
+synthkit ai generate "A SaaS project management tool" --save-to-file
+
+# Generate mock data
+synthkit generate --category checkout-ecommerce --role admin --stage growth --count 100
+
+# Dataset sharing and integration
+synthkit dataset url --category checkout-ecommerce --stage growth --copy
+synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json"
+synthkit dataset integrate "<url>" --tool cursor --rules
+
+# Scenario management
+synthkit scenario list
+synthkit scenario activate checkout-ecommerce-growth-admin
+
+# Create snapshots
+synthkit snapshot create "pre-demo-state"
+synthkit snapshot restore "pre-demo-state"
+```
 
 ## Features
 
@@ -59,7 +84,7 @@ Configure your business scenario, generate realistic data, and click "Share Data
 
 ## Business Categories
 
-Inspired by [Stripe's synthetic-dataset](https://github.com/swanson-stripe/synthetic-dataset), Synthkit includes **9 comprehensive business models** with realistic data patterns:
+Synthkit includes **9 comprehensive business models** with realistic data patterns:
 
 ### E-commerce & Retail
 - **Checkout e-commerce** - Fashion E-commerce with products, customers, orders, and payments
@@ -276,33 +301,6 @@ module.exports = withSynth({
 });
 ```
 
-## CLI Usage
-
-```bash
-# Initialize new project
-synthkit init my-project --template next-js
-
-# AI-powered scenario building
-synthkit ai analyze "A fitness app for tracking workouts"
-synthkit ai match "An e-commerce marketplace"
-synthkit ai generate "A SaaS project management tool" --save-to-file
-
-# Generate mock data
-synthkit generate --category checkout-ecommerce --role admin --stage growth --count 100
-
-# Dataset sharing and integration
-synthkit dataset url --category checkout-ecommerce --stage growth --copy
-synthkit dataset fetch "https://nicholasswanson.github.io/synthkit/datasets/scenario-checkout-ecommerce-admin-growth-12345.json"
-synthkit dataset integrate "<url>" --tool cursor --rules
-
-# Scenario management
-synthkit scenario list
-synthkit scenario activate checkout-ecommerce-growth-admin
-
-# Create snapshots
-synthkit snapshot create "pre-demo-state"
-synthkit snapshot restore "pre-demo-state"
-```
 
 ## Contributing
 
