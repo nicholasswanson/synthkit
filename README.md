@@ -14,8 +14,6 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 
 ## How to Get Started
 
-Run the demo app to configure your dataset and get integration code:
-
 ```bash
 # Clone and setup
 git clone https://github.com/nicholasswanson/synthkit.git
@@ -27,10 +25,6 @@ cd examples/next-app
 pnpm dev
 # Opens at http://localhost:3001
 ```
-
-![Synthkit Demo Interface](https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-demo-screenshot.png)
-
-Configure your business scenario, generate realistic data, and click "Share Dataset" to get integration code for your preferred tool (Cursor, React, v0, Claude, ChatGPT, or Vanilla JS).
 
 ## Synthkit Enhanced - Zero Configuration Data
 
