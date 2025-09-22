@@ -108,22 +108,22 @@ synthkit dataset fetch \
 
 ### `synthkit dataset integrate`
 
-Generate integration code for AI development tools.
+Generate Enhanced integration code for AI development tools.
 
 ```bash
-# Generate Cursor integration with .cursorrules
+# Generate Cursor integration with Enhanced approach
 synthkit dataset integrate \
   "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" \
   --tool cursor \
   --rules
 
-# Generate v0 component prompt
+# Generate v0 component prompt with Enhanced
 synthkit dataset integrate \
   "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" \
   --tool v0 \
   --output component-prompt.txt
 
-# Generate React hook code
+# Generate Enhanced JavaScript integration
 synthkit dataset integrate \
   "https://nicholasswanson.github.io/synthkit/datasets/scenario-modaic-admin-growth-12345.json" \
   --tool fetch \
@@ -136,12 +136,12 @@ synthkit dataset integrate \
 - `-o, --output <path>` - Output file path
 - `--rules` - Generate .cursorrules file (for cursor tool)
 
-**Available Tools:**
-- **cursor**: React hooks + TypeScript + .cursorrules file
-- **claude**: Comprehensive prompts with business context
-- **chatgpt**: Concise, practical prompts
-- **v0**: Component-focused prompts with styling
-- **fetch**: Complete DatasetManager class with utilities
+**Available Tools (Enhanced):**
+- **cursor**: Enhanced integration with `getData()` and `useSynthkit()` + .cursorrules file
+- **claude**: Comprehensive prompts with Enhanced approach and business context
+- **chatgpt**: Concise, practical prompts with `getData()` examples
+- **v0**: Component-focused prompts with Enhanced data integration
+- **fetch**: Enhanced JavaScript with `getData()` and universal compatibility
 
 ### `synthkit dataset tools`
 

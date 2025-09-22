@@ -106,40 +106,40 @@ export function generateCursorPrompt(url: string, datasetInfo: DatasetInfo): Int
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- URL: ${url}
+- Zero Configuration: Works with \`getData()\` - no URLs needed!
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
 - Business Metrics: CLV, AOV, MRR, DAU, conversion rate
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - Provides 60+ business metrics with time series data (daily, weekly, monthly)
+- Smart Caching: Automatic data caching with invalidation
 
 **Technical Integration:**
-1. **Use the provided hook** - Import and use the useSynthkitDataset() hook from './useSynthkitDataset.ts'
-2. **Replace all mock data** - Update components to use data from the hook instead of hardcoded values
-3. **Handle missing data** - For any prototype features not covered by the dataset, create mock data that closely matches the dataset's patterns and relationships
-4. **Maintain data consistency** - Ensure all data follows the same formatting (currency in cents, percentages to hundredths, etc.)
+1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
+2. **Simple data access** - Use \`const result = await getData();\` for instant data
+3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
+4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
 5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Integrate Stripe data** - Use the included Stripe objects for payment processing, subscription management, and financial data
+6. **Zero configuration** - No setup, no URLs, no environment variables needed
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
+// Simple one-line data fetching
+const result = await getData();
+const { customers, charges, subscriptions, invoices, plans } = result.data;
 
-// Metrics API (fetch separately for business intelligence):
-const metricsResponse = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly');
-const metrics = await metricsResponse.json();
-// Available: metrics.metrics[] - Array of 60+ business metrics with time series data
+// Or use React hook
+const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
+// Stripe data: customers, charges, subscriptions, invoices, plans
 \`\`\`
 
 **Integration Steps:**
-1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
-3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
-5. Add loading states: Show loading UI when \`loading\` is true
-6. Handle errors: Display error message when \`error\` exists
-7. For uncovered features: Create data that matches the dataset's patterns and relationships
+1. Install Enhanced: \`npm install @synthkit/enhanced\`
+2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
+3. Get data: \`const result = await getData();\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
+5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
+6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
+7. Handle states: Show loading/error UI as needed
 
 **Stripe Integration Examples:**
 - Display customers: \`customers.slice(0, 10).map(customer => ...)\`
@@ -149,12 +149,12 @@ const metrics = await metricsResponse.json();
 - Show subscription plans: \`plans.map(plan => ...)\`
 - Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
-**Metrics API Examples:**
-- Get all metrics: \`fetch('/api/metrics?granularity=monthly')\`
-- Get specific metric: \`fetch('/api/metrics?metric=Monthly Recurring Revenue&granularity=daily')\`
-- Display MRR chart: \`metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue').timeSeries.monthly\`
-- Show payment success rate: \`metrics.metrics.find(m => m.name === 'Payment Success Rate').currentValue\`
-- Available granularities: daily (365 values), weekly (52 values), monthly (12 values)
+**Enhanced Features:**
+- Zero dependencies - works everywhere
+- Smart caching - automatic data caching
+- Environment detection - works in browser, Node, Deno, Bun
+- Always returns data - never breaks
+- Universal compatibility - any JavaScript environment
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -177,49 +177,72 @@ export function generateCursorIntegration(url: string, datasetInfo: DatasetInfo)
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
-  const cursorRules = `Synthkit Dataset Integration
-Dataset: ${businessContext.name} (${businessContext.domain})
-Contains: ${recordSummary}
-Dataset URL: ${url}
-Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')}
+  const cursorRules = `# Synthkit Enhanced Integration Rules
+# Add this to your .cursorrules file for optimal AI assistance
 
-${datasetInfo.scenario ? `Scenario Configuration:
-- Category: ${businessContext.name}
-- Stage: ${datasetInfo.scenario.stage} (affects data volume)
-- Role: ${datasetInfo.scenario.role} (affects access patterns)
-- ID: ${datasetInfo.scenario.id} (ensures deterministic data)` : `AI-Generated Dataset:
+## Quick Start
+\`\`\bash
+npm install @synthkit/enhanced
+\`\`\`
+
+## Usage
+\`\`\javascript
+import { getData } from '@synthkit/enhanced';
+
+// One line to get data
+const result = await getData();
+console.log(\`Got \${result.data.customers.length} customers!\`);
+\`\`\`
+
+## React Hook
+\`\`\jsx
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function Dashboard() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Customers: {customers.length}</p>
+      <p>Charges: {charges.length}</p>
+    </div>
+  );
+}
+\`\`\`
+
+## Dataset Context
+Zero Configuration: Works with \`getData()\` - no URLs needed!
+Business Type: ${businessContext}
+Data Volume: ${recordSummary}
+${datasetInfo.type === 'scenario' ? `
+Scenario Details:
+- Category: ${datasetInfo.scenario?.category}
+- Stage: ${datasetInfo.scenario?.stage}
+- Role: ${datasetInfo.scenario?.role}
+- ID: ${datasetInfo.scenario?.id}
+` : `
+AI Generated Context:
 - Original Prompt: "${datasetInfo.aiAnalysis?.prompt}"
 - Business Type: ${datasetInfo.aiAnalysis?.businessType}
-- Custom entities based on AI analysis`}
+`}
 
-Dataset Characteristics:
-- Static JSON file (cached, reliable, fast)
-- Production-ready with realistic relationships
-- Formatted values: currency in cents, percentages to hundredths
-- Deterministic: same URL = identical data every time
-- No authentication required, publicly accessible
+## Data Structure
+- \`result.data.customers\` - Array of customer objects
+- \`result.data.charges\` - Array of charge objects
+- \`result.data.subscriptions\` - Array of subscription objects
+- \`result.data.invoices\` - Array of invoice objects
+- \`result.data.plans\` - Array of plan objects
 
-Metrics API Characteristics:
-- 60+ business metrics with time series data
-- Granularities: daily (365 values), weekly (52 values), monthly (12 values)
-- Categories: Payments, Subscriptions, Customers, Revenue, Fraud & Risk, Authentication
-- Realistic business intelligence for dashboards and analytics
-
-Integration Pattern:
-1. Fetch dataset once on component mount or user selection change
-2. Fetch metrics separately for analytics and charts
-3. Cache both results for performance
-4. Use TypeScript interfaces for type safety
-5. Handle loading and error states properly
-
-// Dataset fetching
-const dataset = await fetch('${url}').then(r => r.json());
-const { ${Object.keys(datasetInfo.recordCounts).join(', ')}, businessMetrics } = dataset.data;
-
-// Metrics fetching
-const metrics = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly').then(r => r.json());
-const mrrData = metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue');
-const successRate = metrics.metrics.find(m => m.name === 'Payment Success Rate');
+## Features
+- Zero dependencies
+- Works everywhere (browser, Node, Deno, Bun)
+- Always returns data (never breaks)
+- Smart caching
+- Environment auto-detection
 
 // Common metrics for dashboards:
 - Monthly Recurring Revenue (MRR)
@@ -233,40 +256,42 @@ const successRate = metrics.metrics.find(m => m.name === 'Payment Success Rate')
 - Net Volume
 - Dispute Rate`;
 
-  const integrationCode = `// Synthkit Dataset Integration for ${businessContext.name}
-import { useState, useEffect } from 'react';
+  const integrationCode = `// Synthkit Enhanced Integration for ${businessContext.name}
+// Install: npm install @synthkit/enhanced
 
-${generateTypeScriptInterfaces(datasetInfo.recordCounts)}
+import { getData } from '@synthkit/enhanced';
+import { useSynthkit } from '@synthkit/enhanced/react';
 
+// Simple one-line data fetching
+export async function useSynthkitData() {
+  const result = await getData();
+  return {
+    data: result.data,
+    customers: result.data.customers,
+    charges: result.data.charges,
+    subscriptions: result.data.subscriptions || [],
+    invoices: result.data.invoices || [],
+    plans: result.data.plans || [],
+    metadata: result.data.metadata,
+    status: result.status,
+    debug: result.debug
+  };
+}
+
+// React hook version (if you prefer hooks)
 export function useSynthkitDataset() {
-  const [data, setData] = useState<Dataset | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    // Fetch static dataset - only runs once per component mount
-    fetch('${url}')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(\`Failed to load dataset: HTTP \${response.status}\`);
-        }
-        return response.json();
-      })
-      .then(dataset => {
-        setData(dataset.data);
-        setLoading(false);
-        console.log('📊 Synthkit dataset loaded:', {
-          ${Object.keys(datasetInfo.recordCounts).map(key => `${key}: dataset.data.${key}?.length || 0`).join(',\n          ')}
-        });
-      })
-      .catch(err => {
-        setError(err);
-        setLoading(false);
-        console.error('❌ Dataset loading failed:', err);
-      });
-  }, []); // Empty dependency array - fetch only once
-
-  return { data, loading, error };
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  return { 
+    data, 
+    loading, 
+    error, 
+    customers,
+    charges,
+    subscriptions,
+    invoices,
+    plans
+  };
 }
 
 // Usage in your component:
@@ -306,40 +331,40 @@ export function generateClaudeIntegration(url: string, datasetInfo: DatasetInfo)
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- URL: ${url}
+- Zero Configuration: Works with \`getData()\` - no URLs needed!
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
 - Business Metrics: CLV, AOV, MRR, DAU, conversion rate
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - Provides 60+ business metrics with time series data (daily, weekly, monthly)
+- Smart Caching: Automatic data caching with invalidation
 
 **Technical Integration:**
-1. **Use the provided hook** - Import and use the useSynthkitDataset() hook from './useSynthkitDataset.ts'
-2. **Replace all mock data** - Update components to use data from the hook instead of hardcoded values
-3. **Handle missing data** - For any prototype features not covered by the dataset, create mock data that closely matches the dataset's patterns and relationships
-4. **Maintain data consistency** - Ensure all data follows the same formatting (currency in cents, percentages to hundredths, etc.)
+1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
+2. **Simple data access** - Use \`const result = await getData();\` for instant data
+3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
+4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
 5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Integrate Stripe data** - Use the included Stripe objects for payment processing, subscription management, and financial data
+6. **Zero configuration** - No setup, no URLs, no environment variables needed
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
+// Simple one-line data fetching
+const result = await getData();
+const { customers, charges, subscriptions, invoices, plans } = result.data;
 
-// Metrics API (fetch separately for business intelligence):
-const metricsResponse = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly');
-const metrics = await metricsResponse.json();
-// Available: metrics.metrics[] - Array of 60+ business metrics with time series data
+// Or use React hook
+const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
+// Stripe data: customers, charges, subscriptions, invoices, plans
 \`\`\`
 
 **Integration Steps:**
-1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
-3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
-5. Add loading states: Show loading UI when \`loading\` is true
-6. Handle errors: Display error message when \`error\` exists
-7. For uncovered features: Create data that matches the dataset's patterns and relationships
+1. Install Enhanced: \`npm install @synthkit/enhanced\`
+2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
+3. Get data: \`const result = await getData();\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
+5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
+6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
+7. Handle states: Show loading/error UI as needed
 
 **Stripe Integration Examples:**
 - Display customers: \`customers.slice(0, 10).map(customer => ...)\`
@@ -349,12 +374,12 @@ const metrics = await metricsResponse.json();
 - Show subscription plans: \`plans.map(plan => ...)\`
 - Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
-**Metrics API Examples:**
-- Get all metrics: \`fetch('/api/metrics?granularity=monthly')\`
-- Get specific metric: \`fetch('/api/metrics?metric=Monthly Recurring Revenue&granularity=daily')\`
-- Display MRR chart: \`metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue').timeSeries.monthly\`
-- Show payment success rate: \`metrics.metrics.find(m => m.name === 'Payment Success Rate').currentValue\`
-- Available granularities: daily (365 values), weekly (52 values), monthly (12 values)
+**Enhanced Features:**
+- Zero dependencies - works everywhere
+- Smart caching - automatic data caching
+- Environment detection - works in browser, Node, Deno, Bun
+- Always returns data - never breaks
+- Universal compatibility - any JavaScript environment
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -376,40 +401,40 @@ export function generateChatGPTIntegration(url: string, datasetInfo: DatasetInfo
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- URL: ${url}
+- Zero Configuration: Works with \`getData()\` - no URLs needed!
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
 - Business Metrics: CLV, AOV, MRR, DAU, conversion rate
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - Provides 60+ business metrics with time series data (daily, weekly, monthly)
+- Smart Caching: Automatic data caching with invalidation
 
 **Technical Integration:**
-1. **Use the provided hook** - Import and use the useSynthkitDataset() hook from './useSynthkitDataset.ts'
-2. **Replace all mock data** - Update components to use data from the hook instead of hardcoded values
-3. **Handle missing data** - For any prototype features not covered by the dataset, create mock data that closely matches the dataset's patterns and relationships
-4. **Maintain data consistency** - Ensure all data follows the same formatting (currency in cents, percentages to hundredths, etc.)
+1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
+2. **Simple data access** - Use \`const result = await getData();\` for instant data
+3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
+4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
 5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Integrate Stripe data** - Use the included Stripe objects for payment processing, subscription management, and financial data
+6. **Zero configuration** - No setup, no URLs, no environment variables needed
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
+// Simple one-line data fetching
+const result = await getData();
+const { customers, charges, subscriptions, invoices, plans } = result.data;
 
-// Metrics API (fetch separately for business intelligence):
-const metricsResponse = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly');
-const metrics = await metricsResponse.json();
-// Available: metrics.metrics[] - Array of 60+ business metrics with time series data
+// Or use React hook
+const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
+// Stripe data: customers, charges, subscriptions, invoices, plans
 \`\`\`
 
 **Integration Steps:**
-1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
-3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
-5. Add loading states: Show loading UI when \`loading\` is true
-6. Handle errors: Display error message when \`error\` exists
-7. For uncovered features: Create data that matches the dataset's patterns and relationships
+1. Install Enhanced: \`npm install @synthkit/enhanced\`
+2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
+3. Get data: \`const result = await getData();\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
+5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
+6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
+7. Handle states: Show loading/error UI as needed
 
 **Stripe Integration Examples:**
 - Display customers: \`customers.slice(0, 10).map(customer => ...)\`
@@ -419,12 +444,12 @@ const metrics = await metricsResponse.json();
 - Show subscription plans: \`plans.map(plan => ...)\`
 - Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
-**Metrics API Examples:**
-- Get all metrics: \`fetch('/api/metrics?granularity=monthly')\`
-- Get specific metric: \`fetch('/api/metrics?metric=Monthly Recurring Revenue&granularity=daily')\`
-- Display MRR chart: \`metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue').timeSeries.monthly\`
-- Show payment success rate: \`metrics.metrics.find(m => m.name === 'Payment Success Rate').currentValue\`
-- Available granularities: daily (365 values), weekly (52 values), monthly (12 values)
+**Enhanced Features:**
+- Zero dependencies - works everywhere
+- Smart caching - automatic data caching
+- Environment detection - works in browser, Node, Deno, Bun
+- Always returns data - never breaks
+- Universal compatibility - any JavaScript environment
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -452,40 +477,40 @@ export function generateV0Integration(url: string, datasetInfo: DatasetInfo): In
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- URL: ${url}
+- Zero Configuration: Works with \`getData()\` - no URLs needed!
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
 - Business Metrics: CLV, AOV, MRR, DAU, conversion rate
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Metrics API: ${url.replace('/api/dataset/current?full=true', '/api/metrics')} - Provides 60+ business metrics with time series data (daily, weekly, monthly)
+- Smart Caching: Automatic data caching with invalidation
 
 **Technical Integration:**
-1. **Use the provided hook** - Import and use the useSynthkitDataset() hook from './useSynthkitDataset.ts'
-2. **Replace all mock data** - Update components to use data from the hook instead of hardcoded values
-3. **Handle missing data** - For any prototype features not covered by the dataset, create mock data that closely matches the dataset's patterns and relationships
-4. **Maintain data consistency** - Ensure all data follows the same formatting (currency in cents, percentages to hundredths, etc.)
+1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
+2. **Simple data access** - Use \`const result = await getData();\` for instant data
+3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
+4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
 5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Integrate Stripe data** - Use the included Stripe objects for payment processing, subscription management, and financial data
+6. **Zero configuration** - No setup, no URLs, no environment variables needed
 
 **Data Structure to Use:**
 \`\`\`javascript
-const { data, loading, error, customers, charges, subscriptions, invoices, plans, stripeData } = useSynthkitDataset();
-// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans, stripeData
+// Simple one-line data fetching
+const result = await getData();
+const { customers, charges, subscriptions, invoices, plans } = result.data;
 
-// Metrics API (fetch separately for business intelligence):
-const metricsResponse = await fetch('${url.replace('/api/dataset/current?full=true', '/api/metrics')}?granularity=monthly');
-const metrics = await metricsResponse.json();
-// Available: metrics.metrics[] - Array of 60+ business metrics with time series data
+// Or use React hook
+const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+// Available: data.${Object.keys(datasetInfo.recordCounts).join(', data.')}, data.businessMetrics
+// Stripe data: customers, charges, subscriptions, invoices, plans
 \`\`\`
 
 **Integration Steps:**
-1. Import the hook: \`import { useSynthkitDataset } from './useSynthkitDataset.ts'\`
-2. Replace mock data calls with: \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();\`
-3. Update data references: \`data.${Object.keys(datasetInfo.recordCounts)[0]}\` instead of mock arrays
-4. Add Stripe data: Use \`customers\`, \`charges\`, \`subscriptions\`, \`invoices\`, \`plans\` for payment-related features
-5. Add loading states: Show loading UI when \`loading\` is true
-6. Handle errors: Display error message when \`error\` exists
-7. For uncovered features: Create data that matches the dataset's patterns and relationships
+1. Install Enhanced: \`npm install @synthkit/enhanced\`
+2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
+3. Get data: \`const result = await getData();\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
+5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
+6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
+7. Handle states: Show loading/error UI as needed
 
 **Stripe Integration Examples:**
 - Display customers: \`customers.slice(0, 10).map(customer => ...)\`
@@ -495,12 +520,12 @@ const metrics = await metricsResponse.json();
 - Show subscription plans: \`plans.map(plan => ...)\`
 - Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
-**Metrics API Examples:**
-- Get all metrics: \`fetch('/api/metrics?granularity=monthly')\`
-- Get specific metric: \`fetch('/api/metrics?metric=Monthly Recurring Revenue&granularity=daily')\`
-- Display MRR chart: \`metrics.metrics.find(m => m.name === 'Monthly Recurring Revenue').timeSeries.monthly\`
-- Show payment success rate: \`metrics.metrics.find(m => m.name === 'Payment Success Rate').currentValue\`
-- Available granularities: daily (365 values), weekly (52 values), monthly (12 values)
+**Enhanced Features:**
+- Zero dependencies - works everywhere
+- Smart caching - automatic data caching
+- Environment detection - works in browser, Node, Deno, Bun
+- Always returns data - never breaks
+- Universal compatibility - any JavaScript environment
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.`;
 
@@ -521,279 +546,123 @@ export function generateFetchIntegration(url: string, datasetInfo: DatasetInfo):
 
   const entityKeys = Object.keys(datasetInfo.recordCounts);
 
-  const code = `// Synthkit Dataset Manager for ${businessContext.name}
-// Handles static dataset fetching, caching, and utilities
+  const code = `// Synthkit Enhanced Integration for ${businessContext.name}
+// Install: npm install @synthkit/enhanced
 
-class SynthkitDataset {
-  constructor(datasetUrl) {
-    this.url = datasetUrl;
-    this.metricsUrl = datasetUrl.replace('/api/dataset/current?full=true', '/api/metrics');
-    this.cache = null;
-    this.metricsCache = null;
-    this.loading = false;
-    this.lastFetch = null;
-  }
+import { getData } from '@synthkit/enhanced';
 
-  async fetchData() {
-    // Return cached data if available (static datasets don't change)
-    if (this.cache) {
-      console.log('📊 Using cached Synthkit dataset');
-      return this.cache;
-    }
-    
-    // Prevent concurrent fetches
-    if (this.loading) {
-      console.log('⏳ Dataset fetch already in progress...');
-      return null;
-    }
-    
-    this.loading = true;
-    console.log('🔄 Fetching Synthkit dataset from:', this.url);
-    
-    try {
-      const response = await fetch(this.url);
-      
-      if (!response.ok) {
-        throw new Error(\`Failed to fetch dataset: HTTP \${response.status} \${response.statusText}\`);
-      }
-      
-      const dataset = await response.json();
-      
-      // Validate dataset structure
-      if (!dataset.data) {
-        throw new Error('Invalid dataset format: missing data property');
-      }
-      
-      this.cache = dataset.data;
-      this.lastFetch = new Date();
-      
-      // Log dataset summary
-      console.log('✅ Synthkit dataset loaded successfully:', {
-        ${entityKeys.map(key => `${key}: this.cache.${key}?.length || 0`).join(',\n        ')},
-        businessMetrics: !!this.cache.businessMetrics,
-        fetchedAt: this.lastFetch.toISOString()
-      });
-      
-      return this.cache;
-      
-    } catch (error) {
-      console.error('❌ Synthkit dataset fetch failed:', error);
-      throw error;
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  // Get all data entities
-  getData() {
-    return this.cache;
-  }
-
-  // Get specific entity by name
-  getEntity(entityName) {
-    return this.cache?.[entityName] || [];
-  }
-
-  // Get business metrics
-  getBusinessMetrics() {
-    return this.cache?.businessMetrics || {};
-  }
-
-  // Utility: Find entity by ID
-  findById(entityName, id) {
-    const entities = this.getEntity(entityName);
-    return entities.find(item => item.id === id);
-  }
-
-  // Utility: Filter entities by property
-  filterBy(entityName, property, value) {
-    const entities = this.getEntity(entityName);
-    return entities.filter(item => item[property] === value);
-  }
-
-  // Utility: Get entity statistics
-  getEntityStats(entityName) {
-    const entities = this.getEntity(entityName);
-    if (!entities.length) return null;
-
-    return {
-      total: entities.length,
-      sample: entities.slice(0, 3),
-      properties: Object.keys(entities[0] || {})
-    };
-  }
-
-  // Advanced: Calculate relationships (e.g., payments per customer)
-  getRelationshipStats() {
-    if (!this.cache) return null;
-
-    const stats = {};
-    
-    // Example: If we have customers and payments
-    if (this.cache.customers && this.cache.payments) {
-      const paymentsByCustomer = {};
-      this.cache.payments.forEach(payment => {
-        const customerId = payment.customerId;
-        if (customerId) {
-          paymentsByCustomer[customerId] = (paymentsByCustomer[customerId] || 0) + 1;
-        }
-      });
-
-      stats.avgPaymentsPerCustomer = Object.values(paymentsByCustomer).reduce((a, b) => a + b, 0) / this.cache.customers.length;
-      stats.customersWithPayments = Object.keys(paymentsByCustomer).length;
-    }
-
-    return stats;
-  }
-
-  // Fetch metrics from Metrics API
-  async fetchMetrics(granularity = 'monthly') {
-    // Return cached metrics if available
-    if (this.metricsCache && this.metricsCache.granularity === granularity) {
-      console.log('📈 Using cached Synthkit metrics');
-      return this.metricsCache;
-    }
-    
-    console.log('🔄 Fetching Synthkit metrics from:', this.metricsUrl);
-    
-    try {
-      const response = await fetch(\`\${this.metricsUrl}?granularity=\${granularity}\`);
-      
-      if (!response.ok) {
-        throw new Error(\`Failed to fetch metrics: HTTP \${response.status} \${response.statusText}\`);
-      }
-      
-      const metricsData = await response.json();
-      
-      this.metricsCache = { ...metricsData, granularity };
-      
-      console.log('✅ Synthkit metrics loaded successfully:', {
-        metricsCount: metricsData.metrics?.length || 0,
-        granularity: granularity,
-        businessType: metricsData.businessType,
-        stage: metricsData.stage
-      });
-      
-      return this.metricsCache;
-      
-    } catch (error) {
-      console.error('❌ Synthkit metrics fetch failed:', error);
-      throw error;
-    }
-  }
-
-  // Get specific metric by name
-  getMetric(metricName, granularity = 'monthly') {
-    if (!this.metricsCache || this.metricsCache.granularity !== granularity) {
-      console.warn('Metrics not loaded for granularity:', granularity);
-      return null;
-    }
-    
-    return this.metricsCache.metrics?.find(m => m.name === metricName) || null;
-  }
-
-  // Get all metrics
-  getAllMetrics() {
-    return this.metricsCache?.metrics || [];
-  }
-
-  // Clear cache (useful for development/testing)
-  clearCache() {
-    this.cache = null;
-    this.metricsCache = null;
-    this.lastFetch = null;
-    console.log('🗑️ Synthkit dataset and metrics cache cleared');
-  }
-
-  // Get dataset info
-  getInfo() {
-    return {
-      url: this.url,
-      metricsUrl: this.metricsUrl,
-      cached: !!this.cache,
-      metricsCached: !!this.metricsCache,
-      lastFetch: this.lastFetch,
-      entities: this.cache ? Object.keys(this.cache).filter(key => Array.isArray(this.cache[key])) : []
-    };
-  }
+// Simple one-line data fetching
+async function loadData() {
+  const result = await getData();
+  return result.data;
 }
 
-// Usage Examples for ${businessContext.name} Prototype
+// React integration
+import { useSynthkit } from '@synthkit/enhanced/react';
 
-// 1. Basic Setup
-const synthkit = new SynthkitDataset('${url}');
-
-// 2. Load and display data
-async function loadPrototypeData() {
-  try {
-    const data = await synthkit.fetchData();
-    
-    // Display entity counts
-    ${entityKeys.map(key => `console.log('${key.charAt(0).toUpperCase() + key.slice(1)}:', data.${key}?.length || 0);`).join('\n    ')}
-    
-    // Display business metrics
-    const metrics = synthkit.getBusinessMetrics();
-    console.log('Customer Lifetime Value: $' + metrics.customerLifetimeValue?.toFixed(2));
-    console.log('Monthly Recurring Revenue: $' + metrics.monthlyRecurringRevenue?.toFixed(2));
-    console.log('Conversion Rate: ' + metrics.conversionRate?.toFixed(2) + '%');
-    
-    // Get relationship insights
-    const relationships = synthkit.getRelationshipStats();
-    console.log('Relationship Stats:', relationships);
-    
-    // Load advanced metrics from Metrics API
-    const advancedMetrics = await synthkit.fetchMetrics('monthly');
-    console.log('Advanced Metrics Available:', advancedMetrics.metrics?.length || 0);
-    
-    // Display specific metrics
-    const mrrMetric = synthkit.getMetric('Monthly Recurring Revenue');
-    if (mrrMetric) {
-      console.log('MRR Current Value: $' + mrrMetric.currentValue?.toFixed(2));
-      console.log('MRR 12-Month Trend:', mrrMetric.timeSeries.monthly);
-    }
-    
-    const successRateMetric = synthkit.getMetric('Payment Success Rate');
-    if (successRateMetric) {
-      console.log('Payment Success Rate: ' + successRateMetric.currentValue?.toFixed(2) + '%');
-    }
-    
-  } catch (error) {
-    console.error('Failed to load prototype data:', error);
-  }
+function MyComponent() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>My ${businessContext.name} Prototype</h1>
+      <p>Customers: {customers?.length || 0}</p>
+      <p>Charges: {charges?.length || 0}</p>
+    </div>
+  );
 }
 
-// 3. React Integration Example
-function useReactIntegration() {
-  const [data, setData] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  React.useEffect(() => {
-    synthkit.fetchData()
-      .then(data => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  return { data, loading, error };
+// Vanilla JavaScript usage
+async function myPrototype() {
+  const data = await loadData();
+  console.log(\`Got \${data.customers.length} customers!\`);
+  
+  // Display entity counts
+  ${entityKeys.map(key => `console.log('${key.charAt(0).toUpperCase() + key.slice(1)}:', data.${key}?.length || 0);`).join('\n  ')}
+  
+  // Display business metrics
+  console.log('Customer Lifetime Value: $' + data.businessMetrics?.customerLifetimeValue?.toFixed(2));
+  console.log('Monthly Recurring Revenue: $' + data.businessMetrics?.monthlyRecurringRevenue?.toFixed(2));
+  console.log('Conversion Rate: ' + data.businessMetrics?.conversionRate?.toFixed(2) + '%');
 }
 
-// 4. Start your prototype
-loadPrototypeData();
+// Start your prototype
+myPrototype();
 
 // Export for use in other modules
-export default synthkit;`;
+export { loadData, MyComponent };`;
+
+    return {
+    tool: 'Fetch API',
+    description: 'Enhanced JavaScript integration with zero dependencies',
+    code: code,
+    instructions: 'Install @synthkit/enhanced and use getData() for instant data access - zero configuration needed!',
+    copyText: code
+  };
+}
+
+// React Integration - Optimized for React components
+export function generateReactIntegration(url: string, datasetInfo: DatasetInfo): IntegrationExample {
+  const businessContext = datasetInfo.scenario 
+    ? getBusinessContext(datasetInfo.scenario.category)
+    : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
+
+  const recordSummary = Object.entries(datasetInfo.recordCounts)
+    .map(([key, count]) => `${count.toLocaleString()} ${key}`)
+    .join(', ');
+
+  const code = `// Install: npm install @synthkit/enhanced
+
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+// Simple React component with data
+export function MyPrototype() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <div>
+      <h1>My ${businessContext.name} Prototype</h1>
+      <p>Data source: {data?.metadata.source}</p>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-4 border rounded">
+          <h2>Customers ({customers?.length || 0})</h2>
+          <p>Sample: {customers?.[0]?.name || 'N/A'}</p>
+        </div>
+        <div className="p-4 border rounded">
+          <h2>Charges ({charges?.length || 0})</h2>
+          <p>Sample: \${charges?.[0]?.amount || 'N/A'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Or use the simple async version:
+import { getData } from '@synthkit/enhanced';
+
+export async function MyAsyncPrototype() {
+  const result = await getData();
+  const { customers, charges } = result.data;
+  
+  return (
+    <div>
+      <h1>My ${businessContext.name} Prototype</h1>
+      <p>Got {customers?.length || 0} customers and {charges?.length || 0} charges!</p>
+    </div>
+  );
+}`;
 
   return {
-    tool: 'Fetch API',
-    description: 'Complete JavaScript class for static dataset integration',
+    tool: 'React',
+    description: 'React component with Synthkit Enhanced',
     code: code,
-    instructions: 'Copy this SynthkitDataset class for vanilla JavaScript projects or as a foundation for framework integration. Includes caching, utilities, and React example.',
+    instructions: 'Install @synthkit/enhanced and use the useSynthkit hook - zero configuration needed!',
     copyText: code
   };
 }
@@ -801,6 +670,7 @@ export default synthkit;`;
 // Main function to generate all integrations
 export function generateAllIntegrations(url: string, datasetInfo: DatasetInfo): IntegrationExample[] {
   return [
+    generateReactIntegration(url, datasetInfo),
     generateCursorPrompt(url, datasetInfo),
     generateCursorIntegration(url, datasetInfo),
     generateClaudeIntegration(url, datasetInfo),

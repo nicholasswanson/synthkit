@@ -30,6 +30,7 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
 
   const tabs = [
     { id: 'Cursor', label: '🤖 Cursor', description: 'AI-powered code editor' },
+    { id: 'React', label: '⚛️ React', description: 'One-line data integration' },
     { id: 'Claude', label: '🧠 Claude', description: 'Detailed development guidance' },
     { id: 'ChatGPT', label: '💬 ChatGPT', description: 'Quick coding solutions' },
     { id: 'v0', label: '⚡ v0', description: 'Component generator' },
@@ -156,7 +157,7 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
             className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium"
           >
             <Download className="w-4 h-4" />
-            React Hook (.ts)
+            Enhanced Hook (.ts)
           </button>
           <button
             onClick={() => downloadCursorRules(url, datasetInfo)}
@@ -168,8 +169,8 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
         </div>
         <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <p className="text-xs text-green-700 dark:text-green-300">
-            💡 <strong>Pro tip:</strong> Download both files, add the React hook to your project,
-            and place the .cursorrules file in your project root for optimal AI assistance!
+            💡 <strong>Pro tip:</strong> Install <code>@synthkit/enhanced</code> for zero-config data integration!
+            Just run <code>npm install @synthkit/enhanced</code> and use <code>const result = await getData();</code>
           </p>
         </div>
       </div>
@@ -231,9 +232,9 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
       {/* Footer */}
       <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          <p>✅ Dataset is immediately accessible</p>
-          <p>🔄 Same URL always returns identical data</p>
-          <p>🌐 Works with any HTTP client or AI tool</p>
+          <p>✅ Zero configuration - works out of the box</p>
+          <p>🚀 One line integration: <code>const result = await getData();</code></p>
+          <p>🌐 Universal compatibility - works everywhere</p>
         </div>
       </div>
     </div>

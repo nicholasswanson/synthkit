@@ -57,7 +57,10 @@ pnpm typecheck
 - 🎮 Interactive scenario configuration
 - 🤖 AI-powered business analysis
 - 📊 Real-time mock data generation
-- 🔄 MSW integration for API mocking
+- 🚀 **Synthkit Enhanced** - Zero-config data integration
+- ⚡ One-line integration: `const result = await getData();`
+- 🌐 Universal compatibility - works everywhere
+- 🔄 Smart caching and fallbacks
 
 ## Troubleshooting
 
@@ -109,25 +112,53 @@ src/
 1. **Manual Configuration**: Use the dropdowns to select business category, role, and stage
 2. **AI Analysis**: Enter a business description and click "Analyze Business"
 3. **Data Generation**: Click refresh buttons to see mock data based on your scenario
-4. **Scenario Persistence**: Settings are saved to localStorage
+4. **Share Dataset**: Click "Share Dataset" to get integration code for your prototype
+5. **Scenario Persistence**: Settings are saved to localStorage
+
+## 🚀 For Vibe Coders
+
+### Quick Integration
+1. **Generate Dataset** - Select your business scenario
+2. **Click "Share Dataset"** - Opens integration panel
+3. **Choose Your Tool** - React, Cursor, v0, Claude, etc.
+4. **Copy & Paste** - Get working code instantly
+5. **Install Enhanced** - `npm install @synthkit/enhanced`
+
+### What's New
+- **Zero Configuration** - Works out of the box
+- **One Line Integration** - `const result = await getData();`
+- **Never Breaks** - Always returns data
+- **Works Everywhere** - Browser, Node, Deno, Bun
+- **Smart Caching** - Fast, efficient data loading
 
 ## Integration Example
 
 ```typescript
-// Using Synthkit in your own Next.js app
-import { SynthProvider } from '@synthkit/client';
-import { setupMSW } from '@synthkit/client/msw';
+// Using Synthkit Enhanced in your own Next.js app
+import { getData } from '@synthkit/enhanced';
 
-// In your app layout
-export default function RootLayout({ children }) {
+// Simple one-line data fetching
+export async function MyComponent() {
+  const result = await getData();
+  console.log(`Got ${result.data.customers.length} customers!`);
+  return <div>Customers: {result.data.customers.length}</div>;
+}
+
+// Or use the React hook
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+export function MyComponent() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
   return (
-    <html>
-      <body>
-        <SynthProvider>
-          {children}
-        </SynthProvider>
-      </body>
-    </html>
+    <div>
+      <h1>Dashboard</h1>
+      <p>Customers: {customers?.length || 0}</p>
+      <p>Charges: {charges?.length || 0}</p>
+    </div>
   );
 }
 ```

@@ -9,11 +9,45 @@ export function generateCursorRules(url: string, datasetInfo: DatasetInfo): stri
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
-  return `# Synthkit Dataset Integration Rules
+  return `# Synthkit Enhanced Integration Rules
 # Add this to your .cursorrules file for optimal AI assistance
 
+## Quick Start
+\`\`\bash
+npm install @synthkit/enhanced
+\`\`\`
+
+## Usage
+\`\`\javascript
+import { getData } from '@synthkit/enhanced';
+
+// One line to get data
+const result = await getData();
+console.log(\`Got \${result.data.customers.length} customers!\`);
+\`\`\`
+
+## React Hook
+\`\`\jsx
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function Dashboard() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Customers: {customers?.length || 0}</p>
+      <p>Charges: {charges?.length || 0}</p>
+    </div>
+  );
+}
+\`\`\`
+
 ## Dataset Context
-Dataset URL: ${url}
+Zero Configuration: Works with \`getData()\` - no URLs needed!
 Business Type: ${businessContext}
 Data Volume: ${recordSummary}
 ${datasetInfo.type === 'scenario' ? `
@@ -28,26 +62,19 @@ AI Generated Context:
 - Business Type: ${datasetInfo.aiAnalysis?.businessType}
 `}
 
-## Integration Guidelines
+## Data Structure
+- \`result.data.customers\` - Array of customer objects
+- \`result.data.charges\` - Array of charge objects
+- \`result.data.subscriptions\` - Array of subscription objects
+- \`result.data.invoices\` - Array of invoice objects
+- \`result.data.plans\` - Array of plan objects
 
-### Data Fetching
-When working with this dataset:
-1. Always use the exact URL: ${url}
-2. Implement proper error handling and loading states
-3. Cache the data appropriately (it's deterministic)
-4. Use TypeScript interfaces for type safety
-
-### Data Structure
-The dataset contains:
-${Object.keys(datasetInfo.recordCounts).map(key => `- ${key}: Array of ${key.slice(0, -1)} objects`).join('\n')}
-- businessMetrics: Object with CLV, AOV, MRR, DAU, conversion rate
-
-### Code Patterns
-Prefer these patterns:
-- React hooks for data management
-- Proper TypeScript typing
-- Error boundaries for data fetching
-- Loading skeletons for better UX
+## Features
+- Zero dependencies
+- Works everywhere (browser, Node, Deno, Bun)
+- Always returns data (never breaks)
+- Smart caching
+- Environment auto-detection
 - Pagination for large datasets
 
 ### Business Logic

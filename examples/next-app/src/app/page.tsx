@@ -543,7 +543,7 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
-  const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('javascript');
+  const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('cursor');
   
   // Dataset creation is now automatic - no hook needed
 
@@ -1540,21 +1540,23 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Quick Setup Files - Dynamic based on selected tool */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">
-              Add this React Hook to your project root directory
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => downloadReactHook(getCurrentDatasetUrl(), getDatasetInfo())}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <Download className="w-4 h-4" />
-                useSynthkitDataset.ts
-              </button>
+          {/* Quick Setup Files - Only for Cursor tab */}
+          {activeIntegrationTab === 'cursor' && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3">
+                Add this React Hook to your project root directory
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => downloadReactHook(getCurrentDatasetUrl(), getDatasetInfo())}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+                >
+                  <Download className="w-4 h-4" />
+                  useSynthkitDataset.ts
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Integration Examples */}
           <div>
@@ -1634,7 +1636,8 @@ export default function Home() {
                 return filteredExamples.map((example, index) => (
                   <div key={index}>
                     <h3 className="font-semibold text-gray-900 mb-3">
-                      {activeIntegrationTab === 'javascript' ? 'JavaScript Class for Vanilla JS Projects' : 'Integration prompt'}
+                      {activeIntegrationTab === 'javascript' ? 'JavaScript Class for Vanilla JS Projects' : 
+                       activeIntegrationTab === 'cursor' ? 'Cursor Integration Rules' : 'Integration prompt'}
                     </h3>
                     {activeIntegrationTab === 'javascript' && (
                       <div className="mb-4 p-4 bg-blue-50 rounded-xl">

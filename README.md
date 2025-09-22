@@ -22,6 +22,8 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 - 🤖 **AI-Powered Analysis** - Describe your business and get intelligent scenario recommendations
 - 📤 **Dataset Sharing** - Generate shareable URLs with AI tool integration code
 - 🔗 **AI Tool Integration** - Optimized for Cursor, Claude, ChatGPT, v0, and vanilla JS
+- 🚀 **Synthkit Enhanced** - Zero-configuration data integration with `getData()`
+- ⚡ **Universal Compatibility** - Works everywhere (browser, Node, Deno, Bun)
 - 🔄 **MSW Integration** - Seamless API mocking with Mock Service Worker
 - ⚡ **Framework Agnostic** - Works with React, Next.js, Vue, and more
 - 📦 **Modular Packs** - Extensible library of domain-specific schemas
@@ -106,7 +108,54 @@ Synthkit includes AI-powered scenario generation that works immediately without 
 cd examples/next-app
 pnpm dev  # AI analysis available at http://localhost:3001
 ```
-### **Basic Usage**
+### **🚀 Synthkit Enhanced - Zero Configuration Data**
+
+The easiest way to get realistic data for your prototypes:
+
+```bash
+# Install Enhanced
+npm install @synthkit/enhanced
+```
+
+```javascript
+// One line to get data - works everywhere!
+import { getData } from '@synthkit/enhanced';
+
+const result = await getData();
+console.log(`Got ${result.data.customers.length} customers!`);
+// { data: { customers: [...], charges: [...], businessMetrics: {...} }, status: 'success' }
+```
+
+```jsx
+// React integration
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function Dashboard() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Customers: {customers.length}</p>
+      <p>Charges: {charges.length}</p>
+    </div>
+  );
+}
+```
+
+**Features:**
+- ✅ **Zero Configuration** - No setup, no URLs, no environment variables
+- ✅ **Universal Compatibility** - Works in browser, Node, Deno, Bun
+- ✅ **Always Returns Data** - Never breaks, always provides realistic data
+- ✅ **Smart Caching** - Automatic data caching with invalidation
+- ✅ **Environment Detection** - Automatically detects platform and capabilities
+
+### **Basic Usage (Advanced)**
+
+For more control over data generation:
 
 ```typescript
 import { SchemaGenerator } from '@synthkit/sdk';
@@ -141,6 +190,27 @@ const scenario = {
 
 ### **React Integration**
 
+**Enhanced Approach (Recommended):**
+```tsx
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function App() {
+  const { data, loading, error, customers, charges } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h1>My App</h1>
+      <p>Customers: {customers.length}</p>
+      <p>Charges: {charges.length}</p>
+    </div>
+  );
+}
+```
+
+**Advanced Approach (Full Control):**
 ```tsx
 import { SynthProvider, PersonaScenarioSwitcher } from '@synthkit/client';
 
@@ -201,6 +271,7 @@ synthkit ai generate "A nonprofit platform for donations" --save-to-file
 
 | Package | Description | Status |
 |---------|-------------|--------|
+| `@synthkit/enhanced` | **Zero-config data integration** | ✅ **New!** |
 | `@synthkit/sdk` | Core generation engine | ✅ Implemented |
 | `@synthkit/client` | React components & providers | ✅ Implemented |
 | `@synthkit/ai` | AI-powered scenario analysis & generation | ✅ Implemented |
@@ -406,39 +477,43 @@ Synthkit generates optimized integration code for popular AI development tools:
 ```bash
 synthkit dataset integrate "<url>" --tool cursor --rules
 ```
-- Generates complete React hooks with TypeScript interfaces
+- Generates Enhanced integration code with `getData()` and `useSynthkit()`
 - Creates `.cursorrules` file for context-aware AI assistance
 - Includes business domain knowledge for better suggestions
+- Zero-configuration approach with universal compatibility
 
 #### **Claude Integration**  
 ```bash
 synthkit dataset integrate "<url>" --tool claude --output claude-prompt.txt
 ```
-- Comprehensive prompts with business context
+- Comprehensive prompts with Enhanced integration approach
 - Detailed integration requirements and best practices
 - Domain-specific guidance (e.g., fashion e-commerce patterns)
+- Zero-configuration data access with `getData()`
 
 #### **ChatGPT Integration**
 ```bash
 synthkit dataset integrate "<url>" --tool chatgpt --output chatgpt-prompt.txt  
 ```
 - Concise, practical prompts for quick solutions
-- Ready-to-paste integration requests
+- Ready-to-paste integration requests with Enhanced approach
+- Simple `getData()` and `useSynthkit()` examples
 
 #### **v0 Integration**
 ```bash
 synthkit dataset integrate "<url>" --tool v0 --output component-prompt.txt
 ```
 - Component-focused prompts with styling requirements
-- Modern dashboard templates with proper data display
+- Modern dashboard templates with Enhanced data integration
+- Zero-configuration data access
 
 #### **Vanilla JavaScript**
 ```bash
 synthkit dataset integrate "<url>" --tool fetch --output data-manager.js
 ```
-- Complete DatasetManager class with caching
-- Utility methods for common operations
-- Framework-agnostic implementation
+- Enhanced integration with `getData()` function
+- Universal compatibility (browser, Node, Deno, Bun)
+- Zero dependencies and smart caching
 
 ### **📊 Business Context Awareness**
 

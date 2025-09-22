@@ -104,86 +104,37 @@ export function generateReactHook(url: string, datasetInfo: DatasetInfo): string
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
-  return `// Synthkit Dataset Integration for ${businessContext.name}
-import { useState, useEffect } from 'react';
+  return `// Synthkit Enhanced Integration for ${businessContext.name}
+// Install: npm install @synthkit/enhanced
 
-${generateTypeScriptInterfaces(datasetInfo.recordCounts)}
+import { getData } from '@synthkit/enhanced';
+
+// Simple one-line data fetching
+export async function useSynthkitData() {
+  const result = await getData();
+  return {
+    data: result.data,
+    customers: result.data.customers,
+    charges: result.data.charges,
+    subscriptions: result.data.subscriptions || [],
+    invoices: result.data.invoices || [],
+    plans: result.data.plans || [],
+    metadata: result.data.metadata,
+    status: result.status,
+    debug: result.debug
+  };
+}
+
+// React hook version (if you prefer hooks)
+import { useSynthkit } from '@synthkit/enhanced/react';
 
 export function useSynthkitDataset() {
-  const [data, setData] = useState<Dataset | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [source, setSource] = useState<'live' | 'api' | 'static'>('live');
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // 1. Try live demo connection (sessionStorage - same browser)
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-          const liveData = sessionStorage.getItem('synthkit-current-dataset');
-          if (liveData) {
-            const parsed = JSON.parse(liveData);
-            setData(parsed.data);
-            setSource('live');
-            setLoading(false);
-            console.log('📊 Connected to live Synthkit demo!');
-            return;
-          }
-        }
-
-        // 2. Try live API endpoint (cross-port - different localhost ports)
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-          try {
-            const response = await fetch('http://localhost:3001/api/dataset/current');
-            if (response.ok) {
-              const dataset = await response.json();
-              setData(dataset.data);
-              setSource('api');
-              setLoading(false);
-              console.log('📡 Connected to live Synthkit API!');
-              return;
-            }
-          } catch (e) {
-            // Demo not running, continue to fallback
-          }
-        }
-
-        // 3. Fallback to static dataset URL (deployed prototypes)
-        const response = await fetch('${url}');
-        if (!response.ok) {
-          throw new Error(\`Failed to load dataset: HTTP \${response.status}\`);
-        }
-        const dataset = await response.json();
-        setData(dataset.data);
-        setSource('static');
-        setLoading(false);
-        console.log('📄 Using static Synthkit dataset');
-        
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        setLoading(false);
-        console.error('❌ Dataset loading failed:', err);
-      }
-    }
-
-    loadData();
-  }, []); // Empty dependency array - fetch only once
-
-  // Stripe data access helpers
-  const stripeData = data?.stripeData;
-  const customers = stripeData?.customers || [];
-  const charges = stripeData?.charges || [];
-  const subscriptions = stripeData?.subscriptions || [];
-  const invoices = stripeData?.invoices || [];
-  const plans = stripeData?.plans || [];
-
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
   return { 
     data, 
     loading, 
     error, 
-    source,
-    // Stripe data access
-    stripeData,
     customers,
     charges,
     subscriptions,
@@ -194,7 +145,7 @@ export function useSynthkitDataset() {
 
 // Usage in your component:
 export function MyPrototype() {
-  const { data, loading, error, source, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkitDataset();
 
   if (loading) return <div>Loading ${recordSummary}...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -204,7 +155,7 @@ export function MyPrototype() {
     <div>
       <h1>${businessContext.name} Prototype</h1>
       <p className="text-sm text-gray-500">
-        Data source: {source === 'live' ? '📊 Live Demo' : source === 'api' ? '📡 Live API' : '📄 Static Dataset'}
+        Data source: {data?.metadata.source}
       </p>
       ${Object.keys(datasetInfo.recordCounts).map(key => 
         `<p>{data.${key}?.length || 0} ${key}</p>`
@@ -212,36 +163,48 @@ export function MyPrototype() {
       <p>CLV: \${data.businessMetrics.customerLifetimeValue.toFixed(2)}</p>
       
       {/* Stripe Data Display */}
-      {customers.length > 0 && (
+      {customers?.length > 0 && (
         <div>
           <h2>Stripe Customers</h2>
           <p>{customers.length} customers available</p>
         </div>
       )}
-      {charges.length > 0 && (
+      {charges?.length > 0 && (
         <div>
           <h2>Recent Charges</h2>
           <p>{charges.length} charges available</p>
         </div>
       )}
-      {subscriptions.length > 0 && (
+      {subscriptions?.length > 0 && (
         <div>
           <h2>Active Subscriptions</h2>
           <p>{subscriptions.length} subscriptions available</p>
         </div>
       )}
-      {invoices.length > 0 && (
+      {invoices?.length > 0 && (
         <div>
           <h2>Recent Invoices</h2>
           <p>{invoices.length} invoices available</p>
         </div>
       )}
-      {plans.length > 0 && (
+      {plans?.length > 0 && (
         <div>
           <h2>Subscription Plans</h2>
           <p>{plans.length} plans available</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// Or use the simple async version:
+export async function MyAsyncPrototype() {
+  const { data, customers, charges } = await useSynthkitData();
+  
+  return (
+    <div>
+      <h1>${businessContext.name} Prototype</h1>
+      <p>Got {customers?.length || 0} customers and {charges?.length || 0} charges!</p>
     </div>
   );
 }`;
