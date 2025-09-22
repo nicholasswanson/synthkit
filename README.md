@@ -28,10 +28,17 @@ pnpm dev
 
 ## Synthkit Enhanced - Zero Configuration Data
 
-The easiest way to get realistic data for your prototypes:
+After configuring your dataset in the demo app above, use the generated integration code in your project:
 
+**1. Get Integration Code from Demo**
+- Run the demo app (see "How to Get Started" above)
+- Configure your business scenario
+- Click "Share Dataset" 
+- Copy the integration code for your tool (Cursor, React, v0, etc.)
+
+**2. Use in Your Project**
 ```bash
-# Install Enhanced
+# Install Enhanced (in your project directory)
 npm install @synthkit/enhanced
 ```
 
@@ -64,12 +71,11 @@ function Dashboard() {
 }
 ```
 
-**Features:**
-- ✅ **Zero Configuration** - No setup, no URLs, no environment variables
-- ✅ **Universal Compatibility** - Works in browser, Node, Deno, Bun
+**Why This Works:**
+- ✅ **Zero Configuration** - No setup, no URLs, no environment variables needed
 - ✅ **Always Returns Data** - Never breaks, always provides realistic data
+- ✅ **Works Everywhere** - Browser, Node, Deno, Bun
 - ✅ **Smart Caching** - Automatic data caching with invalidation
-- ✅ **Environment Detection** - Automatically detects platform and capabilities
 
 ## Features
 
