@@ -26,56 +26,8 @@ pnpm dev
 # Opens at http://localhost:3001
 ```
 
-## Synthkit Enhanced - Zero Configuration Data
+Configure your business scenario, generate realistic data, and click "Share Dataset" to get integration code for your preferred tool (Cursor, React, v0, Claude, ChatGPT, or Vanilla JS).
 
-After configuring your dataset in the demo app above, use the generated integration code in your project:
-
-**1. Get Integration Code from Demo**
-- Run the demo app (see "How to Get Started" above)
-- Configure your business scenario
-- Click "Share Dataset" 
-- Copy the integration code for your tool (Cursor, React, v0, etc.)
-
-**2. Use in Your Project**
-```bash
-# Install Enhanced (in your project directory)
-npm install @synthkit/enhanced
-```
-
-```javascript
-// One line to get data - works everywhere!
-import { getData } from '@synthkit/enhanced';
-
-const result = await getData();
-console.log(`Got ${result.data.customers.length} customers!`);
-// { data: { customers: [...], charges: [...], businessMetrics: {...} }, status: 'success' }
-```
-
-```jsx
-// React integration
-import { useSynthkit } from '@synthkit/enhanced/react';
-
-function Dashboard() {
-  const { data, loading, error, customers, charges } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Customers: {customers.length}</p>
-      <p>Charges: {charges.length}</p>
-    </div>
-  );
-}
-```
-
-**Why This Works:**
-- ✅ **Zero Configuration** - No setup, no URLs, no environment variables needed
-- ✅ **Always Returns Data** - Never breaks, always provides realistic data
-- ✅ **Works Everywhere** - Browser, Node, Deno, Bun
-- ✅ **Smart Caching** - Automatic data caching with invalidation
 
 ## Features
 
