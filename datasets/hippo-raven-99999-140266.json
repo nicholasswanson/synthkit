@@ -1,0 +1,20 @@
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "Test Customer"
+    }
+  ],
+  "charges": [
+    {
+      "id": 1,
+      "amount": 2500
+    }
+  ],
+  "businessMetrics": {
+    "customerLifetimeValue": 1250,
+    "averageOrderValue": 89.5,
+    "monthlyRecurringRevenue": 45000,
+    "conversionRate": 3.2
+  }
+}
