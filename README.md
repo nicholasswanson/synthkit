@@ -14,11 +14,10 @@ Synthkit provides deterministic, schema-driven mock data generation with realist
 
 ## How to Get Started
 
-### Step 1: Run the Demo App
-Configure your dataset using the interactive demo:
+Run the demo app to configure your dataset and get integration code:
 
 ```bash
-# Clone and setup (only needed to run the demo)
+# Clone and setup
 git clone https://github.com/nicholasswanson/synthkit.git
 cd synthkit
 ./scripts/setup-dev-auto.sh
@@ -29,24 +28,9 @@ pnpm dev
 # Opens at http://localhost:3001
 ```
 
-### Step 2: Configure Your Dataset
-Use the interactive demo interface to configure your dataset:
-
 ![Synthkit Demo Interface](https://github.com/nicholasswanson/synthkit/raw/main/docs/synthkit-demo-screenshot.png)
 
-1. **Select Business Category** - Choose from 9 realistic business types (e-commerce, SaaS, etc.)
-2. **Set Role & Stage** - Admin/Support roles with Early/Growth/Enterprise stages
-3. **AI Analysis** (Optional) - Describe your business for intelligent recommendations
-4. **Generate Data** - Click refresh to see realistic mock data
-5. **Share Dataset** - Click "Share Dataset" to get integration code for your tool
-
-### Step 3: Get Integration Code
-The integration panel will provide tool-specific instructions:
-- **Cursor**: Copy the integration code and `.cursorrules` file
-- **React**: Copy the hook code and install `@synthkit/enhanced`
-- **v0**: Copy the component prompt
-- **Claude/ChatGPT**: Copy the integration prompt
-- **Vanilla JS**: Copy the JavaScript code
+Configure your business scenario, generate realistic data, and click "Share Dataset" to get integration code for your preferred tool (Cursor, React, v0, Claude, ChatGPT, or Vanilla JS).
 
 ## Synthkit Enhanced - Zero Configuration Data
 
