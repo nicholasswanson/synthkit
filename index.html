@@ -762,10 +762,13 @@
 
         // Update Stripe products display (PERSONA-BASED)
         function updateStripeProducts(businessType, stage) {
+            console.log('updateStripeProducts called');
             const persona = PREDEFINED_PERSONAS[businessType];
+            console.log('Persona found:', persona);
             if (!persona) return;
             
             const recommendedProducts = analyzeStripeProducts(persona);
+            console.log('Recommended products:', recommendedProducts);
             const container = document.getElementById('stripe-products-section');
             
             container.innerHTML = `
@@ -942,8 +945,11 @@
 
         // Update included metrics display (EXACT SAME AS ORIGINAL NEXT-APP)
         function updateIncludedMetrics(businessType, stage) {
+            console.log('updateIncludedMetrics called');
             const sampleData = generateSampleData(businessType, stage);
+            console.log('Sample data generated:', sampleData);
             const includedMetrics = getIncludedMetrics(sampleData, businessType, stage);
+            console.log('Included metrics:', includedMetrics);
             const container = document.getElementById('included-metrics-section');
             
             container.innerHTML = `
