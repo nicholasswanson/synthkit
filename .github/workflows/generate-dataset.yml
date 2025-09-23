@@ -1,0 +1,88 @@
+name: Generate Dataset
+
+on:
+  repository_dispatch:
+    types: [generate-dataset]
+  workflow_dispatch:
+    inputs:
+      businessType:
+        description: 'Business Type'
+        required: true
+        default: 'b2b-saas-subscriptions'
+        type: choice
+        options:
+          - 'b2b-saas-subscriptions'
+          - 'checkout-ecommerce'
+          - 'food-delivery-platform'
+          - 'consumer-fitness-app'
+          - 'b2b-invoicing'
+          - 'property-management-platform'
+          - 'creator-platform'
+          - 'donation-marketplace'
+      stage:
+        description: 'Stage'
+        required: true
+        default: 'growth'
+        type: choice
+        options:
+          - 'early'
+          - 'growth'
+          - 'enterprise'
+      scenarioId:
+        description: 'Scenario ID'
+        required: true
+        default: '12345'
+        type: string
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          cd examples/next-app
+          npm ci
+          
+      - name: Generate dataset
+        id: generate
+        run: |
+          cd examples/next-app
+          node ../../scripts/generate-dataset.js ${{ github.event.inputs.businessType || 'b2b-saas-subscriptions' }} ${{ github.event.inputs.stage || 'growth' }} ${{ github.event.inputs.scenarioId || '12345' }}
+          
+      - name: Commit and push dataset
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add examples/next-app/public/datasets/
+          git commit -m "Add generated dataset: ${{ steps.generate.outputs.filename }}" || exit 0
+          git push
+          
+      - name: Create deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'dataset-generation',
+              description: `Dataset generated: ${process.env.DATASET_URL || 'Unknown URL'}`
+            });
+            
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: 'success',
+              environment_url: process.env.DATASET_URL || 'https://raw.githubusercontent.com/nicholasswanson/synthkit/main/datasets/'
+            });
