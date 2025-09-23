@@ -1159,15 +1159,15 @@ Focus on **direct implementation** - show me exactly how to modify my existing c
 // Replace your existing data fetching with this:
 import { useSynthkit } from '@synthkit/enhanced/react';
 
-function YourExistingComponent() {
-  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  // Use the real data instead of mock data
-  // customers, charges, subscriptions, invoices, plans are now real data
-}
+// function YourExistingComponent() {
+//   const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+//   
+//   if (loading) return <div>Loading...</div>;
+//   if (error) return <div>Error: {error.message}</div>;
+//   
+//   // Use the real data instead of mock data
+//   // customers, charges, subscriptions, invoices, plans are now real data
+// }
 \`\`\`
 
 **Real Data Available:**
@@ -1214,15 +1214,15 @@ Integration steps:
 // Replace your existing data fetching with this:
 import { useSynthkit } from '@synthkit/enhanced/react';
 
-function YourExistingComponent() {
-  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  // Use the real data instead of mock data
-  // customers, charges, subscriptions, invoices, plans are now real data
-}
+// function YourExistingComponent() {
+//   const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+//   
+//   if (loading) return <div>Loading...</div>;
+//   if (error) return <div>Error: {error.message}</div>;
+//   
+//   // Use the real data instead of mock data
+//   // customers, charges, subscriptions, invoices, plans are now real data
+// }
 \`\`\`
 
 **Real Data Available:**
@@ -1260,15 +1260,15 @@ Integration steps:
 // Replace your existing data fetching with this:
 import { useSynthkit } from '@synthkit/enhanced/react';
 
-function YourExistingComponent() {
-  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  // Use the real data instead of mock data
-  // customers, charges, subscriptions, invoices, plans are now real data
-}
+// function YourExistingComponent() {
+//   const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+//   
+//   if (loading) return <div>Loading...</div>;
+//   if (error) return <div>Error: {error.message}</div>;
+//   
+//   // Use the real data instead of mock data
+//   // customers, charges, subscriptions, invoices, plans are now real data
+// }
 \`\`\`
 
 **Real Data Available:**
@@ -1300,22 +1300,22 @@ async function loadData() {
 }
 
 // React integration
-import { useSynthkit } from '@synthkit/enhanced/react';
+// import { useSynthkit } from '@synthkit/enhanced/react';
 
-function MyComponent() {
-  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return (
-    <div>
-      <h2>Customers ({customers.length.toLocaleString()})</h2>
-      <h2>Charges ({charges.length.toLocaleString()})</h2>
-      <h2>Subscriptions ({subscriptions.length.toLocaleString()})</h2>
-    </div>
-  );
-}
+// function MyComponent() {
+//   const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+//   
+//   if (loading) return <div>Loading...</div>;
+//   if (error) return <div>Error: {error.message}</div>;
+//   
+//   return (
+//     <div>
+//       <h2>Customers ({customers.length.toLocaleString()})</h2>
+//       <h2>Charges ({charges.length.toLocaleString()})</h2>
+//       <h2>Subscriptions ({subscriptions.length.toLocaleString()})</h2>
+//     </div>
+//   );
+// }
 
 // Dataset URL: ${currentDatasetUrl}
 // Business Metrics: ${includedMetricsText}
