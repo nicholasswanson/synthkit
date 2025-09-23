@@ -119,20 +119,14 @@
                     </div>
                 </div>
 
-                <!-- Dataset Objects (Dynamic) -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Dataset objects</h3>
-                    <div id="dataset-objects" class="space-y-3">
-                        <!-- Will be populated dynamically -->
-                    </div>
+                <!-- Object Lists (Dynamic) -->
+                <div id="object-lists-section" class="mb-8">
+                    <!-- Will be populated dynamically -->
                 </div>
 
                 <!-- Included Metrics (Dynamic) -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Included metrics</h3>
-                    <div id="included-metrics" class="space-y-2">
-                        <!-- Will be populated dynamically -->
-                    </div>
+                <div id="included-metrics-section" class="mb-8">
+                    <!-- Will be populated dynamically -->
                 </div>
 
                 <!-- Stripe Products -->
@@ -295,14 +289,10 @@
                 'b2b-invoicing': { customers: 3000, subscriptions: 0, charges: 15000, invoices: 12000 },
                 'property-management-platform': { customers: 2000, subscriptions: 0, charges: 10000, invoices: 8000 },
                 'creator-platform': { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 },
-                'donation-marketplace': { customers: 20000, subscriptions: 0, charges: 120000, invoices: 20000 },
-                // Legacy mappings
-                saas: { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
-                ecommerce: { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
-                marketplace: { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 }
+                'donation-marketplace': { customers: 20000, subscriptions: 0, charges: 120000, invoices: 20000 }
             };
             
-            const businessCounts = baseCounts[businessType.toLowerCase()] || baseCounts.saas;
+            const businessCounts = baseCounts[businessType.toLowerCase()] || baseCounts['b2b-saas-subscriptions'];
             
             const stageMultipliers = {
                 early: 0.1,
@@ -322,60 +312,88 @@
             };
         }
 
+        // Generate sample data objects (like the original next-app)
+        function generateSampleData(businessType, stage) {
+            const counts = getRealisticCounts(businessType, stage);
+            const data = {};
+            
+            // Generate customers
+            if (counts.customers > 0) {
+                data.customers = Array.from({length: Math.min(3, counts.customers)}, (_, i) => ({
+                    id: generateStripeId('cus_', i),
+                    name: `Customer ${i + 1}`,
+                    email: `customer${i + 1}@example.com`,
+                    created: generateRealisticTimestamp(i, 365),
+                    status: 'active'
+                }));
+            }
+            
+            // Generate charges
+            if (counts.charges > 0) {
+                data.charges = Array.from({length: Math.min(3, counts.charges)}, (_, i) => ({
+                    id: generateStripeId('ch_', i),
+                    amount: Math.floor(seededRandom(i) * 10000) + 1000,
+                    status: seededRandom(i + 1) < 0.9 ? 'succeeded' : 'failed',
+                    created: generateRealisticTimestamp(i + 2, 90),
+                    currency: 'usd'
+                }));
+            }
+            
+            // Generate subscriptions
+            if (counts.subscriptions > 0) {
+                data.subscriptions = Array.from({length: Math.min(3, counts.subscriptions)}, (_, i) => ({
+                    id: generateStripeId('sub_', i),
+                    status: seededRandom(i + 3) < 0.8 ? 'active' : 'canceled',
+                    created: generateRealisticTimestamp(i + 4, 180),
+                    amount: Math.floor(seededRandom(i + 5) * 5000) + 1000,
+                    interval: 'month'
+                }));
+            }
+            
+            // Generate invoices
+            if (counts.invoices > 0) {
+                data.invoices = Array.from({length: Math.min(3, counts.invoices)}, (_, i) => ({
+                    id: generateStripeId('in_', i),
+                    amount_due: Math.floor(seededRandom(i + 6) * 8000) + 2000,
+                    status: seededRandom(i + 7) < 0.85 ? 'paid' : 'open',
+                    created: generateRealisticTimestamp(i + 8, 60),
+                    currency: 'usd'
+                }));
+            }
+            
+            return data;
+        }
+
         // Generate comprehensive metrics (same logic as next-app)
         function generateComprehensiveMetrics(stripeData, businessType, stage) {
             const { customers, charges, subscriptions, invoices } = stripeData;
             
             const metrics = [
-                {
-                    name: 'Gross Payment Volume',
-                    currentValue: charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0),
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Total payment volume processed'
-                },
-                {
-                    name: 'Payment Success Rate',
-                    currentValue: charges.filter(c => c.status === 'succeeded').length / charges.length,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Percentage of successful payments'
-                },
-                {
-                    name: 'Monthly Recurring Revenue',
-                    currentValue: subscriptions.filter(s => s.status === 'active').length * 5000,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Recurring revenue from active subscriptions'
-                },
-                {
-                    name: 'Customer Lifetime Value',
-                    currentValue: 5000 * 12,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Average customer lifetime value'
-                },
-                {
-                    name: 'Average Order Value',
-                    currentValue: charges.filter(c => c.status === 'succeeded').length > 0 ? 
-                        charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0) / charges.filter(c => c.status === 'succeeded').length : 0,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Average value per successful payment'
-                },
-                {
-                    name: 'Conversion Rate',
-                    currentValue: 0.15 + Math.random() * 0.1,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Payment conversion rate'
-                }
+                'Gross Payment Volume',
+                'Payment Success Rate', 
+                'Monthly Recurring Revenue',
+                'Customer Lifetime Value',
+                'Average Order Value',
+                'Conversion Rate',
+                'Successful Payments',
+                'Failed Card Payments - Failed Volume',
+                'Failed Card Payments - Failed Count',
+                'Failed Card Payments - Failure Rate',
+                'Active Subscribers',
+                'Subscription Revenue',
+                'One-time Revenue',
+                'Refund Rate',
+                'Chargeback Rate',
+                'Dispute Rate',
+                'Tax Collected',
+                'Processing Fees',
+                'Net Revenue',
+                'Customer Acquisition Cost',
+                'Revenue per Customer',
+                'Payment Method Distribution',
+                'Geographic Distribution',
+                'Time-based Trends',
+                'Seasonal Patterns'
             ];
             
             return metrics;
@@ -384,53 +402,82 @@
         // Get included metrics (same logic as next-app)
         function getIncludedMetrics(dataset, businessType, stage) {
             const metrics = generateComprehensiveMetrics(dataset, businessType, stage);
-            return metrics.map(metric => metric.name);
+            return metrics.slice(0, 12); // Show first 12 metrics
         }
 
-        // Update dataset objects display
-        function updateDatasetObjects(businessType, stage) {
-            const counts = getRealisticCounts(businessType, stage);
-            const container = document.getElementById('dataset-objects');
+        // Update object lists display (EXACT SAME AS ORIGINAL NEXT-APP)
+        function updateObjectLists(businessType, stage) {
+            const sampleData = generateSampleData(businessType, stage);
+            const container = document.getElementById('object-lists-section');
             
-            const objects = [
-                { name: 'Customers', count: counts.customers, description: 'Customer data and profiles', fields: ['id', 'name', 'email', 'loyalty_tier'] },
-                { name: 'Charges', count: counts.charges, description: 'Payment transactions', fields: ['amount', 'status', 'payment_method'] },
-                { name: 'Subscriptions', count: counts.subscriptions, description: 'Recurring billing', fields: ['plan', 'status', 'billing_cycle'] },
-                { name: 'Invoices', count: counts.invoices, description: 'Billing documents', fields: ['amount_due', 'status', 'due_date'] }
-            ];
+            if (Object.keys(sampleData).length === 0) {
+                container.innerHTML = '';
+                return;
+            }
             
-            container.innerHTML = objects.map(obj => `
-                <div class="border-l-4 pl-4 border-orange">
-                    <div class="font-medium text-gray-900">${obj.name}</div>
-                    <div class="text-sm text-gray-600 mb-1">${obj.description}</div>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">${obj.count.toLocaleString()} records</span>
-                        ${obj.fields.map(field => `<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">${field}</span>`).join('')}
+            container.innerHTML = `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Object Lists</h3>
+                    ${Object.entries(sampleData).map(([entityName, entityData]) => `
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                                ${entityName.charAt(0).toUpperCase() + entityName.slice(1)} (${entityData.length.toLocaleString()})
+                            </h3>
+                            <div class="space-y-2">
+                                ${entityData.slice(0, 3).map(item => `
+                                    <div class="p-2 bg-gray-50 rounded">
+                                        <div class="space-y-1">
+                                            ${Object.entries(item).slice(0, 4).map(([key, value]) => `
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-medium text-gray-600 capitalize">
+                                                        ${key}:
+                                                    </span>
+                                                    <span class="text-sm text-gray-900">
+                                                        ${typeof value === 'number' && key.includes('amount') 
+                                                            ? `$${(value / 100).toFixed(2)}`
+                                                            : typeof value === 'string' && value.length > 30
+                                                            ? `${value.substring(0, 30)}...`
+                                                            : String(value)
+                                                        }
+                                                    </span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                ${entityData.length > 3 ? `
+                                    <div class="text-sm text-gray-500 text-center py-2">
+                                        ... and ${(entityData.length - 3).toLocaleString()} more
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Update included metrics display (EXACT SAME AS ORIGINAL NEXT-APP)
+        function updateIncludedMetrics(businessType, stage) {
+            const sampleData = generateSampleData(businessType, stage);
+            const includedMetrics = getIncludedMetrics(sampleData, businessType, stage);
+            const container = document.getElementById('included-metrics-section');
+            
+            container.innerHTML = `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Included metrics</h3>
+                    <div class="space-y-3">
+                        ${includedMetrics.map(metric => `
+                            <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
+                                <span class="text-sm font-medium text-gray-900">${metric}</span>
+                                <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-lg">
+                                    Available
+                                </span>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
-            `).join('');
-        }
-
-        // Update included metrics display
-        function updateIncludedMetrics(businessType, stage) {
-            const container = document.getElementById('included-metrics');
-            
-            // Generate sample dataset for metrics calculation
-            const sampleDataset = {
-                customers: Array.from({length: 100}, (_, i) => ({ id: `cus_${i}`, status: 'active' })),
-                charges: Array.from({length: 500}, (_, i) => ({ id: `ch_${i}`, status: i % 10 === 0 ? 'failed' : 'succeeded', amount: 1000 + i * 10 })),
-                subscriptions: Array.from({length: 200}, (_, i) => ({ id: `sub_${i}`, status: i % 5 === 0 ? 'canceled' : 'active' })),
-                invoices: Array.from({length: 300}, (_, i) => ({ id: `in_${i}`, status: 'paid' }))
-            };
-            
-            const includedMetrics = getIncludedMetrics(sampleDataset, businessType, stage);
-            
-            container.innerHTML = includedMetrics.map(metric => `
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span class="text-sm text-gray-700">${metric}</span>
-                </div>
-            `).join('');
+            `;
         }
 
         // Update display when configuration changes
@@ -438,12 +485,12 @@
             const businessType = document.getElementById('scenario-select').value;
             const stage = document.getElementById('stage-select').value;
             
-            updateDatasetObjects(businessType, stage);
+            updateObjectLists(businessType, stage);
             updateIncludedMetrics(businessType, stage);
         }
 
         // ============================================================================
-        // UI FUNCTIONALITY
+        // COMPREHENSIVE INTEGRATION PROMPTS (RESTORED FROM ORIGINAL)
         // ============================================================================
         
         let currentDatasetUrl = null;
@@ -483,12 +530,7 @@
             
             // Generate dataset info
             const counts = getRealisticCounts(scenario, stage);
-            const sampleDataset = {
-                customers: Array.from({length: counts.customers}, (_, i) => ({ id: `cus_${i}`, status: 'active' })),
-                charges: Array.from({length: counts.charges}, (_, i) => ({ id: `ch_${i}`, status: 'succeeded', amount: 1000 + i * 10 })),
-                subscriptions: Array.from({length: counts.subscriptions}, (_, i) => ({ id: `sub_${i}`, status: 'active' })),
-                invoices: Array.from({length: counts.invoices}, (_, i) => ({ id: `in_${i}`, status: 'paid' }))
-            };
+            const sampleDataset = generateSampleData(scenario, stage);
             const includedMetrics = getIncludedMetrics(sampleDataset, scenario, stage);
             
             currentDatasetInfo = {
@@ -515,7 +557,7 @@
             alert('URL copied to clipboard!');
         });
         
-        // Update integration content
+        // Update integration content with COMPREHENSIVE PROMPTS (RESTORED FROM ORIGINAL)
         function updateIntegrationContent(tab) {
             const content = document.getElementById('integration-content');
             if (!currentDatasetUrl || !currentDatasetInfo) {
@@ -532,7 +574,11 @@
             }
             
             const { recordCounts, includedMetrics, businessType, stage } = currentDatasetInfo;
-            const metricsText = includedMetrics.slice(0, 4).join(', ');
+            const recordSummary = Object.entries(recordCounts)
+                .map(([key, count]) => `${count.toLocaleString()} ${key}`)
+                .join(', ');
+            const entityList = Object.keys(recordCounts).join(', ');
+            const includedMetricsText = includedMetrics.join(', ');
             
             let integrationCode = '';
             switch(tab) {
@@ -550,8 +596,56 @@ When working with Synthkit data:
 - Always handle loading states and errors
 - Use realistic data volumes (thousands of records)
 - Dataset URL: ${currentDatasetUrl}
-- Business Metrics: ${metricsText}
-- Data Objects: customers (${recordCounts.customers.toLocaleString()}), charges (${recordCounts.charges.toLocaleString()}), subscriptions (${recordCounts.subscriptions.toLocaleString()}), invoices (${recordCounts.invoices.toLocaleString()})</code></pre>
+- Business Metrics: ${includedMetricsText}
+- Data Objects: ${recordSummary}
+- Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
+- Smart Caching: Automatic data caching with invalidation
+
+**Technical Integration:**
+1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
+2. **Simple data access** - Use \`const result = await getData();\` for instant data
+3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
+4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
+5. **Preserve existing UI** - Keep all current components and styling, only change the data source
+6. **Zero configuration** - No setup, no URLs, no environment variables needed
+
+**Data Structure to Use:**
+\`\`\`javascript
+// Simple one-line data fetching
+const result = await getData();
+const { customers, charges, subscriptions, invoices, plans } = result.data;
+
+// Or use React hook
+const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+// Available: data.${Object.keys(recordCounts).join(', data.')}, data.businessMetrics
+// Stripe data: customers, charges, subscriptions, invoices, plans
+\`\`\`
+
+**Integration Steps:**
+1. Install Enhanced: \`npm install @synthkit/enhanced\`
+2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
+3. Get data: \`const result = await getData();\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
+5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
+6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
+7. Handle states: Show loading/error UI as needed
+
+**Stripe Integration Examples:**
+- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
+- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
+- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
+- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
+- Show subscription plans: \`plans.map(plan => ...)\`
+- Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
+
+**Enhanced Features:**
+- Zero dependencies - works everywhere
+- Smart caching - automatic data caching
+- Environment detection - works in browser, Node, Deno, Bun
+- Always returns data - never breaks
+- Universal compatibility - any JavaScript environment
+
+Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.</code></pre>
                             </div>
                         </div>
                     `;
@@ -561,15 +655,57 @@ When working with Synthkit data:
                         <div class="space-y-4">
                             <div class="bg-gray-100 p-5 rounded-xl">
                                 <h4 class="font-semibold text-gray-900 mb-3">V0 Integration</h4>
-                                <pre class="text-sm text-gray-800 overflow-x-auto"><code>// Paste this URL into v0.dev
-${currentDatasetUrl}
+                                <pre class="text-sm text-gray-800 overflow-x-auto"><code>Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
-Then ask v0 to:
-1. Install @synthkit/enhanced: npm install @synthkit/enhanced
-2. Replace mock data with: const result = await getData()
-3. Use the data: const { customers, charges } = result.data
-4. Display realistic volumes: ${currentDatasetUrl.split('/').pop()} contains ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges
-5. Include business metrics: ${metricsText}</code></pre>
+**Dataset Information:**
+- Dataset URL: \`${currentDatasetUrl}\`
+- Data Volume: ${recordSummary}
+- Business Type: ${businessType}
+- Available Entities: ${entityList}
+- Business Metrics: ${includedMetricsText}
+
+**Integration Focus:**
+- Replace existing mock/hardcoded data with real data from the dataset
+- Keep all existing UI components and styling
+- Only change the data source, not the design
+- Maintain current component structure and layout
+
+**Technical Integration:**
+1. **Install Enhanced**: \`npm install @synthkit/enhanced\`
+2. **Import the hook**: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. **Replace data source**: Change from mock data to \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();\`
+4. **Update data references**: Replace hardcoded arrays with real data arrays
+5. **Add loading states**: Handle loading and error states appropriately
+
+**Data Access Pattern:**
+\`\`\`javascript
+// Replace your existing data fetching with this:
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function YourExistingComponent() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  // Use the real data instead of mock data
+  // customers, charges, subscriptions, invoices, plans are now real data
+}
+\`\`\`
+
+**Real Data Available:**
+${Object.entries(recordCounts).map(([key, count]) => `- ${key}: ${count.toLocaleString()} records`).join('\n')}
+- Business metrics: CLV, AOV, MRR, conversion rate
+- Comprehensive Stripe metrics: Payment volume, success rates, failed payments, etc.
+
+**Integration Steps:**
+1. Install: \`npm install @synthkit/enhanced\`
+2. Import: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. Replace: Change mock data to \`useSynthkit()\` hook
+4. Update: Replace hardcoded data references with real data
+5. Test: Verify the integration works with the actual dataset
+
+Focus on **integrating the real data** into your existing prototype without changing the UI design.</code></pre>
                             </div>
                         </div>
                     `;
@@ -586,8 +722,36 @@ Integration steps:
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
 4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: ${metricsText}
-6. Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions, ${recordCounts.invoices.toLocaleString()} invoices</code></pre>
+5. Business Metrics: ${includedMetricsText}
+6. Data Volume: ${recordSummary}
+
+**Technical Integration:**
+1. **Install Enhanced**: \`npm install @synthkit/enhanced\`
+2. **Import the hook**: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. **Replace data source**: Change from mock data to \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();\`
+4. **Update data references**: Replace hardcoded arrays with real data arrays
+5. **Add loading states**: Handle loading and error states appropriately
+
+**Data Access Pattern:**
+\`\`\`javascript
+// Replace your existing data fetching with this:
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function YourExistingComponent() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  // Use the real data instead of mock data
+  // customers, charges, subscriptions, invoices, plans are now real data
+}
+\`\`\`
+
+**Real Data Available:**
+${Object.entries(recordCounts).map(([key, count]) => `- ${key}: ${count.toLocaleString()} records`).join('\n')}
+- Business metrics: CLV, AOV, MRR, conversion rate
+- Comprehensive Stripe metrics: Payment volume, success rates, failed payments, etc.</code></pre>
                             </div>
                         </div>
                     `;
@@ -604,8 +768,36 @@ Integration steps:
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
 4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: ${metricsText}
-6. Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions, ${recordCounts.invoices.toLocaleString()} invoices</code></pre>
+5. Business Metrics: ${includedMetricsText}
+6. Data Volume: ${recordSummary}
+
+**Technical Integration:**
+1. **Install Enhanced**: \`npm install @synthkit/enhanced\`
+2. **Import the hook**: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. **Replace data source**: Change from mock data to \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();\`
+4. **Update data references**: Replace hardcoded arrays with real data arrays
+5. **Add loading states**: Handle loading and error states appropriately
+
+**Data Access Pattern:**
+\`\`\`javascript
+// Replace your existing data fetching with this:
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function YourExistingComponent() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  // Use the real data instead of mock data
+  // customers, charges, subscriptions, invoices, plans are now real data
+}
+\`\`\`
+
+**Real Data Available:**
+${Object.entries(recordCounts).map(([key, count]) => `- ${key}: ${count.toLocaleString()} records`).join('\n')}
+- Business metrics: CLV, AOV, MRR, conversion rate
+- Comprehensive Stripe metrics: Payment volume, success rates, failed payments, etc.</code></pre>
                             </div>
                         </div>
                     `;
@@ -630,9 +822,27 @@ async function loadData() {
   return result.data;
 }
 
+// React integration
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function MyComponent() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h2>Customers ({customers.length.toLocaleString()})</h2>
+      <h2>Charges ({charges.length.toLocaleString()})</h2>
+      <h2>Subscriptions ({subscriptions.length.toLocaleString()})</h2>
+    </div>
+  );
+}
+
 // Dataset URL: ${currentDatasetUrl}
-// Business Metrics: ${metricsText}
-// Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions</code></pre>
+// Business Metrics: ${includedMetricsText}
+// Data Volume: ${recordSummary}</code></pre>
                             </div>
                         </div>
                     `;
