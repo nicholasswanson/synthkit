@@ -119,19 +119,77 @@
                     </div>
                 </div>
 
-                <!-- Dataset Objects (Dynamic) -->
+                <!-- Dataset Objects -->
                 <div class="mb-8">
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Dataset objects</h3>
-                    <div id="dataset-objects" class="space-y-3">
-                        <!-- Will be populated dynamically -->
+                    <div class="space-y-3">
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Customers</div>
+                            <div class="text-sm text-gray-600 mb-1">Customer data and profiles</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">25,000 records</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">id, name, email</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">loyalty_tier</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Charges</div>
+                            <div class="text-sm text-gray-600 mb-1">Payment transactions</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">150,000 records</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">amount, status</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_method</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Subscriptions</div>
+                            <div class="text-sm text-gray-600 mb-1">Recurring billing</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">12,000 records</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">plan, status</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">billing_cycle</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Invoices</div>
+                            <div class="text-sm text-gray-600 mb-1">Billing documents</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">25,000 records</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">amount_due, status</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">due_date</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Included Metrics (Dynamic) -->
+                <!-- Included Metrics -->
                 <div class="mb-8">
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Included metrics</h3>
-                    <div id="included-metrics" class="space-y-2">
-                        <!-- Will be populated dynamically -->
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Gross Payment Volume</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Payment Success Rate</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Monthly Recurring Revenue</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Customer Lifetime Value</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Average Order Value</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Conversion Rate</span>
+                        </div>
                     </div>
                 </div>
 
@@ -258,196 +316,8 @@
     </div>
 
     <script>
-        // ============================================================================
-        // COMPLETE DATA GENERATION SYSTEM (RESTORED FROM NEXT-APP)
-        // ============================================================================
-        
-        // Seeded random function for deterministic generation
-        function seededRandom(seed) {
-            const x = Math.sin(seed) * 10000;
-            return x - Math.floor(x);
-        }
-
-        // Generate realistic Stripe-style IDs
-        function generateStripeId(prefix, seed) {
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let id = prefix;
-            for (let i = 0; i < 20; i++) {
-                id += chars[Math.floor(seededRandom(seed + i) * chars.length)];
-            }
-            return id;
-        }
-
-        // Generate realistic timestamps
-        function generateRealisticTimestamp(seed, daysBack) {
-            const now = Math.floor(Date.now() / 1000);
-            const secondsBack = Math.floor(seededRandom(seed) * daysBack * 24 * 60 * 60);
-            return now - secondsBack;
-        }
-
-        // Get realistic counts based on business type and stage (EXACT SAME LOGIC AS NEXT-APP)
-        function getRealisticCounts(businessType, stage) {
-            const baseCounts = {
-                'checkout-ecommerce': { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
-                'b2b-saas-subscriptions': { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
-                'food-delivery-platform': { customers: 50000, subscriptions: 0, charges: 300000, invoices: 50000 },
-                'consumer-fitness-app': { customers: 15000, subscriptions: 25000, charges: 75000, invoices: 15000 },
-                'b2b-invoicing': { customers: 3000, subscriptions: 0, charges: 15000, invoices: 12000 },
-                'property-management-platform': { customers: 2000, subscriptions: 0, charges: 10000, invoices: 8000 },
-                'creator-platform': { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 },
-                'donation-marketplace': { customers: 20000, subscriptions: 0, charges: 120000, invoices: 20000 },
-                // Legacy mappings
-                saas: { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
-                ecommerce: { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
-                marketplace: { customers: 30000, subscriptions: 0, charges: 180000, invoices: 30000 }
-            };
-            
-            const businessCounts = baseCounts[businessType.toLowerCase()] || baseCounts.saas;
-            
-            const stageMultipliers = {
-                early: 0.1,
-                growth: 1.0,
-                enterprise: 20.0
-            };
-            
-            const stageMultiplier = stageMultipliers[stage] || 1.0;
-            const enterpriseVariation = stage === 'enterprise' ? (0.7 + Math.random() * 0.6) : 1.0;
-            
-            return {
-                customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                plans: 5
-            };
-        }
-
-        // Generate comprehensive metrics (same logic as next-app)
-        function generateComprehensiveMetrics(stripeData, businessType, stage) {
-            const { customers, charges, subscriptions, invoices } = stripeData;
-            
-            const metrics = [
-                {
-                    name: 'Gross Payment Volume',
-                    currentValue: charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0),
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Total payment volume processed'
-                },
-                {
-                    name: 'Payment Success Rate',
-                    currentValue: charges.filter(c => c.status === 'succeeded').length / charges.length,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Percentage of successful payments'
-                },
-                {
-                    name: 'Monthly Recurring Revenue',
-                    currentValue: subscriptions.filter(s => s.status === 'active').length * 5000,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Recurring revenue from active subscriptions'
-                },
-                {
-                    name: 'Customer Lifetime Value',
-                    currentValue: 5000 * 12,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Average customer lifetime value'
-                },
-                {
-                    name: 'Average Order Value',
-                    currentValue: charges.filter(c => c.status === 'succeeded').length > 0 ? 
-                        charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0) / charges.filter(c => c.status === 'succeeded').length : 0,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Bar chart',
-                    description: 'Average value per successful payment'
-                },
-                {
-                    name: 'Conversion Rate',
-                    currentValue: 0.15 + Math.random() * 0.1,
-                    previousValue: 0,
-                    change: 0,
-                    chartType: 'Line chart',
-                    description: 'Payment conversion rate'
-                }
-            ];
-            
-            return metrics;
-        }
-
-        // Get included metrics (same logic as next-app)
-        function getIncludedMetrics(dataset, businessType, stage) {
-            const metrics = generateComprehensiveMetrics(dataset, businessType, stage);
-            return metrics.map(metric => metric.name);
-        }
-
-        // Update dataset objects display
-        function updateDatasetObjects(businessType, stage) {
-            const counts = getRealisticCounts(businessType, stage);
-            const container = document.getElementById('dataset-objects');
-            
-            const objects = [
-                { name: 'Customers', count: counts.customers, description: 'Customer data and profiles', fields: ['id', 'name', 'email', 'loyalty_tier'] },
-                { name: 'Charges', count: counts.charges, description: 'Payment transactions', fields: ['amount', 'status', 'payment_method'] },
-                { name: 'Subscriptions', count: counts.subscriptions, description: 'Recurring billing', fields: ['plan', 'status', 'billing_cycle'] },
-                { name: 'Invoices', count: counts.invoices, description: 'Billing documents', fields: ['amount_due', 'status', 'due_date'] }
-            ];
-            
-            container.innerHTML = objects.map(obj => `
-                <div class="border-l-4 pl-4 border-orange">
-                    <div class="font-medium text-gray-900">${obj.name}</div>
-                    <div class="text-sm text-gray-600 mb-1">${obj.description}</div>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">${obj.count.toLocaleString()} records</span>
-                        ${obj.fields.map(field => `<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">${field}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update included metrics display
-        function updateIncludedMetrics(businessType, stage) {
-            const container = document.getElementById('included-metrics');
-            
-            // Generate sample dataset for metrics calculation
-            const sampleDataset = {
-                customers: Array.from({length: 100}, (_, i) => ({ id: `cus_${i}`, status: 'active' })),
-                charges: Array.from({length: 500}, (_, i) => ({ id: `ch_${i}`, status: i % 10 === 0 ? 'failed' : 'succeeded', amount: 1000 + i * 10 })),
-                subscriptions: Array.from({length: 200}, (_, i) => ({ id: `sub_${i}`, status: i % 5 === 0 ? 'canceled' : 'active' })),
-                invoices: Array.from({length: 300}, (_, i) => ({ id: `in_${i}`, status: 'paid' }))
-            };
-            
-            const includedMetrics = getIncludedMetrics(sampleDataset, businessType, stage);
-            
-            container.innerHTML = includedMetrics.map(metric => `
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span class="text-sm text-gray-700">${metric}</span>
-                </div>
-            `).join('');
-        }
-
-        // Update display when configuration changes
-        function updateConfiguration() {
-            const businessType = document.getElementById('scenario-select').value;
-            const stage = document.getElementById('stage-select').value;
-            
-            updateDatasetObjects(businessType, stage);
-            updateIncludedMetrics(businessType, stage);
-        }
-
-        // ============================================================================
-        // UI FUNCTIONALITY
-        // ============================================================================
-        
+        // Simple JavaScript for basic functionality
         let currentDatasetUrl = null;
-        let currentDatasetInfo = null;
         
         // Tab switching
         const tabs = ['cursor', 'v0', 'claude', 'codex', 'javascript'];
@@ -481,23 +351,6 @@
             const filename = `${animal1}-${animal2}-${id}-${timestamp}.json`;
             currentDatasetUrl = `https://nicholasswanson.github.io/synthkit/datasets/${filename}`;
             
-            // Generate dataset info
-            const counts = getRealisticCounts(scenario, stage);
-            const sampleDataset = {
-                customers: Array.from({length: counts.customers}, (_, i) => ({ id: `cus_${i}`, status: 'active' })),
-                charges: Array.from({length: counts.charges}, (_, i) => ({ id: `ch_${i}`, status: 'succeeded', amount: 1000 + i * 10 })),
-                subscriptions: Array.from({length: counts.subscriptions}, (_, i) => ({ id: `sub_${i}`, status: 'active' })),
-                invoices: Array.from({length: counts.invoices}, (_, i) => ({ id: `in_${i}`, status: 'paid' }))
-            };
-            const includedMetrics = getIncludedMetrics(sampleDataset, scenario, stage);
-            
-            currentDatasetInfo = {
-                recordCounts: counts,
-                includedMetrics: includedMetrics,
-                businessType: scenario,
-                stage: stage
-            };
-            
             // Show URL
             document.getElementById('url-input').value = currentDatasetUrl;
             document.getElementById('dataset-url').classList.remove('hidden');
@@ -518,7 +371,7 @@
         // Update integration content
         function updateIntegrationContent(tab) {
             const content = document.getElementById('integration-content');
-            if (!currentDatasetUrl || !currentDatasetInfo) {
+            if (!currentDatasetUrl) {
                 content.innerHTML = `
                     <div class="space-y-4">
                         <div class="p-4 bg-yellow-100 rounded-xl">
@@ -530,9 +383,6 @@
                 `;
                 return;
             }
-            
-            const { recordCounts, includedMetrics, businessType, stage } = currentDatasetInfo;
-            const metricsText = includedMetrics.slice(0, 4).join(', ');
             
             let integrationCode = '';
             switch(tab) {
@@ -550,8 +400,8 @@ When working with Synthkit data:
 - Always handle loading states and errors
 - Use realistic data volumes (thousands of records)
 - Dataset URL: ${currentDatasetUrl}
-- Business Metrics: ${metricsText}
-- Data Objects: customers (${recordCounts.customers.toLocaleString()}), charges (${recordCounts.charges.toLocaleString()}), subscriptions (${recordCounts.subscriptions.toLocaleString()}), invoices (${recordCounts.invoices.toLocaleString()})</code></pre>
+- Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
+- Data Objects: customers (25,000), charges (150,000), subscriptions (12,000), invoices (25,000)</code></pre>
                             </div>
                         </div>
                     `;
@@ -568,8 +418,8 @@ Then ask v0 to:
 1. Install @synthkit/enhanced: npm install @synthkit/enhanced
 2. Replace mock data with: const result = await getData()
 3. Use the data: const { customers, charges } = result.data
-4. Display realistic volumes: ${currentDatasetUrl.split('/').pop()} contains ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges
-5. Include business metrics: ${metricsText}</code></pre>
+4. Display realistic volumes: ${currentDatasetUrl.split('/').pop()} contains 25,000 customers, 150,000 charges
+5. Include business metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue</code></pre>
                             </div>
                         </div>
                     `;
@@ -586,8 +436,8 @@ Integration steps:
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
 4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: ${metricsText}
-6. Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions, ${recordCounts.invoices.toLocaleString()} invoices</code></pre>
+5. Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
+6. Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions, 25,000 invoices</code></pre>
                             </div>
                         </div>
                     `;
@@ -604,8 +454,8 @@ Integration steps:
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
 4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: ${metricsText}
-6. Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions, ${recordCounts.invoices.toLocaleString()} invoices</code></pre>
+5. Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
+6. Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions, 25,000 invoices</code></pre>
                             </div>
                         </div>
                     `;
@@ -631,8 +481,8 @@ async function loadData() {
 }
 
 // Dataset URL: ${currentDatasetUrl}
-// Business Metrics: ${metricsText}
-// Data Volume: ${recordCounts.customers.toLocaleString()} customers, ${recordCounts.charges.toLocaleString()} charges, ${recordCounts.subscriptions.toLocaleString()} subscriptions</code></pre>
+// Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue
+// Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions</code></pre>
                             </div>
                         </div>
                     `;
@@ -647,13 +497,6 @@ async function loadData() {
             const generateBtn = document.getElementById('generate-custom');
             generateBtn.disabled = !e.target.value.trim();
         });
-        
-        // Update configuration when settings change
-        document.getElementById('scenario-select').addEventListener('change', updateConfiguration);
-        document.getElementById('stage-select').addEventListener('change', updateConfiguration);
-        
-        // Initialize display
-        updateConfiguration();
     </script>
 </body>
 </html>
