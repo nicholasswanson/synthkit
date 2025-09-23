@@ -1,11 +1,22 @@
-name: Test Workflow
+name: Test Dataset Generation
 
 on:
   workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - name: Hello World
-        run: echo "Hello, GitHub Actions!"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Test dataset generation
+        run: |
+          echo "Testing standalone dataset generation..."
+          node scripts/generate-dataset.js b2b-saas-subscriptions growth 99999
+          echo "✅ Test completed successfully!"
