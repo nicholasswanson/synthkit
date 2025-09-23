@@ -129,41 +129,9 @@
                     <!-- Will be populated dynamically -->
                 </div>
 
-                <!-- Stripe Products -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Stripe products</h3>
-                    <div class="space-y-3">
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Payments</div>
-                            <div class="text-sm text-gray-600 mb-1">Accept payments online and in person</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: essential</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">charges</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_intents</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_methods</span>
-                            </div>
-                        </div>
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Tax</div>
-                            <div class="text-sm text-gray-600 mb-1">Automated tax calculation and reporting</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: recommended</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_rates</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_transactions</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_calculations</span>
-                            </div>
-                        </div>
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Radar</div>
-                            <div class="text-sm text-gray-600 mb-1">Machine learning fraud prevention</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: recommended</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">disputes</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">review_events</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">early_fraud_warnings</span>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Stripe Products (Dynamic) -->
+                <div id="stripe-products-section" class="mb-8">
+                    <!-- Will be populated dynamically -->
                 </div>
 
                 <!-- User Roles -->
@@ -256,6 +224,387 @@
         // COMPLETE DATA GENERATION SYSTEM (RESTORED FROM NEXT-APP)
         // ============================================================================
         
+        // PREDEFINED PERSONAS (EXACT SAME AS ORIGINAL NEXT-APP)
+        const PREDEFINED_PERSONAS = {
+            'checkout-ecommerce': {
+                name: 'Checkout e-commerce',
+                businessContext: {
+                    type: 'Checkout e-commerce',
+                    stage: 'growth',
+                    primaryFeatures: ['Product Catalog', 'Shopping Cart', 'Payment Processing', 'User Reviews'],
+                    targetAudience: ['Fashion Enthusiasts', 'Online Shoppers', 'Trend Followers'],
+                    monetizationModel: 'E-commerce Sales'
+                },
+                entities: [
+                    { name: 'Customer', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Full customer name' },
+                        { name: 'email', type: 'string', description: 'Customer email address' },
+                        { name: 'loyaltyTier', type: 'string', description: 'Bronze, Silver, or Gold tier' }
+                    ]},
+                    { name: 'Payment', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Payment amount in dollars' },
+                        { name: 'status', type: 'string', description: 'Payment status' },
+                        { name: 'paymentMethod', type: 'string', description: 'Payment method used' }
+                    ]}
+                ],
+                keyFeatures: ['Product Catalog', 'Shopping Cart', 'Payment Processing', 'User Reviews'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'b2b-saas-subscriptions': {
+                name: 'B2B SaaS subscriptions',
+                businessContext: {
+                    type: 'B2B SaaS subscriptions',
+                    stage: 'growth',
+                    primaryFeatures: ['User Management', 'Subscription Billing', 'Analytics Dashboard', 'API Access'],
+                    targetAudience: ['Business Teams', 'Enterprise Users', 'Developers'],
+                    monetizationModel: 'Subscription Revenue'
+                },
+                entities: [
+                    { name: 'Customer', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Company name' },
+                        { name: 'email', type: 'string', description: 'Primary contact email' },
+                        { name: 'plan', type: 'string', description: 'Subscription plan tier' }
+                    ]},
+                    { name: 'Subscription', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Monthly subscription amount' },
+                        { name: 'status', type: 'string', description: 'Subscription status' },
+                        { name: 'billingCycle', type: 'string', description: 'Billing frequency' }
+                    ]}
+                ],
+                keyFeatures: ['User Management', 'Subscription Billing', 'Analytics Dashboard', 'API Access'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'food-delivery-platform': {
+                name: 'Food delivery platform',
+                businessContext: {
+                    type: 'Food delivery platform',
+                    stage: 'growth',
+                    primaryFeatures: ['Restaurant Listings', 'Order Management', 'Delivery Tracking', 'Payment Processing'],
+                    targetAudience: ['Food Lovers', 'Busy Professionals', 'Families'],
+                    monetizationModel: 'Commission-based Revenue'
+                },
+                entities: [
+                    { name: 'Customer', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Customer name' },
+                        { name: 'email', type: 'string', description: 'Customer email' },
+                        { name: 'address', type: 'string', description: 'Delivery address' }
+                    ]},
+                    { name: 'Order', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Order total' },
+                        { name: 'status', type: 'string', description: 'Order status' },
+                        { name: 'restaurant', type: 'string', description: 'Restaurant name' }
+                    ]}
+                ],
+                keyFeatures: ['Restaurant Listings', 'Order Management', 'Delivery Tracking', 'Payment Processing'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'consumer-fitness-app': {
+                name: 'Consumer fitness app',
+                businessContext: {
+                    type: 'Consumer fitness app',
+                    stage: 'growth',
+                    primaryFeatures: ['Workout Tracking', 'Progress Analytics', 'Social Features', 'Premium Subscriptions'],
+                    targetAudience: ['Fitness Enthusiasts', 'Health-conscious Users', 'Athletes'],
+                    monetizationModel: 'Freemium with Premium Subscriptions'
+                },
+                entities: [
+                    { name: 'User', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'User name' },
+                        { name: 'email', type: 'string', description: 'User email' },
+                        { name: 'subscription', type: 'string', description: 'Premium subscription status' }
+                    ]},
+                    { name: 'Workout', type: 'transaction', properties: [
+                        { name: 'duration', type: 'number', description: 'Workout duration in minutes' },
+                        { name: 'type', type: 'string', description: 'Workout type' },
+                        { name: 'calories', type: 'number', description: 'Calories burned' }
+                    ]}
+                ],
+                keyFeatures: ['Workout Tracking', 'Progress Analytics', 'Social Features', 'Premium Subscriptions'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'b2b-invoicing': {
+                name: 'B2B invoicing',
+                businessContext: {
+                    type: 'B2B invoicing',
+                    stage: 'growth',
+                    primaryFeatures: ['Invoice Generation', 'Payment Tracking', 'Client Management', 'Financial Reporting'],
+                    targetAudience: ['Small Businesses', 'Freelancers', 'Consultants'],
+                    monetizationModel: 'Subscription + Transaction Fees'
+                },
+                entities: [
+                    { name: 'Client', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Client company name' },
+                        { name: 'email', type: 'string', description: 'Client contact email' },
+                        { name: 'paymentTerms', type: 'string', description: 'Payment terms' }
+                    ]},
+                    { name: 'Invoice', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Invoice amount' },
+                        { name: 'status', type: 'string', description: 'Payment status' },
+                        { name: 'dueDate', type: 'string', description: 'Due date' }
+                    ]}
+                ],
+                keyFeatures: ['Invoice Generation', 'Payment Tracking', 'Client Management', 'Financial Reporting'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'property-management-platform': {
+                name: 'Property management platform',
+                businessContext: {
+                    type: 'Property management platform',
+                    stage: 'growth',
+                    primaryFeatures: ['Property Listings', 'Tenant Management', 'Rent Collection', 'Maintenance Tracking'],
+                    targetAudience: ['Property Managers', 'Landlords', 'Real Estate Professionals'],
+                    monetizationModel: 'Subscription + Transaction Fees'
+                },
+                entities: [
+                    { name: 'Tenant', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Tenant name' },
+                        { name: 'email', type: 'string', description: 'Tenant email' },
+                        { name: 'property', type: 'string', description: 'Property address' }
+                    ]},
+                    { name: 'Rent', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Monthly rent amount' },
+                        { name: 'status', type: 'string', description: 'Payment status' },
+                        { name: 'dueDate', type: 'string', description: 'Due date' }
+                    ]}
+                ],
+                keyFeatures: ['Property Listings', 'Tenant Management', 'Rent Collection', 'Maintenance Tracking'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'creator-platform': {
+                name: 'Creator platform',
+                businessContext: {
+                    type: 'Creator platform',
+                    stage: 'growth',
+                    primaryFeatures: ['Content Creation', 'Monetization Tools', 'Audience Analytics', 'Fan Engagement'],
+                    targetAudience: ['Content Creators', 'Influencers', 'Artists'],
+                    monetizationModel: 'Commission + Subscription Revenue'
+                },
+                entities: [
+                    { name: 'Creator', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Creator name' },
+                        { name: 'email', type: 'string', description: 'Creator email' },
+                        { name: 'category', type: 'string', description: 'Content category' }
+                    ]},
+                    { name: 'Earning', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Earning amount' },
+                        { name: 'source', type: 'string', description: 'Revenue source' },
+                        { name: 'status', type: 'string', description: 'Payment status' }
+                    ]}
+                ],
+                keyFeatures: ['Content Creation', 'Monetization Tools', 'Audience Analytics', 'Fan Engagement'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            },
+            'donation-marketplace': {
+                name: 'Donation marketplace',
+                businessContext: {
+                    type: 'Donation marketplace',
+                    stage: 'growth',
+                    primaryFeatures: ['Campaign Management', 'Donation Processing', 'Impact Tracking', 'Donor Engagement'],
+                    targetAudience: ['Nonprofits', 'Charitable Organizations', 'Fundraisers'],
+                    monetizationModel: 'Transaction Fees + Platform Fees'
+                },
+                entities: [
+                    { name: 'Donor', type: 'person', properties: [
+                        { name: 'name', type: 'string', description: 'Donor name' },
+                        { name: 'email', type: 'string', description: 'Donor email' },
+                        { name: 'totalDonated', type: 'number', description: 'Total amount donated' }
+                    ]},
+                    { name: 'Donation', type: 'transaction', properties: [
+                        { name: 'amount', type: 'number', description: 'Donation amount' },
+                        { name: 'campaign', type: 'string', description: 'Campaign name' },
+                        { name: 'status', type: 'string', description: 'Payment status' }
+                    ]}
+                ],
+                keyFeatures: ['Campaign Management', 'Donation Processing', 'Impact Tracking', 'Donor Engagement'],
+                userRoles: [
+                    { name: 'Admin', description: 'Complete system access', permissions: ['Full Access', 'Financial Data', 'User Management'] },
+                    { name: 'Support', description: 'Customer service access', permissions: ['Customer Support', 'Order Management'] }
+                ]
+            }
+        };
+
+        // STRIPE PRODUCTS ANALYZER (EXACT SAME AS ORIGINAL)
+        const STRIPE_PRODUCTS = {
+            payments: {
+                name: 'Payments',
+                description: 'Accept payments online and in person',
+                priority: 'essential',
+                dataObjects: ['charges', 'payment_intents', 'payment_methods'],
+                triggers: ['payment', 'transaction', 'checkout', 'e-commerce', 'retail']
+            },
+            billing: {
+                name: 'Billing',
+                description: 'Subscription and recurring billing management',
+                priority: 'essential',
+                dataObjects: ['subscriptions', 'invoices', 'customers', 'plans', 'subscription_items'],
+                triggers: ['subscription', 'recurring', 'membership', 'saas', 'billing']
+            },
+            connect: {
+                name: 'Connect',
+                description: 'Platform payments and marketplace functionality',
+                priority: 'essential',
+                dataObjects: ['accounts', 'transfers', 'application_fees', 'charges'],
+                triggers: ['marketplace', 'platform', 'payouts', 'commission', 'multi-party', 'connect']
+            },
+            tax: {
+                name: 'Tax',
+                description: 'Automated tax calculation and reporting',
+                priority: 'recommended',
+                dataObjects: ['tax_rates', 'tax_transactions', 'tax_calculations'],
+                triggers: ['e-commerce', 'retail', 'physical goods', 'tax compliance', 'sales tax']
+            },
+            radar: {
+                name: 'Radar',
+                description: 'Machine learning fraud prevention',
+                priority: 'recommended',
+                dataObjects: ['disputes', 'review_events', 'early_fraud_warnings'],
+                triggers: ['high-value', 'fraud risk', 'chargebacks', 'marketplace', 'b2b', 'security']
+            }
+        };
+
+        // Analyze Stripe products for a persona
+        function analyzeStripeProducts(persona) {
+            const recommendedProducts = [];
+            
+            // Always include Payments as essential
+            recommendedProducts.push({
+                name: STRIPE_PRODUCTS.payments.name,
+                description: STRIPE_PRODUCTS.payments.description,
+                priority: 'essential',
+                dataObjects: STRIPE_PRODUCTS.payments.dataObjects
+            });
+            
+            // Persona-specific analysis
+            if (persona.name === 'Checkout e-commerce') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.radar.name,
+                    description: STRIPE_PRODUCTS.radar.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.radar.dataObjects
+                });
+            } else if (persona.name === 'B2B SaaS subscriptions') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.billing.name,
+                    description: STRIPE_PRODUCTS.billing.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.billing.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.radar.name,
+                    description: STRIPE_PRODUCTS.radar.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.radar.dataObjects
+                });
+            } else if (persona.name === 'Food delivery platform') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.connect.name,
+                    description: STRIPE_PRODUCTS.connect.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.connect.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+            } else if (persona.name === 'Consumer fitness app') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.billing.name,
+                    description: STRIPE_PRODUCTS.billing.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.billing.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+            } else if (persona.name === 'B2B invoicing') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.billing.name,
+                    description: STRIPE_PRODUCTS.billing.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.billing.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+            } else if (persona.name === 'Property management platform') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.billing.name,
+                    description: STRIPE_PRODUCTS.billing.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.billing.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+            } else if (persona.name === 'Creator platform') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.connect.name,
+                    description: STRIPE_PRODUCTS.connect.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.connect.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.billing.name,
+                    description: STRIPE_PRODUCTS.billing.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.billing.dataObjects
+                });
+            } else if (persona.name === 'Donation marketplace') {
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.connect.name,
+                    description: STRIPE_PRODUCTS.connect.description,
+                    priority: 'essential',
+                    dataObjects: STRIPE_PRODUCTS.connect.dataObjects
+                });
+                recommendedProducts.push({
+                    name: STRIPE_PRODUCTS.tax.name,
+                    description: STRIPE_PRODUCTS.tax.description,
+                    priority: 'recommended',
+                    dataObjects: STRIPE_PRODUCTS.tax.dataObjects
+                });
+            }
+            
+            return recommendedProducts;
+        }
+
         // Seeded random function for deterministic generation
         function seededRandom(seed) {
             const x = Math.sin(seed) * 10000;
@@ -405,15 +754,104 @@
             return metrics.slice(0, 12); // Show first 12 metrics
         }
 
-        // Update object lists display (EXACT SAME AS ORIGINAL NEXT-APP)
+        // Update Stripe products display (PERSONA-BASED)
+        function updateStripeProducts(businessType, stage) {
+            const persona = PREDEFINED_PERSONAS[businessType];
+            if (!persona) return;
+            
+            const recommendedProducts = analyzeStripeProducts(persona);
+            const container = document.getElementById('stripe-products-section');
+            
+            container.innerHTML = `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Stripe products</h3>
+                    <div class="space-y-3">
+                        ${recommendedProducts.map(product => `
+                            <div class="border-l-4 pl-4 border-orange">
+                                <div class="font-medium text-gray-900">${product.name}</div>
+                                <div class="text-sm text-gray-600 mb-1">${product.description}</div>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: ${product.priority}</span>
+                                    ${product.dataObjects.map(obj => `
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">${obj}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update object lists display (PERSONA-BASED WITH STRIPE PRODUCT DATA OBJECTS)
         function updateObjectLists(businessType, stage) {
-            const sampleData = generateSampleData(businessType, stage);
+            const persona = PREDEFINED_PERSONAS[businessType];
+            if (!persona) return;
+            
+            const recommendedProducts = analyzeStripeProducts(persona);
+            const allDataObjects = Array.from(new Set(recommendedProducts.flatMap(p => p.dataObjects)));
             const container = document.getElementById('object-lists-section');
             
-            if (Object.keys(sampleData).length === 0) {
+            if (allDataObjects.length === 0) {
                 container.innerHTML = '';
                 return;
             }
+            
+            // Generate sample data for each data object
+            const sampleData = {};
+            allDataObjects.forEach(objName => {
+                const counts = getRealisticCounts(businessType, stage);
+                let count = 0;
+                
+                // Map data object names to counts
+                if (objName === 'charges') count = counts.charges;
+                else if (objName === 'customers') count = counts.customers;
+                else if (objName === 'subscriptions') count = counts.subscriptions;
+                else if (objName === 'invoices') count = counts.invoices;
+                else if (objName === 'payment_intents') count = Math.floor(counts.charges * 0.8);
+                else if (objName === 'payment_methods') count = Math.floor(counts.customers * 1.2);
+                else if (objName === 'plans') count = counts.plans;
+                else if (objName === 'accounts') count = Math.floor(counts.customers * 0.1);
+                else if (objName === 'transfers') count = Math.floor(counts.charges * 0.3);
+                else if (objName === 'application_fees') count = Math.floor(counts.charges * 0.05);
+                else if (objName === 'tax_rates') count = 5;
+                else if (objName === 'tax_transactions') count = Math.floor(counts.charges * 0.7);
+                else if (objName === 'tax_calculations') count = Math.floor(counts.charges * 0.7);
+                else if (objName === 'disputes') count = Math.floor(counts.charges * 0.02);
+                else if (objName === 'review_events') count = Math.floor(counts.charges * 0.1);
+                else if (objName === 'early_fraud_warnings') count = Math.floor(counts.charges * 0.01);
+                else count = Math.floor(counts.customers * 0.5);
+                
+                // Generate sample records
+                sampleData[objName] = Array.from({length: Math.min(3, count)}, (_, i) => {
+                    const seed = i * 1000;
+                    const baseItem = {
+                        id: generateStripeId(objName.slice(0, 3) + '_', seed),
+                        created: generateRealisticTimestamp(seed, 365),
+                        status: seededRandom(seed + 1) < 0.9 ? 'active' : 'inactive'
+                    };
+                    
+                    // Add object-specific fields
+                    if (objName.includes('charge') || objName.includes('payment')) {
+                        baseItem.amount = Math.floor(seededRandom(seed + 2) * 10000) + 1000;
+                        baseItem.currency = 'usd';
+                    }
+                    if (objName.includes('customer') || objName.includes('account')) {
+                        baseItem.email = `user${i + 1}@example.com`;
+                        baseItem.name = `User ${i + 1}`;
+                    }
+                    if (objName.includes('subscription')) {
+                        baseItem.amount = Math.floor(seededRandom(seed + 3) * 5000) + 1000;
+                        baseItem.interval = 'month';
+                    }
+                    if (objName.includes('invoice')) {
+                        baseItem.amount_due = Math.floor(seededRandom(seed + 4) * 8000) + 2000;
+                        baseItem.currency = 'usd';
+                    }
+                    
+                    return baseItem;
+                });
+            });
             
             container.innerHTML = `
                 <div class="mb-8">
@@ -485,6 +923,7 @@
             const businessType = document.getElementById('scenario-select').value;
             const stage = document.getElementById('stage-select').value;
             
+            updateStripeProducts(businessType, stage);
             updateObjectLists(businessType, stage);
             updateIncludedMetrics(businessType, stage);
         }
