@@ -5,6 +5,7 @@ import { Copy, Check, ExternalLink, Download } from 'lucide-react';
 import { generateAllIntegrations, type DatasetInfo } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
 import { downloadReactHook } from '@/lib/react-hook-generator';
+import { generateAndPublishDataset, storeDatasetUrl, getStoredDatasetUrl } from '@/lib/client-dataset-generator';
 
 interface IntegrationPanelProps {
   url: string;
@@ -15,6 +16,8 @@ interface IntegrationPanelProps {
 export function IntegrationPanel({ url, datasetInfo, isLoading = false }: IntegrationPanelProps) {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('Cursor');
+  const [datasetUrl, setDatasetUrl] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const copyToClipboard = async (text: string, item: string) => {
     try {
@@ -23,6 +26,44 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
       setTimeout(() => setCopiedItem(null), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
+    }
+  };
+
+  const handlePublishDataset = async () => {
+    setIsPublishing(true);
+    try {
+      const result = await generateAndPublishDataset({
+        businessType: 'b2b-saas-subscriptions', // Default business type
+        stage: 'growth', // Default stage
+        scenarioId: datasetInfo.scenario?.id || 12345
+      });
+      if (result.success && result.url) {
+        setDatasetUrl(result.url);
+        storeDatasetUrl(result.url);
+      }
+    } catch (error) {
+      console.error('Failed to publish dataset:', error);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleUpdateDataset = async () => {
+    setIsPublishing(true);
+    try {
+      const result = await generateAndPublishDataset({
+        businessType: 'b2b-saas-subscriptions', // Default business type
+        stage: 'growth', // Default stage
+        scenarioId: datasetInfo.scenario?.id || 12345
+      });
+      if (result.success && result.url) {
+        setDatasetUrl(result.url);
+        storeDatasetUrl(result.url);
+      }
+    } catch (error) {
+      console.error('Failed to update dataset:', error);
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -113,6 +154,48 @@ export function IntegrationPanel({ url, datasetInfo, isLoading = false }: Integr
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Dataset Publishing Section */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+          🌐 Dataset Publishing
+        </h3>
+        
+        {!datasetUrl ? (
+          <button
+            onClick={handlePublishDataset}
+            disabled={isPublishing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+          >
+            {isPublishing ? 'Generating...' : 'Generate Dataset URL'}
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="p-3 bg-green-100 rounded-xl">
+              <p className="text-sm text-green-700 mb-2">Dataset URL Generated:</p>
+              <code className="text-xs font-mono text-green-800 break-all">{datasetUrl}</code>
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => copyToClipboard(datasetUrl, 'dataset-url')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200"
+              >
+                <Copy className="w-4 h-4" />
+                Copy URL
+              </button>
+              
+              <button
+                onClick={handleUpdateDataset}
+                disabled={isPublishing}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:opacity-50"
+              >
+                {isPublishing ? 'Updating...' : 'Update Dataset'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* URL Section */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AnalysisResult } from '@/app/components/AIComponents';
 import { DatasetShareModal } from '@/components/DatasetShareModal';
 // Dataset creation is now automatic - no hook needed
@@ -8,6 +8,7 @@ import { Copy, Download, ExternalLink, Info } from 'lucide-react';
 import { generateAllIntegrations } from '@/lib/ai-integrations';
 import { downloadCursorRules } from '@/lib/cursor-rules-generator';
 import { downloadReactHook } from '@/lib/react-hook-generator';
+import { generateAndPublishDataset, storeDatasetUrl, getStoredDatasetUrl } from '@/lib/client-dataset-generator';
 import { 
   generateRealisticName, 
   generateRealisticEmail, 
@@ -22,6 +23,8 @@ import {
 } from '@/lib/realistic-data-generator';
 import { analyzeStripeProducts, type StripeAnalysisResult } from '@/lib/stripe-products-analyzer';
 import { generateStripeDataForPersona, generateStripeMetadataForPersona } from '@/lib/stripe-data-generators';
+import { generateRealisticStripeData } from '@/lib/realistic-stripe-generator';
+import { generateMetrics } from '@/lib/metrics-generator';
 
 // Customer and Payment interfaces are now imported from realistic-data-generator
 
@@ -452,7 +455,7 @@ function getRealisticVolume(scenario: { category: string; stage: string; id: num
   };
 }
 
-// Calculate realistic business metrics from actual data
+// Calculate comprehensive business metrics using the metrics generator
 function calculateBusinessMetricsFromStripeData(stripeData: Record<string, any[]>, stage: string, seed: number): BusinessMetrics {
   const customers = stripeData.customers || [];
   const charges = stripeData.charges || [];
@@ -462,15 +465,29 @@ function calculateBusinessMetricsFromStripeData(stripeData: Record<string, any[]
     return generateFallbackMetrics(stage, seed);
   }
 
-  // Calculate metrics from Stripe data
-  const succeededCharges = charges.filter((c: any) => c.status === 'succeeded');
-  const totalRevenue = succeededCharges.reduce((sum: number, c: any) => sum + (c.amount / 100), 0); // Convert from cents
-  const averageOrderValue = succeededCharges.length > 0 ? totalRevenue / succeededCharges.length : 0;
+  // Determine business type from the data or use a default
+  const businessType = 'b2b-saas-subscriptions'; // Default, could be enhanced to detect from data
   
-  // Calculate customer lifetime value (simplified: total revenue / total customers)
+  // Generate comprehensive metrics using the metrics generator
+  const comprehensiveMetrics = generateMetrics(stripeData, businessType, stage);
+  
+  // Extract key metrics for the simple BusinessMetrics interface
+  const grossPaymentVolume = comprehensiveMetrics.find(m => m.name === 'Gross Payment Volume');
+  const paymentSuccessRate = comprehensiveMetrics.find(m => m.name === 'Payment Success Rate');
+  const successfulPayments = comprehensiveMetrics.find(m => m.name === 'Successful Payments');
+  const acceptedVolume = comprehensiveMetrics.find(m => m.name === 'Accepted Volume');
+  const acceptedPayments = comprehensiveMetrics.find(m => m.name === 'Accepted Payments');
+  const failedVolume = comprehensiveMetrics.find(m => m.name === 'Failed Card Payments - Failed Volume');
+  const failedCount = comprehensiveMetrics.find(m => m.name === 'Failed Card Payments - Failed Count');
+  const failureRate = comprehensiveMetrics.find(m => m.name === 'Failed Card Payments - Failure Rate');
+  const activeSubscribers = comprehensiveMetrics.find(m => m.name === 'Active Subscribers');
+  
+  // Calculate derived metrics
+  const totalRevenue = acceptedVolume?.currentValue || 0;
+  const averageOrderValue = (successfulPayments?.currentValue && successfulPayments.currentValue > 0) ? totalRevenue / successfulPayments.currentValue : 0;
   const customerLifetimeValue = customers.length > 0 ? totalRevenue / customers.length : 0;
   
-  // Calculate monthly recurring revenue from subscriptions
+  // Get MRR from subscriptions if available
   const subscriptions = stripeData.subscriptions || [];
   const activeSubscriptions = subscriptions.filter((s: any) => s.status === 'active');
   const monthlyRecurringRevenue = activeSubscriptions.reduce((sum: number, s: any) => {
@@ -482,9 +499,8 @@ function calculateBusinessMetricsFromStripeData(stripeData: Record<string, any[]
   const dauPercentages = { early: 0.12, growth: 0.18, enterprise: 0.25 };
   const dailyActiveUsers = Math.floor(customers.length * (dauPercentages[stage as keyof typeof dauPercentages] || 0.18));
   
-  // Estimate conversion rate based on payment success rate and stage
-  const baseConversionRates = { early: 2.5, growth: 4.2, enterprise: 6.8 };
-  const conversionRate = baseConversionRates[stage as keyof typeof baseConversionRates] || 4.2;
+  // Use the actual conversion rate from metrics or fallback
+  const conversionRate = paymentSuccessRate?.currentValue || 4.2;
   
   return {
     customerLifetimeValue: Math.round(customerLifetimeValue * 100) / 100,
@@ -516,7 +532,69 @@ function generateFallbackMetrics(stage: string, seed: number): BusinessMetrics {
 
 // generateRealisticAmount is now imported from realistic-data-generator
 
+// Generate dataset in chunks to keep UI responsive
+async function generateDatasetInChunks(businessType: string, stage: string, onProgress?: (message: string) => void): Promise<Record<string, any[]>> {
+  return new Promise((resolve) => {
+    const generateWithProgress = async () => {
+      try {
+        onProgress?.('Generating full realistic dataset...');
+        
+        // Generate the FULL realistic dataset using the existing function
+        // This will generate hundreds of thousands of records as intended
+        const result = generateRealisticStripeData(businessType, stage);
+        
+        onProgress?.('Dataset generation complete!');
+        resolve(result);
+      } catch (error) {
+        console.error('Error generating dataset:', error);
+        resolve({});
+      }
+    };
+    
+    // Use a combination of techniques to keep UI responsive
+    // First, yield control to the browser
+    setTimeout(() => {
+      // Then use requestIdleCallback if available for better scheduling
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(() => {
+          generateWithProgress();
+        }, { timeout: 10000 });
+      } else {
+        // Fallback: use setTimeout with a longer delay to allow UI updates
+        setTimeout(generateWithProgress, 100);
+      }
+    }, 0);
+  });
+}
+
+
 export default function Home() {
+  // Helper function to check if category is custom
+  const isCustomCategory = (category: string) => {
+    return customCategories.some(cat => cat.id === category);
+  };
+
+  // Helper function to get custom category
+  const getCustomCategory = (category: string) => {
+    return customCategories.find(cat => cat.id === category);
+  };
+
+  // Helper function to get business type from persona
+  const getBusinessTypeFromPersona = (persona: any) => {
+    const businessTypeMap: Record<string, string> = {
+      'Checkout e-commerce': 'checkout-ecommerce',
+      'B2B SaaS subscriptions': 'b2b-saas-subscriptions',
+      'Food delivery platform': 'food-delivery-platform',
+      'Consumer fitness app': 'consumer-fitness-app',
+      'B2B invoicing': 'b2b-invoicing',
+      'Property management platform': 'property-management-platform',
+      'Creator platform': 'creator-platform',
+      'Donation marketplace': 'donation-marketplace'
+    };
+    
+    return businessTypeMap[persona.name] || 'b2b-saas-subscriptions';
+  };
+
   // Unified state management
   const [selectedCategory, setSelectedCategory] = useState<string>('checkout-ecommerce');
   const [aiPrompt, setAiPrompt] = useState<string>('');
@@ -544,6 +622,9 @@ export default function Home() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharedDatasetUrl, setSharedDatasetUrl] = useState<string | null>(null);
   const [activeIntegrationTab, setActiveIntegrationTab] = useState<string>('cursor');
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isGeneratingDataset, setIsGeneratingDataset] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState<string>('');
   
   // Dataset creation is now automatic - no hook needed
 
@@ -589,35 +670,40 @@ export default function Home() {
     generateScenarioData();
   }, [selectedCategory, role, stage, scenarioId]);
 
-  // Calculate business metrics from Stripe data
-  useEffect(() => {
+  // Memoize business metrics calculation to prevent unnecessary recalculations
+  const memoizedBusinessMetrics = useMemo(() => {
     if (selectedCategory && stage && Object.keys(stripeData).length > 0) {
-      const metrics = calculateBusinessMetricsFromStripeData(stripeData, stage, scenarioId);
-      setBusinessMetrics(metrics);
-      setMetricsLoaded(true);
+      return calculateBusinessMetricsFromStripeData(stripeData, stage, scenarioId);
     } else if (selectedCategory && stage) {
-      // Fallback for when data is not yet generated
-      const metrics = generateFallbackMetrics(stage, scenarioId);
-      setBusinessMetrics(metrics);
-      setMetricsLoaded(true);
+      return generateFallbackMetrics(stage, scenarioId);
     }
+    return null;
   }, [selectedCategory, stage, scenarioId, stripeData]);
 
-  // Generate Stripe data when persona or stage changes
+  // Update business metrics when memoized value changes
+  useEffect(() => {
+    if (memoizedBusinessMetrics) {
+      setBusinessMetrics(memoizedBusinessMetrics);
+      setMetricsLoaded(true);
+    }
+  }, [memoizedBusinessMetrics]);
+
+  // Generate Stripe data when persona or stage changes (optimized for performance)
   useEffect(() => {
     const generateDataset = async () => {
       if (!isCustomCategory(selectedCategory)) {
         const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
         
         try {
-          // Generate metadata and sample data only (performance optimized)
+          setIsGeneratingDataset(true);
+          // Generate realistic dataset with proper volumes for the scenario
           const generatedStripeData = generateStripeMetadataForPersona(persona, stage);
           setStripeData(generatedStripeData);
-          
-          // Full dataset generation is now handled automatically by useEffect        
         } catch (error) {
           console.error('Error generating Stripe data:', error);
           setStripeData({});
+        } finally {
+          setIsGeneratingDataset(false);
         }
       } else {
         setStripeData({});
@@ -670,77 +756,101 @@ export default function Home() {
     }
   }, [stripeData, dynamicEntities, businessMetrics, metricsLoaded, selectedCategory, role, stage, scenarioId, aiPrompt]);
 
-  // Automatically generate full dataset for integration URLs
-  useEffect(() => {
-    if (metricsLoaded && Object.keys(stripeData).length > 0) {
-      console.log('=== Generating Full Dataset ===');
-      
-      let datasetData;
-      if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+  // Helper functions are defined at the top of the component
+
+  // Memoize comprehensive metrics generation to prevent expensive recalculations
+  const memoizedComprehensiveMetrics = useMemo(() => {
+    if (!metricsLoaded || Object.keys(stripeData).length === 0) return null;
+    
+    if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+      const businessType = 'b2b-saas-subscriptions';
+      return generateMetrics(dynamicEntities, businessType, stage);
+    } else {
+      const businessType = selectedCategory;
+      return generateMetrics(stripeData, businessType, stage);
+    }
+  }, [selectedCategory, stage, stripeData, dynamicEntities, metricsLoaded]);
+
+  // Memoize full dataset generation to prevent expensive recalculations
+  const memoizedFullDataset = useMemo(() => {
+    if (!metricsLoaded || Object.keys(stripeData).length === 0) return null;
+    
+    console.log('=== Generating Full Dataset (Memoized) ===');
+    
+    let datasetData;
+    if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+      datasetData = { 
+        ...dynamicEntities, 
+        businessMetrics: businessMetrics || {},
+        metrics: memoizedComprehensiveMetrics || []
+      };
+    } else {
+      const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
+      if (persona) {
+        // Use existing stripeData instead of regenerating
         datasetData = { 
-          ...dynamicEntities, 
-          businessMetrics: businessMetrics || {} 
+          ...stripeData, 
+          businessMetrics: businessMetrics || {},
+          metrics: memoizedComprehensiveMetrics || []
         };
       } else {
-        // Generate full dataset for JSON files (not just sample data)
-        const persona = ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS];
-        if (persona) {
-          const fullStripeData = generateStripeDataForPersona(persona, stage);
-          datasetData = { ...fullStripeData, businessMetrics: businessMetrics || {} };
-        } else {
-          datasetData = { ...stripeData, businessMetrics: businessMetrics || {} };
-        }
-      }
-      
-      console.log('Full dataset generated with keys:', Object.keys(datasetData));
-      console.log('Full dataset counts:', Object.fromEntries(
-        Object.entries(datasetData)
-          .filter(([key]) => key !== '_metadata' && key !== 'businessMetrics')
-          .map(([key, value]) => [key, Array.isArray(value) ? value.length : 0])
-      ));
-      
-      setFullDataset(datasetData);
-      
-      // Send full dataset to API for integration URLs
-      fetch('/api/dataset/current', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dataset: datasetData })
-      }).catch(err => {
-        console.log('Failed to update current dataset API:', err.message);
-      });
-
-      // Send metrics data to API
-      if ((datasetData as any).metrics && (datasetData as any)._metadata) {
-        fetch('/api/metrics', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            dataset: datasetData,
-            businessType: (datasetData as any)._metadata.businessType,
-            stage: (datasetData as any)._metadata.stage
-          })
-        }).then(response => {
-          if (response.ok) {
-            console.log('Metrics sent to API successfully');
-          } else {
-            console.error('Failed to send metrics to API:', response.status);
-          }
-        }).catch(err => {
-          console.error('Error sending metrics to API:', err);
-        });
+        datasetData = { 
+          ...stripeData, 
+          businessMetrics: businessMetrics || {},
+          metrics: memoizedComprehensiveMetrics || []
+        };
       }
     }
-  }, [selectedCategory, stage, role, scenarioId, stripeData, dynamicEntities, businessMetrics, metricsLoaded]);
+    
+    console.log('Full dataset generated with keys:', Object.keys(datasetData));
+    console.log('Comprehensive metrics count:', datasetData.metrics?.length || 0);
+    
+    return datasetData;
+  }, [selectedCategory, stage, stripeData, dynamicEntities, businessMetrics, metricsLoaded, memoizedComprehensiveMetrics]);
 
-  // Helper functions
-  const isCustomCategory = (categoryId: string): boolean => {
-    return !ENHANCED_PERSONAS.hasOwnProperty(categoryId);
-  };
+  // Update full dataset when memoized value changes
+  useEffect(() => {
+    if (memoizedFullDataset) {
+      setFullDataset(memoizedFullDataset);
+      
+      // Debounce API calls to prevent excessive requests
+      const timeoutId = setTimeout(() => {
+        // Send full dataset to API for integration URLs
+        fetch('/api/dataset/current', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dataset: memoizedFullDataset })
+        }).catch(err => {
+          console.log('Failed to update current dataset API:', err.message);
+        });
 
-  const getCustomCategory = (categoryId: string): CustomCategory | undefined => {
-    return customCategories.find(cat => cat.id === categoryId);
-  };
+        // Send metrics data to API
+        if (memoizedFullDataset.metrics && (memoizedFullDataset as any)._metadata) {
+          fetch('/api/metrics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              dataset: memoizedFullDataset,
+              businessType: (memoizedFullDataset as any)._metadata.businessType,
+              stage: (memoizedFullDataset as any)._metadata.stage
+            })
+          }).then(response => {
+            if (response.ok) {
+              console.log('Metrics sent to API successfully');
+            } else {
+              console.error('Failed to send metrics to API:', response.status);
+            }
+          }).catch(err => {
+            console.error('Error sending metrics to API:', err);
+          });
+        }
+      }, 500); // 500ms debounce
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [memoizedFullDataset]);
+
+  // Helper functions (moved up to avoid hoisting issues)
 
   const getCurrentBusinessContext = () => {
     if (isCustomCategory(selectedCategory)) {
@@ -968,6 +1078,66 @@ export default function Home() {
     }
   };
 
+  // Handle dataset publishing with client-side generation
+  const handlePublishDataset = useCallback(async () => {
+    setIsPublishing(true);
+    setIsGeneratingDataset(true);
+    setGenerationProgress('Generating dataset...');
+    try {
+      // Generate dataset client-side and upload to GitHub
+      const result = await generateAndPublishDataset({
+        businessType: getBusinessTypeFromPersona(ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]),
+        stage,
+        scenarioId
+      });
+      
+      if (result.success && result.url) {
+        setSharedDatasetUrl(result.url);
+        storeDatasetUrl(result.url);
+        setGenerationProgress('Dataset generation started! It will be available shortly at the URL above.');
+      } else {
+        setGenerationProgress('Failed to start dataset generation.');
+      }
+    } catch (error) {
+      console.error('Failed to publish dataset:', error);
+      setGenerationProgress('Error during dataset generation.');
+    } finally {
+      setIsPublishing(false);
+      setIsGeneratingDataset(false);
+    }
+  }, [selectedCategory, stage, scenarioId]);
+
+  const handleUpdateDataset = useCallback(async () => {
+    setIsPublishing(true);
+    try {
+      // Generate new dataset client-side and upload to GitHub
+      const result = await generateAndPublishDataset({
+        businessType: getBusinessTypeFromPersona(ENHANCED_PERSONAS[selectedCategory as keyof typeof ENHANCED_PERSONAS]),
+        stage,
+        scenarioId
+      });
+      
+      if (result.success && result.url) {
+        setSharedDatasetUrl(result.url);
+        storeDatasetUrl(result.url);
+      }
+    } catch (error) {
+      console.error('Failed to update dataset:', error);
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [selectedCategory, stage, scenarioId]);
+
+  // Copy to clipboard utility
+  const copyToClipboard = async (text: string, item: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here if needed
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
   // Handle custom category deletion
   const handleDeleteCustomCategory = (categoryId: string) => {
     if (window.confirm('Are you sure you want to delete this custom category?')) {
@@ -998,16 +1168,57 @@ export default function Home() {
   // No manual creation needed - full datasets are always available via /api/dataset/current
 
   const getDatasetInfo = () => {
-    const recordCounts = isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0
-      ? Object.fromEntries(Object.entries(dynamicEntities).map(([key, value]) => [key, value.length]).filter(([key, count]) => (count as number) > 0))
-      : (stripeData._metadata as any)?.counts 
-        ? Object.fromEntries(Object.entries((stripeData._metadata as any).counts).filter(([key, count]) => (count as number) > 0))
-        : Object.fromEntries(Object.entries(stripeData).filter(([key]) => key !== '_metadata').map(([key, value]) => [key, (value as any[]).length]).filter(([key, count]) => (count as number) > 0));
+    let recordCounts: Record<string, number> = {};
     
+    if (isCustomCategory(selectedCategory) && Object.keys(dynamicEntities).length > 0) {
+      // Use dynamic entities for custom categories
+      recordCounts = Object.fromEntries(
+        Object.entries(dynamicEntities)
+          .map(([key, value]) => [key, Array.isArray(value) ? value.length : 0])
+          .filter(([key, count]) => typeof count === 'number' && count > 0)
+      );
+    } else if ((stripeData as any)._metadata?.counts) {
+      // Use metadata counts if available (these are the realistic volumes)
+      const metadataCounts = (stripeData as any)._metadata.counts as Record<string, number>;
+      recordCounts = Object.fromEntries(
+        Object.entries(metadataCounts)
+          .filter(([key, count]) => typeof count === 'number' && count > 0)
+      );
+    } else {
+      // Fallback: count actual data arrays (this should rarely be used)
+      recordCounts = Object.fromEntries(
+        Object.entries(stripeData)
+          .filter(([key]) => key !== '_metadata' && key !== 'businessMetrics' && key !== 'metrics')
+          .map(([key, value]) => [key, Array.isArray(value) ? value.length : 0])
+          .filter(([key, count]) => typeof count === 'number' && count > 0)
+      );
+    }
+    
+    // Debug logging
+    console.log('Dataset Info Debug:', {
+      selectedCategory,
+      isCustom: isCustomCategory(selectedCategory),
+      dynamicEntitiesKeys: Object.keys(dynamicEntities),
+      stripeDataKeys: Object.keys(stripeData),
+      hasMetadata: !!(stripeData as any)._metadata,
+      metadataCounts: (stripeData as any)._metadata?.counts,
+      calculatedRecordCounts: recordCounts,
+      stripeDataLengths: Object.fromEntries(
+        Object.entries(stripeData)
+          .filter(([key]) => key !== '_metadata' && key !== 'businessMetrics' && key !== 'metrics')
+          .map(([key, value]) => [key, Array.isArray(value) ? value.length : 'not array'])
+      ),
+      metadataStructure: (stripeData as any)._metadata
+    });
+    
+    // Get included metrics from metadata
+    const includedMetrics = (stripeData as any)._metadata?.includedMetrics || [];
+
     if (isCustomCategory(selectedCategory)) {
       return {
         type: 'ai-generated' as const,
         recordCounts,
+        includedMetrics,
         aiAnalysis: {
           prompt: aiPrompt,
           businessType: getCurrentBusinessContext()?.type
@@ -1017,6 +1228,7 @@ export default function Home() {
       return {
         type: 'scenario' as const,
         recordCounts,
+        includedMetrics,
         scenario: {
           category: selectedCategory,
           role,
@@ -1032,8 +1244,8 @@ export default function Home() {
       return sharedDatasetUrl;
     }
     
-    // Use full dataset endpoint for integrations to ensure complete access
-    return '/api/dataset/current?full=true';
+    // Return null if no dataset URL has been generated yet
+    return null;
   };
 
   const getCurrentDatasetUrlForDisplay = () => {
@@ -1224,102 +1436,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Dataset URLs Section */}
-        <div className="mb-8">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Dataset URLs
-            </h3>
-          
-          {/* Full Dataset URL */}
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Full dataset (for integrations)
-            </h4>
-            <div className="p-3 bg-gray-100 rounded-xl mb-2">
-              <code className="text-sm font-mono text-gray-800 break-all">
-                {getCurrentDatasetUrl()}
-              </code>
-                  </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrl())}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </button>
-              <a
-                href={getCurrentDatasetUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <ExternalLink className="w-4 h-4" />
-                View
-              </a>
-                </div>
-          </div>
-
-          {/* Paginated Dataset URL */}
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Browser-friendly (paginated)
-            </h4>
-            <div className="p-3 bg-gray-100 rounded-xl mb-2">
-              <code className="text-sm font-mono text-gray-800 break-all">
-                {getCurrentDatasetUrlForDisplay()}
-              </code>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigator.clipboard.writeText(getCurrentDatasetUrlForDisplay())}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </button>
-              <a
-                href={getCurrentDatasetUrlForDisplay()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <ExternalLink className="w-4 h-4" />
-                View
-              </a>
-            </div>
-          </div>
-
-          {/* Metrics Dataset URL */}
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Metrics API (business intelligence)
-            </h4>
-            <div className="p-3 bg-gray-100 rounded-xl mb-2">
-              <code className="text-sm font-mono text-gray-800 break-all">
-                /api/metrics?granularity=monthly
-              </code>
-                  </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigator.clipboard.writeText('/api/metrics?granularity=monthly')}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </button>
-              <a
-                href="/api/metrics?granularity=monthly"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
-              >
-                <ExternalLink className="w-4 h-4" />
-                View
-              </a>
-                </div>
-            </div>
-          </div>
 
         {/* Stripe Products */}
         {getCurrentStripeAnalysis() && (
@@ -1540,6 +1656,61 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Dataset Publishing Section */}
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3">
+              🌐 Dataset Publishing
+            </h3>
+            
+            {isGeneratingDataset && (
+              <div className="mb-4 p-3 bg-yellow-100 rounded-xl">
+                <p className="text-sm text-yellow-700">
+                  ⏳ {generationProgress || 'Generating dataset...'} This may take a moment for large datasets.
+                </p>
+                <div className="mt-2">
+                  <div className="w-full bg-yellow-200 rounded-full h-2">
+                    <div className="bg-yellow-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {!sharedDatasetUrl ? (
+              <button
+                onClick={handlePublishDataset}
+                disabled={isPublishing || isGeneratingDataset}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+              >
+                {isPublishing ? 'Publishing...' : isGeneratingDataset ? 'Generating Dataset...' : 'Generate Dataset URL'}
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <p className="text-sm text-green-700 mb-2">Dataset URL Generated:</p>
+                  <code className="text-xs font-mono text-green-800 break-all">{sharedDatasetUrl}</code>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(sharedDatasetUrl, 'dataset-url')}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy URL
+                  </button>
+                  
+                  <button
+                    onClick={handleUpdateDataset}
+                    disabled={isPublishing}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:opacity-50"
+                  >
+                    {isPublishing ? 'Updating...' : 'Update Dataset'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Quick Setup Files - Only for Cursor tab */}
           {activeIntegrationTab === 'cursor' && (
             <div className="mb-6">
@@ -1548,8 +1719,12 @@ export default function Home() {
               </h3>
               <div className="flex flex-wrap gap-3">
                 <button
-                  onClick={() => downloadReactHook(getCurrentDatasetUrl(), getDatasetInfo())}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
+                  onClick={() => {
+                    const url = getCurrentDatasetUrl();
+                    if (url) downloadReactHook(url, getDatasetInfo());
+                  }}
+                  disabled={!getCurrentDatasetUrl()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium disabled:opacity-50" style={{ backgroundColor: '#FFCCB4', color: '#DB4F0B' }} onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFB896'} onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#FFCCB4'}
                 >
                   <Download className="w-4 h-4" />
                   useSynthkitDataset.ts
@@ -1564,10 +1739,21 @@ export default function Home() {
             {/* Tab Content */}
             <div className="space-y-4">
               {(() => {
-                const examples = generateAllIntegrations(
-                  getCurrentDatasetUrl(),
-                  getDatasetInfo()
-                );
+                const datasetUrl = getCurrentDatasetUrl();
+                const datasetInfo = getDatasetInfo();
+                
+                // Show message if no dataset URL is available
+                if (!datasetUrl) {
+                  return (
+                    <div className="p-4 bg-yellow-100 rounded-xl">
+                      <p className="text-sm text-yellow-700">
+                        ⚠️ Please generate a dataset URL first by clicking "Generate Dataset URL" above to get integration code with the actual dataset.
+                      </p>
+                    </div>
+                  );
+                }
+                
+                const examples = generateAllIntegrations(datasetUrl!, datasetInfo);
                 const filteredExamples = examples.filter(example => {
                   const toolName = example.tool.toLowerCase();
                   if (activeIntegrationTab === 'cursor') {

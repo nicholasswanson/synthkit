@@ -47,7 +47,7 @@ function Dashboard() {
 \`\`\`
 
 ## Dataset Context
-Zero Configuration: Works with \`getData()\` - no URLs needed!
+Dataset URL: \`${url}\`
 Business Type: ${businessContext}
 Data Volume: ${recordSummary}
 ${datasetInfo.type === 'scenario' ? `

@@ -69,6 +69,11 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           
+      - name: Build TypeScript
+        run: |
+          cd examples/next-app
+          npx tsc --build
+          
       - name: Generate dataset
         id: generate
         run: |

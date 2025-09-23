@@ -4,6 +4,7 @@
 export interface DatasetInfo {
   type: 'scenario' | 'ai-generated';
   recordCounts: Record<string, number>;
+  includedMetrics?: string[];
   scenario?: {
     category: string;
     role: string;
@@ -103,12 +104,16 @@ export function generateCursorPrompt(url: string, datasetInfo: DatasetInfo): Int
     .map(([key, count]) => `${count.toLocaleString()} ${key}`)
     .join(', ');
 
+  const includedMetricsText = datasetInfo.includedMetrics && datasetInfo.includedMetrics.length > 0 
+    ? datasetInfo.includedMetrics.join(', ')
+    : 'Comprehensive business metrics';
+
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- Zero Configuration: Works with \`getData()\` - no URLs needed!
+- Dataset URL: \`${url}\`
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
-- Business Metrics: CLV, AOV, MRR, DAU, conversion rate
+- Business Metrics: ${includedMetricsText}
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
 - Smart Caching: Automatic data caching with invalidation
 
@@ -328,12 +333,16 @@ export function generateClaudeIntegration(url: string, datasetInfo: DatasetInfo)
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
+  const includedMetricsText = datasetInfo.includedMetrics && datasetInfo.includedMetrics.length > 0 
+    ? datasetInfo.includedMetrics.join(', ')
+    : 'Comprehensive business metrics';
+
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- Zero Configuration: Works with \`getData()\` - no URLs needed!
+- Dataset URL: \`${url}\`
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
-- Business Metrics: CLV, AOV, MRR, DAU, conversion rate
+- Business Metrics: ${includedMetricsText}
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
 - Smart Caching: Automatic data caching with invalidation
 
@@ -398,12 +407,16 @@ export function generateChatGPTIntegration(url: string, datasetInfo: DatasetInfo
     ? getBusinessContext(datasetInfo.scenario.category)
     : { name: datasetInfo.aiAnalysis?.businessType || 'Business App', domain: 'business', complexity: 'medium' };
 
+  const includedMetricsText = datasetInfo.includedMetrics && datasetInfo.includedMetrics.length > 0 
+    ? datasetInfo.includedMetrics.join(', ')
+    : 'Comprehensive business metrics';
+
   const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
 **Dataset Information:**
-- Zero Configuration: Works with \`getData()\` - no URLs needed!
+- Dataset URL: \`${url}\`
 - Entities: ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `${key} (${count.toLocaleString()} records)`).join(', ')}
-- Business Metrics: CLV, AOV, MRR, DAU, conversion rate
+- Business Metrics: ${includedMetricsText}
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
 - Smart Caching: Automatic data caching with invalidation
 
@@ -473,56 +486,61 @@ export function generateV0Integration(url: string, datasetInfo: DatasetInfo): In
     .join(', ');
 
   const entityList = Object.keys(datasetInfo.recordCounts).join(', ');
+  const includedMetricsText = datasetInfo.includedMetrics && datasetInfo.includedMetrics.length > 0 
+    ? datasetInfo.includedMetrics.join(', ')
+    : 'Comprehensive business metrics';
 
-  const prompt = `Create a modern dashboard component for ${businessContext.name} that displays realistic business data.
+  const prompt = `Integrate this Synthkit dataset into my existing prototype by replacing mock data with realistic data.
 
-**Component Requirements:**
-- Clean, modern UI with Tailwind CSS
-- Responsive design that works on mobile and desktop
-- Loading and error states
-- Data visualization (charts, tables, cards)
-- Professional styling with good UX
+**Dataset Information:**
+- Dataset URL: \`${url}\`
+- Data Volume: ${recordSummary}
+- Business Type: ${businessContext.name}
+- Available Entities: ${entityList}
+- Business Metrics: ${includedMetricsText}
 
-**Data to Display:**
-- ${recordSummary}
-- Business metrics: CLV, AOV, MRR, conversion rate
-- Recent activity and trends
-- Key performance indicators
+**Integration Focus:**
+- Replace existing mock/hardcoded data with real data from the dataset
+- Keep all existing UI components and styling
+- Only change the data source, not the design
+- Maintain current component structure and layout
 
-**Technical Notes:**
-- Use React hooks for state management
-- Include proper TypeScript types
-- Add hover effects and animations
-- Make it look production-ready
-- Use realistic sample data that matches the business context
+**Technical Integration:**
+1. **Install Enhanced**: \`npm install @synthkit/enhanced\`
+2. **Import the hook**: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. **Replace data source**: Change from mock data to \`const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();\`
+4. **Update data references**: Replace hardcoded arrays with real data arrays
+5. **Add loading states**: Handle loading and error states appropriately
 
-**Sample Data Structure:**
+**Data Access Pattern:**
 \`\`\`javascript
-const sampleData = {
-  customers: [
-    { id: 1, name: "Sarah Johnson", email: "sarah@example.com", totalSpent: 1250, status: "active" },
-    { id: 2, name: "Mike Chen", email: "mike@example.com", totalSpent: 890, status: "active" }
-  ],
-  charges: [
-    { id: 1, amount: 2500, status: "succeeded", created: "2024-01-15" },
-    { id: 2, amount: 1200, status: "succeeded", created: "2024-01-14" }
-  ],
-  businessMetrics: {
-    customerLifetimeValue: 1250,
-    averageOrderValue: 89.50,
-    monthlyRecurringRevenue: 45000,
-    conversionRate: 3.2
-  }
-};
+// Replace your existing data fetching with this:
+import { useSynthkit } from '@synthkit/enhanced/react';
+
+function YourExistingComponent() {
+  const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  // Use the real data instead of mock data
+  // customers, charges, subscriptions, invoices, plans are now real data
+}
 \`\`\`
 
-**After generating this component in v0:**
-1. Copy the generated code to your local project
-2. Run: \`npm install @synthkit/enhanced\`
-3. Replace sample data with: \`const { data, loading, error } = useSynthkit();\`
-4. Add the import: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+**Real Data Available:**
+- ${Object.entries(datasetInfo.recordCounts).map(([key, count]) => `- ${key}: ${count.toLocaleString()} records`).join('\n')}
+- Business metrics: CLV, AOV, MRR, conversion rate
+- Comprehensive Stripe metrics: Payment volume, success rates, failed payments, etc.
 
-Focus on creating a **beautiful, functional component** that showcases the data effectively.`;
+**Integration Steps:**
+1. Install: \`npm install @synthkit/enhanced\`
+2. Import: \`import { useSynthkit } from '@synthkit/enhanced/react';\`
+3. Replace: Change mock data to \`useSynthkit()\` hook
+4. Update: Replace hardcoded data references with real data
+5. Test: Verify the integration works with the actual dataset
+
+Focus on **integrating the real data** into your existing prototype without changing the UI design.`;
 
   return {
     tool: 'v0',
