@@ -1,0 +1,31 @@
+{
+  "id": "scenario-forksy-admin-enterprise-12345",
+  "type": "scenario",
+  "data": {
+    "customers": [
+      {
+        "id": "test1",
+        "name": "Test Customer"
+      }
+    ],
+    "payments": [
+      {
+        "id": "test1",
+        "amount": 50
+      }
+    ],
+    "businessMetrics": {
+      "customerLifetimeValue": 500
+    }
+  },
+  "metadata": {
+    "createdAt": "2025-09-15T21:55:02.426Z",
+    "checksum": "1396cc73a2371dae306867c836c2976c",
+    "scenario": {
+      "category": "forksy",
+      "role": "admin",
+      "stage": "enterprise",
+      "id": 12345
+    }
+  }
+}

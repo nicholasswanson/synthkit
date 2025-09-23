@@ -1,0 +1,47 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Synthesizer Device -->
+  <g stroke="#000" stroke-width="2" fill="none">
+    <!-- Main device body -->
+    <path d="M8 20 L8 44 L56 44 L56 20 Z" fill="#E5E7EB"/>
+    
+    <!-- Top panel controls -->
+    <!-- Four rotary knobs -->
+    <circle cx="16" cy="28" r="4" fill="#000"/>
+    <circle cx="24" cy="28" r="4" fill="#000"/>
+    <circle cx="16" cy="36" r="4" fill="#000"/>
+    <circle cx="24" cy="36" r="4" fill="#000"/>
+    
+    <!-- Small buttons/dots -->
+    <circle cx="36" cy="26" r="1" fill="#000"/>
+    <circle cx="40" cy="26" r="1" fill="#000"/>
+    <circle cx="44" cy="26" r="1" fill="#000"/>
+    <circle cx="36" cy="30" r="1" fill="#000"/>
+    <circle cx="40" cy="30" r="1" fill="#000"/>
+    <circle cx="44" cy="30" r="1" fill="#000"/>
+    <circle cx="36" cy="34" r="1" fill="#000"/>
+    <circle cx="40" cy="34" r="1" fill="#000"/>
+    <circle cx="44" cy="34" r="1" fill="#000"/>
+    
+    <!-- Orange screen -->
+    <rect x="48" y="28" width="6" height="4" fill="#F97316"/>
+    
+    <!-- Horizontal line above screen -->
+    <line x1="36" y1="24" x2="54" y2="24"/>
+  </g>
+  
+  <!-- Mini keyboard on right side -->
+  <g transform="translate(40, 20) rotate(30, 0, 0)">
+    <!-- White keys -->
+    <rect x="0" y="0" width="3" height="12" fill="#F3F4F6" stroke="#000" stroke-width="0.5"/>
+    <rect x="4" y="0" width="3" height="12" fill="#F3F4F6" stroke="#000" stroke-width="0.5"/>
+    <rect x="8" y="0" width="3" height="12" fill="#F3F4F6" stroke="#000" stroke-width="0.5"/>
+    <rect x="12" y="0" width="3" height="12" fill="#F3F4F6" stroke="#000" stroke-width="0.5"/>
+    <rect x="16" y="0" width="3" height="12" fill="#F3F4F6" stroke="#000" stroke-width="0.5"/>
+    
+    <!-- Black keys -->
+    <rect x="2.5" y="0" width="2" height="8" fill="#000"/>
+    <rect x="6.5" y="0" width="2" height="8" fill="#000"/>
+    <rect x="10.5" y="0" width="2" height="8" fill="#000"/>
+    <rect x="14.5" y="0" width="2" height="8" fill="#000"/>
+  </g>
+</svg>

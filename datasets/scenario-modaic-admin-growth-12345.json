@@ -1,0 +1,80 @@
+{
+  "id": "scenario-modaic-admin-growth-12345",
+  "type": "scenario",
+  "data": {
+    "customers": [
+      {
+        "id": "customer-12345-0",
+        "name": "Alice Johnson",
+        "email": "alice.johnson@example.com",
+        "loyaltyTier": "Gold",
+        "createdAt": "2024-01-15T10:30:00.000Z"
+      },
+      {
+        "id": "customer-12345-1", 
+        "name": "Bob Smith",
+        "email": "bob.smith@example.com",
+        "loyaltyTier": "Silver",
+        "createdAt": "2024-01-16T14:22:00.000Z"
+      },
+      {
+        "id": "customer-12345-2",
+        "name": "Carol Davis",
+        "email": "carol.davis@example.com", 
+        "loyaltyTier": "Bronze",
+        "createdAt": "2024-01-17T09:15:00.000Z"
+      }
+    ],
+    "payments": [
+      {
+        "id": "payment-12345-0",
+        "customerId": "customer-12345-0",
+        "amount": 124.67,
+        "status": "completed",
+        "paymentMethod": "credit_card",
+        "createdAt": "2024-01-15T11:00:00.000Z"
+      },
+      {
+        "id": "payment-12345-1",
+        "customerId": "customer-12345-1", 
+        "amount": 89.23,
+        "status": "completed",
+        "paymentMethod": "paypal",
+        "createdAt": "2024-01-16T15:30:00.000Z"
+      },
+      {
+        "id": "payment-12345-2",
+        "customerId": "customer-12345-0",
+        "amount": 256.89,
+        "status": "pending",
+        "paymentMethod": "bank_transfer",
+        "createdAt": "2024-01-17T10:45:00.000Z"
+      },
+      {
+        "id": "payment-12345-3",
+        "customerId": "customer-12345-2",
+        "amount": 45.12,
+        "status": "completed", 
+        "paymentMethod": "credit_card",
+        "createdAt": "2024-01-17T16:20:00.000Z"
+      }
+    ],
+    "businessMetrics": {
+      "customerLifetimeValue": 201.14,
+      "averageOrderValue": 128.98,
+      "monthlyRecurringRevenue": 4358.11,
+      "dailyActiveUsers": 28,
+      "conversionRate": 6.01
+    }
+  },
+  "metadata": {
+    "createdAt": "2024-01-20T12:00:00.000Z",
+    "scenario": {
+      "category": "modaic",
+      "role": "admin", 
+      "stage": "growth",
+      "id": 12345
+    },
+    "checksum": "a1b2c3d4e5f6"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "scenario-checkout-ecommerce-admin-growth-12345",
+  "type": "scenario",
+  "data": {
+    "customers": [
+      {
+        "id": "test",
+        "name": "Test User"
+      }
+    ],
+    "businessMetrics": {
+      "test": 1
+    }
+  },
+  "metadata": {
+    "createdAt": "2025-09-18T23:20:31.932Z",
+    "checksum": "2f0b3e0d01858b1200217138d05fe1ba",
+    "scenario": {
+      "category": "checkout-ecommerce",
+      "role": "admin",
+      "stage": "growth",
+      "id": 12345
+    }
+  }
+}

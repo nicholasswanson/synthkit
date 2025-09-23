@@ -1,0 +1,19 @@
+{
+  "id": "scenario-modaic-admin-enterprise-12345",
+  "type": "scenario",
+  "data": {
+    "customers": [],
+    "payments": [],
+    "businessMetrics": {}
+  },
+  "metadata": {
+    "createdAt": "2025-09-15T21:44:21.662Z",
+    "checksum": "e369721d4c94f0f70347bb8218a08e97",
+    "scenario": {
+      "category": "modaic",
+      "role": "admin",
+      "stage": "enterprise",
+      "id": 12345
+    }
+  }
+}
