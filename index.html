@@ -220,6 +220,12 @@
     </div>
 
     <script>
+        // Test if JavaScript is working
+        console.log('JavaScript is working!');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM is loaded');
+        });
+        
         // ============================================================================
         // COMPLETE DATA GENERATION SYSTEM (RESTORED FROM NEXT-APP)
         // ============================================================================
@@ -1348,8 +1354,12 @@ async function loadData() {
         
         // Initialize display
         console.log('About to call updateConfiguration');
-        updateConfiguration();
-        console.log('updateConfiguration called');
+        try {
+            updateConfiguration();
+            console.log('updateConfiguration called successfully');
+        } catch (error) {
+            console.error('Error in updateConfiguration:', error);
+        }
     </script>
 </body>
 </html>
