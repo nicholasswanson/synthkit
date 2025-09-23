@@ -788,9 +788,10 @@
             const counts = getRealisticCounts(businessType, stage);
             const container = document.getElementById('dataset-structure-section');
             
-            // Generate realistic Stripe data structure
+            // Generate realistic Stripe data structure (sample only for display)
+            const sampleSize = 3; // Only generate 3 examples of each type
             const stripeData = {
-                customers: Array.from({length: counts.customers}, (_, i) => {
+                customers: Array.from({length: Math.min(sampleSize, counts.customers)}, (_, i) => {
                     const seed = i * 1000;
                     return {
                         id: generateStripeId('cus_', seed),
@@ -800,7 +801,7 @@
                         status: 'active'
                     };
                 }),
-                charges: Array.from({length: counts.charges}, (_, i) => {
+                charges: Array.from({length: Math.min(sampleSize, counts.charges)}, (_, i) => {
                     const seed = i * 2000;
                     return {
                         id: generateStripeId('ch_', seed),
@@ -811,7 +812,7 @@
                         customer: generateStripeId('cus_', Math.floor(seededRandom(seed + 3) * counts.customers))
                     };
                 }),
-                subscriptions: Array.from({length: counts.subscriptions}, (_, i) => {
+                subscriptions: Array.from({length: Math.min(sampleSize, counts.subscriptions)}, (_, i) => {
                     const seed = i * 3000;
                     return {
                         id: generateStripeId('sub_', seed),
@@ -822,7 +823,7 @@
                         created: generateRealisticTimestamp(seed + 3, 180)
                     };
                 }),
-                invoices: Array.from({length: counts.invoices}, (_, i) => {
+                invoices: Array.from({length: Math.min(sampleSize, counts.invoices)}, (_, i) => {
                     const seed = i * 4000;
                     return {
                         id: generateStripeId('in_', seed),
@@ -833,7 +834,7 @@
                         created: generateRealisticTimestamp(seed + 3, 60)
                     };
                 }),
-                plans: Array.from({length: counts.plans}, (_, i) => {
+                plans: Array.from({length: Math.min(sampleSize, counts.plans)}, (_, i) => {
                     const seed = i * 5000;
                     const planNames = ['Basic', 'Professional', 'Business', 'Enterprise', 'Team'];
                     return {
