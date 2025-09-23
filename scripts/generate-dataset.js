@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import the generation functions (we'll need to adapt these for Node.js)
-const { generateRealisticStripeData } = require('../examples/next-app/src/lib/realistic-stripe-generator');
-const { generateMetrics } = require('../examples/next-app/src/lib/metrics-generator');
-const { calculateBusinessMetricsFromStripeData } = require('../examples/next-app/src/lib/business-metrics-calculator');
+import { generateRealisticStripeData } from '../examples/next-app/src/lib/realistic-stripe-generator.js';
+import { generateMetrics } from '../examples/next-app/src/lib/metrics-generator.js';
+import { calculateBusinessMetricsFromStripeData } from '../examples/next-app/src/lib/business-metrics-calculator.js';
 
 // Animal names for URL generation
 const ANIMALS = [
@@ -97,8 +102,8 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = { generateDataset };
+export { generateDataset };
