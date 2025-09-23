@@ -1,0 +1,9 @@
+{
+  "test": "data",
+  "customers": [
+    {
+      "id": 1,
+      "name": "Test"
+    }
+  ]
+}

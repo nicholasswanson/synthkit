@@ -1,0 +1,50 @@
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "Performance Test"
+    }
+  ],
+  "charges": [
+    {
+      "id": 1,
+      "amount": 2500,
+      "status": "succeeded"
+    }
+  ],
+  "businessMetrics": {
+    "customerLifetimeValue": 1250,
+    "averageOrderValue": 89.5,
+    "monthlyRecurringRevenue": 45000,
+    "conversionRate": 3.2
+  },
+  "metrics": [
+    {
+      "name": "Gross Payment Volume",
+      "category": "Payments",
+      "type": "calculated",
+      "unit": "Volume ($)",
+      "chartType": "Line chart",
+      "timeSeries": {
+        "daily": [
+          100,
+          200,
+          300
+        ],
+        "weekly": [
+          700,
+          800,
+          900
+        ],
+        "monthly": [
+          2000,
+          3000,
+          4000
+        ]
+      },
+      "currentValue": 2500,
+      "exampleValue": 1016.9,
+      "available": true
+    }
+  ]
+}

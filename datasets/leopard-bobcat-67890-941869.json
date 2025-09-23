@@ -1,0 +1,9 @@
+{
+  "test": "real-data",
+  "customers": [
+    {
+      "id": 1,
+      "name": "Real Test"
+    }
+  ]
+}
