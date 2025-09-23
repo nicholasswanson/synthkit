@@ -35,7 +35,7 @@ function generateDatasetUrl(scenarioId: number): string {
   const animal1 = ANIMALS[scenarioId % ANIMALS.length];
   const animal2 = ANIMALS[(scenarioId * 7) % ANIMALS.length];
   const filename = `${animal1}-${animal2}-${scenarioId}-${timestamp}.json`;
-  return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/datasets/${filename}`;
+  return `https://nicholasswanson.github.io/synthkit/datasets/${filename}`;
 }
 
 async function uploadToGitHub(dataset: any, filename: string): Promise<boolean> {
