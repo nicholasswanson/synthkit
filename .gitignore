@@ -116,6 +116,7 @@ generated-data/
 !tsconfig.json
 !**/pack.json
 !synth.config.schema.json
+!datasets/*.json
 
 # Snapshots (keep local only)
 .synthkit/
