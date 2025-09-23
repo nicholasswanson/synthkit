@@ -61,7 +61,7 @@
                 <!-- Header -->
                 <div class="text-center mb-8">
                     <div class="flex items-center justify-center mb-4">
-                        <img src="/synthkitlogo.png" alt="Synthkit" class="w-16 h-16" onerror="this.style.display='none'">
+                        <img src="/synthkitlogo.png" alt="Synthkit" class="w-16 h-16">
                     </div>
                     <p class="text-lg text-gray-600">Prototype with realistic, synthetic datasets</p>
                 </div>
@@ -115,80 +115,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">ID</label>
                             <p class="text-xs text-gray-500 mb-2">Change this number to generate different datasets with unique URLs</p>
                             <input type="number" id="scenario-id" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus-orange text-gray-900" value="12345">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dataset Objects -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Dataset objects</h3>
-                    <div class="space-y-3">
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Customers</div>
-                            <div class="text-sm text-gray-600 mb-1">Customer data and profiles</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">25,000 records</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">id, name, email</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">loyalty_tier</span>
-                            </div>
-                        </div>
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Charges</div>
-                            <div class="text-sm text-gray-600 mb-1">Payment transactions</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">150,000 records</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">amount, status</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_method</span>
-                            </div>
-                        </div>
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Subscriptions</div>
-                            <div class="text-sm text-gray-600 mb-1">Recurring billing</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">12,000 records</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">plan, status</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">billing_cycle</span>
-                            </div>
-                        </div>
-                        <div class="border-l-4 pl-4 border-orange">
-                            <div class="font-medium text-gray-900">Invoices</div>
-                            <div class="text-sm text-gray-600 mb-1">Billing documents</div>
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">25,000 records</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">amount_due, status</span>
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">due_date</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Included Metrics -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Included metrics</h3>
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Gross Payment Volume</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Payment Success Rate</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Monthly Recurring Revenue</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Customer Lifetime Value</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Average Order Value</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-gray-700">Conversion Rate</span>
                         </div>
                     </div>
                 </div>
@@ -264,7 +190,7 @@
                     <button id="tab-cursor" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-white text-gray-900 shadow-sm">Cursor</button>
                     <button id="tab-v0" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">V0</button>
                     <button id="tab-claude" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Claude</button>
-                    <button id="tab-codex" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Codex</button>
+                    <button id="tab-codex" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-600">Codex</button>
                     <button id="tab-javascript" class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Javascript</button>
                 </div>
             </div>
@@ -399,9 +325,7 @@ When working with Synthkit data:
 - Data structure: result.data.customers, result.data.charges, etc.
 - Always handle loading states and errors
 - Use realistic data volumes (thousands of records)
-- Dataset URL: ${currentDatasetUrl}
-- Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
-- Data Objects: customers (25,000), charges (150,000), subscriptions (12,000), invoices (25,000)</code></pre>
+- Dataset URL: ${currentDatasetUrl}</code></pre>
                             </div>
                         </div>
                     `;
@@ -417,9 +341,7 @@ ${currentDatasetUrl}
 Then ask v0 to:
 1. Install @synthkit/enhanced: npm install @synthkit/enhanced
 2. Replace mock data with: const result = await getData()
-3. Use the data: const { customers, charges } = result.data
-4. Display realistic volumes: ${currentDatasetUrl.split('/').pop()} contains 25,000 customers, 150,000 charges
-5. Include business metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue</code></pre>
+3. Use the data: const { customers, charges } = result.data</code></pre>
                             </div>
                         </div>
                     `;
@@ -435,9 +357,7 @@ Integration steps:
 1. Install: npm install @synthkit/enhanced
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
-4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
-6. Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions, 25,000 invoices</code></pre>
+4. Access: const { customers, charges, subscriptions } = result.data</code></pre>
                             </div>
                         </div>
                     `;
@@ -453,9 +373,7 @@ Integration steps:
 1. Install: npm install @synthkit/enhanced
 2. Import: import { getData } from '@synthkit/enhanced'
 3. Use: const result = await getData()
-4. Access: const { customers, charges, subscriptions } = result.data
-5. Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue, Customer Lifetime Value
-6. Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions, 25,000 invoices</code></pre>
+4. Access: const { customers, charges, subscriptions } = result.data</code></pre>
                             </div>
                         </div>
                     `;
@@ -474,15 +392,10 @@ async function loadData() {
   
   console.log(\`Loaded \${customers.length} customers\`);
   console.log(\`Loaded \${charges.length} charges\`);
-  console.log(\`Loaded \${subscriptions.length} subscriptions\`);
   
   // Use the data in your app
   return result.data;
-}
-
-// Dataset URL: ${currentDatasetUrl}
-// Business Metrics: Gross Payment Volume, Payment Success Rate, Monthly Recurring Revenue
-// Data Volume: 25,000 customers, 150,000 charges, 12,000 subscriptions</code></pre>
+}</code></pre>
                             </div>
                         </div>
                     `;
