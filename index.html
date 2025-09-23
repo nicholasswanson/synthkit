@@ -958,12 +958,18 @@
 
         // Update display when configuration changes
         function updateConfiguration() {
+            console.log('updateConfiguration called');
             const businessType = document.getElementById('scenario-select').value;
             const stage = document.getElementById('stage-select').value;
+            console.log('Business type:', businessType, 'Stage:', stage);
             
+            console.log('Calling updateStripeProducts');
             updateStripeProducts(businessType, stage);
+            console.log('Calling updateDatasetStructure');
             updateDatasetStructure(businessType, stage);
+            console.log('Calling updateIncludedMetrics');
             updateIncludedMetrics(businessType, stage);
+            console.log('updateConfiguration completed');
         }
 
         // ============================================================================
@@ -1340,7 +1346,9 @@ async function loadData() {
         document.getElementById('stage-select').addEventListener('change', updateConfiguration);
         
         // Initialize display
+        console.log('About to call updateConfiguration');
         updateConfiguration();
+        console.log('updateConfiguration called');
     </script>
 </body>
 </html>
