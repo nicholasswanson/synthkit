@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Synthkit - Simple Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --orange: #ff6b35;
+            --orange-light: #ffccb4;
+        }
+        .btn-orange {
+            background-color: var(--orange-light);
+            color: var(--orange);
+        }
+        .btn-orange:hover {
+            background-color: #ffb896;
+        }
+        .border-orange {
+            border-left-color: var(--orange);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <div class="flex h-screen">
+        <!-- Left Panel -->
+        <div class="w-3/10 overflow-y-auto bg-white" style="padding:40px;width:30%">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="/synthkitlogo.png" alt="Synthkit" class="w-16 h-16">
+                    </div>
+                    <p class="text-lg text-gray-600">Prototype with realistic, synthetic datasets</p>
+                </div>
+
+                <!-- Configuration -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Configuration</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pre-built scenarios</label>
+                        <select class="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white">
+                            <option value="checkout-ecommerce" selected>Checkout e-commerce</option>
+                            <option value="b2b-saas-subscriptions">B2B SaaS subscriptions</option>
+                            <option value="food-delivery-platform">Food delivery platform</option>
+                            <option value="consumer-fitness-app">Consumer fitness app</option>
+                            <option value="b2b-invoicing">B2B invoicing</option>
+                            <option value="property-management-platform">Property management platform</option>
+                            <option value="creator-platform">Creator platform</option>
+                            <option value="donation-marketplace">Donation marketplace</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom scenario</label>
+                        <textarea placeholder="e.g. birdwatching app with subscriptions" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-gray-900 mb-2" rows="3"></textarea>
+                        <button disabled class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed btn-orange">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="mb-8">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <select class="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white">
+                                <option value="admin" selected>Admin</option>
+                                <option value="support">Support</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Stage</label>
+                            <select class="w-full px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 appearance-none bg-white">
+                                <option value="early">Early</option>
+                                <option value="growth" selected>Growth</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ID</label>
+                            <p class="text-xs text-gray-500 mb-2">Change this number to generate different datasets with unique URLs</p>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900" value="12345">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stripe Products -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Stripe products</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Payments</div>
+                            <div class="text-sm text-gray-600 mb-1">Accept payments online and in person</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: essential</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">charges</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_intents</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">payment_methods</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Tax</div>
+                            <div class="text-sm text-gray-600 mb-1">Automated tax calculation and reporting</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: recommended</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_rates</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_transactions</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">tax_calculations</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Radar</div>
+                            <div class="text-sm text-gray-600 mb-1">Machine learning fraud prevention</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Priority: recommended</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">disputes</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">review_events</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">early_fraud_warnings</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Roles -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">User roles</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Admin</div>
+                            <div class="text-sm text-gray-600">Complete system access</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Full Access</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Financial Data</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">User Management</span>
+                            </div>
+                        </div>
+                        <div class="border-l-4 pl-4 border-orange">
+                            <div class="font-medium text-gray-900">Support</div>
+                            <div class="text-sm text-gray-600">Customer service access</div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Customer Support</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs">Order Management</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="w-7/10 overflow-y-auto bg-gray-50" style="padding:40px;width:70%">
+            <!-- Tab Navigation -->
+            <div class="mb-6">
+                <div class="flex space-x-1 bg-gray-100 rounded-xl p-1">
+                    <button class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-white text-gray-900 shadow-sm">Cursor</button>
+                    <button class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">V0</button>
+                    <button class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Claude</button>
+                    <button class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Codex</button>
+                    <button class="flex-1 px-3 py-2 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:text-gray-900">Javascript</button>
+                </div>
+            </div>
+
+            <!-- Dataset Publishing -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-gray-900 mb-3">🌐 Dataset Publishing</h3>
+                <button class="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50">
+                    Generate Dataset URL
+                </button>
+            </div>
+
+            <!-- Integration Examples -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-gray-900 mb-3">Add this React Hook to your project root directory</h3>
+                <div class="flex flex-wrap gap-3">
+                    <button disabled class="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium disabled:opacity-50 btn-orange">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                            <path d="M12 15V3"></path>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <path d="m7 10 5 5 5-5"></path>
+                        </svg>
+                        useSynthkitDataset.ts
+                    </button>
+                </div>
+            </div>
+
+            <!-- Integration Content -->
+            <div>
+                <div class="space-y-4">
+                    <div class="p-4 bg-yellow-100 rounded-xl">
+                        <p class="text-sm text-yellow-700">
+                            ⚠️ Please generate a dataset URL first by clicking "Generate Dataset URL" above to get integration code with the actual dataset.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
