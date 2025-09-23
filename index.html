@@ -902,8 +902,8 @@
                     const seed = i * 1000;
                     return {
                         id: generateStripeId('cus_', seed),
-                        name: `Customer ${i + 1}`,
-                        email: `customer${i + 1}@example.com`,
+                        name: generateRealisticName(seed, businessType),
+                        email: generateRealisticEmail(seed, businessType),
                         created: generateRealisticTimestamp(seed, 365),
                         status: 'active'
                     };
