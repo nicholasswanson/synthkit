@@ -35,23 +35,13 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
           
-      - name: Install dependencies
-        run: |
-          cd examples/next-app
-          pnpm install --frozen-lockfile
-          
-      - name: Build static export
-        run: |
-          cd examples/next-app
-          pnpm run build
-          
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./examples/next-app/out
+          path: ./
           
       - name: Deploy to GitHub Pages
         id: deployment
