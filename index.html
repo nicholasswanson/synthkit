@@ -160,10 +160,7 @@
             <!-- Dataset Publishing -->
             <div class="mb-6">
                 <h3 class="font-semibold text-gray-900 mb-3">🌐 Dataset Publishing</h3>
-                <button id="generate-dataset" class="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50">
-                    Generate Dataset URL
-                </button>
-                <div id="dataset-url" class="mt-3">
+                <div id="dataset-url">
                     <div class="p-3 bg-green-100 rounded-xl">
                         <p class="text-sm text-green-700 mb-2">✅ Dataset URL generated:</p>
                         <input type="text" id="url-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono" readonly>
@@ -1641,48 +1638,6 @@
             });
         });
         
-        // Generate dataset URL
-        document.getElementById('generate-dataset').addEventListener('click', () => {
-            const scenario = document.getElementById('scenario-select').value;
-            const stage = document.getElementById('stage-select').value;
-            const id = document.getElementById('scenario-id').value;
-            
-            // Generate filename
-            const animals = ['cheetah', 'lion', 'eagle', 'tiger', 'wolf', 'bear', 'shark', 'dolphin', 'panther', 'leopard', 'jaguar', 'lynx', 'bobcat', 'cougar', 'puma', 'falcon', 'hawk', 'owl', 'raven', 'crow', 'swan', 'heron', 'egret', 'fox', 'coyote', 'jackal', 'hyena', 'mongoose', 'weasel', 'otter', 'seal', 'walrus', 'whale', 'orca', 'narwhal', 'beluga', 'elephant', 'rhino', 'hippo', 'giraffe', 'zebra', 'antelope', 'gazelle', 'buffalo', 'bison', 'yak', 'camel', 'llama', 'alpaca', 'deer'];
-            const timestamp = Date.now().toString().slice(-6);
-            const animal1 = animals[id % animals.length];
-            const animal2 = animals[(id * 7) % animals.length];
-            const filename = `${animal1}-${animal2}-${id}-${timestamp}.json`;
-            
-            // Generate comprehensive dataset data
-            const counts = getRealisticCounts(scenario, stage);
-            const patterns = getPersonaPatterns(scenario);
-            const comprehensiveDataset = generateComprehensiveDataset(scenario, stage, counts, patterns);
-            const includedMetrics = getIncludedMetrics(comprehensiveDataset, scenario, stage);
-            
-            // Create data URL for immediate download
-            const datasetJson = JSON.stringify(comprehensiveDataset, null, 2);
-            const blob = new Blob([datasetJson], { type: 'application/json' });
-            currentDatasetUrl = URL.createObjectURL(blob);
-            
-            currentDatasetInfo = {
-                recordCounts: counts,
-                includedMetrics: includedMetrics,
-                businessType: scenario,
-                stage: stage,
-                filename: filename
-            };
-            
-            // Show URL
-            document.getElementById('url-input').value = `Download: ${filename}`;
-            document.getElementById('dataset-url').classList.remove('hidden');
-            
-            // Enable download button
-            document.getElementById('download-hook').disabled = false;
-            
-            // Update integration content
-            updateIntegrationContent('cursor');
-        });
         
         // Copy URL
         document.getElementById('copy-url').addEventListener('click', () => {
