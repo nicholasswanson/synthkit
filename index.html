@@ -1552,8 +1552,40 @@
         // Update display when configuration changes
         function updateConfiguration() {
             console.log('updateConfiguration called');
-            const businessType = document.getElementById('scenario-select').value;
+            const selectedScenario = document.getElementById('scenario-select').value;
             const stage = document.getElementById('stage-select').value;
+            
+            // Handle custom scenarios
+            let businessType = selectedScenario;
+            if (selectedScenario.startsWith('custom-')) {
+                // For custom scenarios, we need to determine the business type
+                // This would be stored when the custom scenario was created
+                // For now, we'll use a default mapping or try to extract from the option text
+                const customOption = document.querySelector(`option[value="${selectedScenario}"]`);
+                if (customOption) {
+                    const optionText = customOption.textContent.toLowerCase();
+                    if (optionText.includes('saas') || optionText.includes('software') || optionText.includes('b2b')) {
+                        businessType = 'b2b-saas-subscriptions';
+                    } else if (optionText.includes('food') || optionText.includes('delivery') || optionText.includes('restaurant')) {
+                        businessType = 'food-delivery-platform';
+                    } else if (optionText.includes('fitness') || optionText.includes('workout') || optionText.includes('health')) {
+                        businessType = 'consumer-fitness-app';
+                    } else if (optionText.includes('invoice') || optionText.includes('billing') || optionText.includes('payment')) {
+                        businessType = 'b2b-invoicing';
+                    } else if (optionText.includes('property') || optionText.includes('rental') || optionText.includes('real estate')) {
+                        businessType = 'property-management-platform';
+                    } else if (optionText.includes('creator') || optionText.includes('content') || optionText.includes('influencer')) {
+                        businessType = 'creator-platform';
+                    } else if (optionText.includes('donation') || optionText.includes('charity') || optionText.includes('nonprofit')) {
+                        businessType = 'donation-marketplace';
+                    } else {
+                        businessType = 'checkout-ecommerce'; // default
+                    }
+                } else {
+                    businessType = 'checkout-ecommerce'; // fallback
+                }
+            }
+            
             console.log('Business type:', businessType, 'Stage:', stage);
             
             console.log('Calling updateStripeProducts');
@@ -1965,12 +1997,122 @@ async function loadData() {
             content.innerHTML = integrationCode;
         }
         
+        // Custom scenario generation functions
+        function generateCustomScenarioFromPrompt(prompt) {
+            // Simple keyword-based scenario generation
+            const promptLower = prompt.toLowerCase();
+            
+            // Determine business type from keywords
+            let businessType = 'checkout-ecommerce'; // default
+            if (promptLower.includes('saas') || promptLower.includes('software') || promptLower.includes('b2b')) {
+                businessType = 'b2b-saas-subscriptions';
+            } else if (promptLower.includes('food') || promptLower.includes('delivery') || promptLower.includes('restaurant')) {
+                businessType = 'food-delivery-platform';
+            } else if (promptLower.includes('fitness') || promptLower.includes('workout') || promptLower.includes('health')) {
+                businessType = 'consumer-fitness-app';
+            } else if (promptLower.includes('invoice') || promptLower.includes('billing') || promptLower.includes('payment')) {
+                businessType = 'b2b-invoicing';
+            } else if (promptLower.includes('property') || promptLower.includes('rental') || promptLower.includes('real estate')) {
+                businessType = 'property-management-platform';
+            } else if (promptLower.includes('creator') || promptLower.includes('content') || promptLower.includes('influencer')) {
+                businessType = 'creator-platform';
+            } else if (promptLower.includes('donation') || promptLower.includes('charity') || promptLower.includes('nonprofit')) {
+                businessType = 'donation-marketplace';
+            }
+            
+            // Determine stage from keywords
+            let stage = 'growth'; // default
+            if (promptLower.includes('startup') || promptLower.includes('early') || promptLower.includes('mvp')) {
+                stage = 'early';
+            } else if (promptLower.includes('enterprise') || promptLower.includes('large') || promptLower.includes('corporate')) {
+                stage = 'enterprise';
+            }
+            
+            // Generate a custom scenario ID
+            const scenarioId = Math.floor(Math.random() * 900000) + 100000;
+            
+            return {
+                id: `custom-${scenarioId}`,
+                name: prompt.substring(0, 50) + (prompt.length > 50 ? '...' : ''),
+                businessType,
+                stage,
+                prompt,
+                scenarioId
+            };
+        }
+        
+        function updateScenarioSelectWithCustom(customScenario) {
+            const scenarioSelect = document.getElementById('scenario-select');
+            if (!scenarioSelect) return;
+            
+            // Remove any existing custom option
+            const existingCustom = scenarioSelect.querySelector('option[value^="custom-"]');
+            if (existingCustom) {
+                existingCustom.remove();
+            }
+            
+            // Add the new custom option
+            const customOption = document.createElement('option');
+            customOption.value = customScenario.id;
+            customOption.textContent = `Custom: ${customScenario.name}`;
+            customOption.selected = true;
+            
+            scenarioSelect.insertBefore(customOption, scenarioSelect.firstChild);
+        }
+        
+        function updateConfigurationWithCustom(customScenario) {
+            // Update the stage if it was determined from the prompt
+            const stageSelect = document.getElementById('stage-select');
+            if (stageSelect && customScenario.stage !== stageSelect.value) {
+                stageSelect.value = customScenario.stage;
+            }
+            
+            // Update the scenario ID
+            const scenarioIdInput = document.getElementById('scenario-id');
+            if (scenarioIdInput) {
+                scenarioIdInput.value = customScenario.scenarioId;
+            }
+            
+            // Trigger configuration update
+            updateConfiguration();
+        }
+        
         // Enable custom scenario generation
         const customScenarioInput = document.getElementById('custom-scenario');
         const generateCustomBtn = document.getElementById('generate-custom');
         if (customScenarioInput && generateCustomBtn) {
             customScenarioInput.addEventListener('input', (e) => {
                 generateCustomBtn.disabled = !e.target.value.trim();
+            });
+            
+            generateCustomBtn.addEventListener('click', async () => {
+                const customPrompt = customScenarioInput.value.trim();
+                if (!customPrompt) return;
+                
+                // Show loading state
+                generateCustomBtn.disabled = true;
+                generateCustomBtn.textContent = 'Generating...';
+                
+                try {
+                    // Generate a custom scenario based on the prompt
+                    const customScenario = generateCustomScenarioFromPrompt(customPrompt);
+                    
+                    // Update the scenario select to show the custom option
+                    updateScenarioSelectWithCustom(customScenario);
+                    
+                    // Update the configuration with the custom scenario
+                    updateConfigurationWithCustom(customScenario);
+                    
+                    // Clear the input
+                    customScenarioInput.value = '';
+                    generateCustomBtn.disabled = true;
+                    
+                } catch (error) {
+                    console.error('Custom scenario generation failed:', error);
+                    alert('Failed to generate custom scenario. Please try again.');
+                } finally {
+                    generateCustomBtn.textContent = 'Generate';
+                }
             });
         }
         
