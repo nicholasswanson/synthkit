@@ -785,34 +785,75 @@
             const availability = METRIC_AVAILABILITY[businessType.toLowerCase()] || METRIC_AVAILABILITY['b2b-saas-subscriptions'];
             
             const allMetrics = [
+                // Core Payment Metrics (All Personas)
                 { name: 'Gross Payment Volume', available: true },
                 { name: 'Payment Success Rate', available: true },
-                { name: 'Monthly Recurring Revenue', available: availability.subscriptions },
-                { name: 'Customer Lifetime Value', available: true },
-                { name: 'Average Order Value', available: true },
-                { name: 'Conversion Rate', available: true },
                 { name: 'Successful Payments', available: true },
                 { name: 'Failed Card Payments - Failed Volume', available: true },
                 { name: 'Failed Card Payments - Failed Count', available: true },
                 { name: 'Failed Card Payments - Failure Rate', available: true },
-                { name: 'Active Subscribers', available: availability.subscriptions },
-                { name: 'Subscription Revenue', available: availability.subscriptions },
-                { name: 'One-time Revenue', available: true },
-                { name: 'Refund Rate', available: availability.refunds },
-                { name: 'Chargeback Rate', available: availability.disputes },
-                { name: 'Dispute Rate', available: availability.disputes },
-                { name: 'Tax Collected', available: true },
-                { name: 'Processing Fees', available: true },
-                { name: 'Net Revenue', available: true },
-                { name: 'Customer Acquisition Cost', available: true },
-                { name: 'Revenue per Customer', available: true },
+                { name: 'Average Order Value', available: true },
+                { name: 'Conversion Rate', available: true },
                 { name: 'Payment Method Distribution', available: true },
                 { name: 'Geographic Distribution', available: true },
-                { name: 'Time-based Trends', available: true },
-                { name: 'Seasonal Patterns', available: true },
+                { name: 'Processing Fees', available: true },
+                { name: 'Net Revenue', available: true },
+                { name: 'One-time Revenue', available: true },
+                
+                // Subscription Metrics (B2B SaaS, Consumer Fitness)
+                { name: 'Monthly Recurring Revenue', available: availability.subscriptions },
+                { name: 'Annual Recurring Revenue', available: availability.subscriptions },
+                { name: 'Active Subscribers', available: availability.subscriptions },
+                { name: 'Subscription Revenue', available: availability.subscriptions },
+                { name: 'Churn Rate', available: availability.subscriptions },
+                { name: 'Customer Retention Rate', available: availability.subscriptions },
+                { name: 'Average Revenue Per User (ARPU)', available: availability.subscriptions },
+                { name: 'Subscription Growth Rate', available: availability.subscriptions },
+                { name: 'Trial Conversion Rate', available: availability.subscriptions },
+                { name: 'Upgrade/Downgrade Rates', available: availability.subscriptions },
+                { name: 'Billing Cycle Distribution', available: availability.subscriptions },
+                
+                // Customer Metrics (All Personas)
+                { name: 'Customer Lifetime Value', available: true },
+                { name: 'Customer Acquisition Cost', available: true },
+                { name: 'Revenue per Customer', available: true },
+                { name: 'Customer Growth Rate', available: true },
+                { name: 'Customer Engagement Score', available: true },
+                
+                // Risk & Dispute Metrics (Persona-Specific)
+                { name: 'Dispute Rate', available: availability.disputes },
+                { name: 'Chargeback Rate', available: availability.disputes },
+                { name: 'Dispute Resolution Rate', available: availability.disputes },
+                { name: 'Refund Rate', available: availability.refunds },
                 { name: 'Radar Risk Score', available: availability.radar },
                 { name: 'Fraud Detection Rate', available: availability.radar },
-                { name: 'Authentication Success Rate', available: availability.authentication }
+                { name: 'Risk Assessment Score', available: availability.radar },
+                { name: 'Fraud Prevention Effectiveness', available: availability.radar },
+                { name: 'Authentication Success Rate', available: availability.authentication },
+                
+                // Financial Metrics (All Personas)
+                { name: 'Tax Collected', available: true },
+                { name: 'Currency Distribution', available: true },
+                { name: 'Exchange Rate Impact', available: true },
+                { name: 'Fee Structure Analysis', available: true },
+                { name: 'Profit Margin Analysis', available: true },
+                { name: 'Cash Flow Trends', available: true },
+                { name: 'Revenue Recognition', available: true },
+                
+                // Operational Metrics (All Personas)
+                { name: 'API Usage Metrics', available: true },
+                { name: 'Webhook Delivery Success Rate', available: true },
+                { name: 'System Uptime', available: true },
+                { name: 'Response Time Metrics', available: true },
+                { name: 'Error Rate Analysis', available: true },
+                { name: 'Performance Monitoring', available: true },
+                
+                // Time-based Analysis (All Personas)
+                { name: 'Time-based Trends', available: true },
+                { name: 'Seasonal Patterns', available: true },
+                { name: 'Peak Hours Analysis', available: true },
+                { name: 'Weekly Patterns', available: true },
+                { name: 'Monthly Growth Trends', available: true }
             ];
             
             // Filter to only available metrics
@@ -860,39 +901,113 @@
 
         // Generate realistic names and emails based on persona
         function generateRealisticName(seed, businessType) {
-            const names = {
-                'checkout-ecommerce': ['Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'David Kim', 'Lisa Wang'],
-                'b2b-saas-subscriptions': ['TechCorp Solutions', 'DataFlow Inc', 'CloudSync Ltd', 'InnovateTech Corp', 'NextGen Systems'],
-                'food-delivery-platform': ['John Smith', 'Maria Garcia', 'Alex Thompson', 'Jessica Lee', 'Robert Brown'],
-                'consumer-fitness-app': ['FitLife User', 'GymBuddy Member', 'HealthTracker Pro', 'WorkoutWarrior', 'FitnessFanatic'],
-                'b2b-invoicing': ['InvoicePro Client', 'BillMaster Corp', 'PayFlow Business', 'InvoiceTech Ltd', 'BillingSolutions Inc'],
-                'property-management-platform': ['PropertyOwner LLC', 'RealEstate Group', 'RentalManager Corp', 'PropertyTech Inc', 'LandlordPro Ltd'],
-                'creator-platform': ['ContentCreator Pro', 'InfluencerMax', 'CreatorStudio', 'DigitalArtist', 'MediaMaker'],
-                'donation-marketplace': ['CharitySupporter', 'DonorHero', 'GivingHeart', 'CauseChampion', 'ImpactMaker']
-            };
-            const personaNames = names[businessType] || names['b2b-saas-subscriptions'];
-            return personaNames[seed % personaNames.length];
+            // Comprehensive name generators with hundreds of options
+            const firstNames = ['James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer', 'Michael', 'Linda', 'David', 'Elizabeth', 'William', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica', 'Thomas', 'Sarah', 'Christopher', 'Karen', 'Charles', 'Nancy', 'Daniel', 'Lisa', 'Matthew', 'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra', 'Donald', 'Donna', 'Steven', 'Carol', 'Paul', 'Ruth', 'Andrew', 'Sharon', 'Joshua', 'Michelle', 'Kenneth', 'Laura', 'Kevin', 'Sarah', 'Brian', 'Kimberly', 'George', 'Deborah', 'Timothy', 'Dorothy', 'Ronald', 'Lisa', 'Jason', 'Nancy', 'Edward', 'Karen', 'Jeffrey', 'Betty', 'Ryan', 'Helen', 'Jacob', 'Sandra', 'Gary', 'Donna', 'Nicholas', 'Carol', 'Eric', 'Ruth', 'Jonathan', 'Sharon', 'Stephen', 'Michelle', 'Larry', 'Laura', 'Justin', 'Sarah', 'Scott', 'Kimberly', 'Brandon', 'Deborah', 'Benjamin', 'Dorothy', 'Samuel', 'Amy', 'Gregory', 'Angela', 'Alexander', 'Ashley', 'Patrick', 'Brenda', 'Frank', 'Emma', 'Raymond', 'Olivia', 'Jack', 'Cynthia', 'Dennis', 'Marie', 'Jerry', 'Janet', 'Tyler', 'Catherine', 'Aaron', 'Frances', 'Jose', 'Christine', 'Henry', 'Samantha', 'Adam', 'Debra', 'Douglas', 'Rachel', 'Nathan', 'Carolyn', 'Peter', 'Janet', 'Zachary', 'Virginia', 'Kyle', 'Maria', 'Noah', 'Heather', 'Alan', 'Diane', 'Ethan', 'Julie', 'Jeremy', 'Joyce', 'Carl', 'Victoria', 'Harold', 'Kelly', 'Arthur', 'Christina', 'Lawrence', 'Joan', 'Sean', 'Evelyn', 'Christian', 'Lauren', 'Albert', 'Judith', 'Wayne', 'Megan', 'Mason', 'Cheryl', 'Ralph', 'Andrea', 'Roy', 'Hannah', 'Eugene', 'Jacqueline', 'Louis', 'Martha', 'Philip', 'Gloria', 'Bobby', 'Teresa', 'Johnny', 'Sara', 'Mason', 'Janice'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts', 'Gomez', 'Phillips', 'Evans', 'Turner', 'Diaz', 'Parker', 'Cruz', 'Edwards', 'Collins', 'Reyes', 'Stewart', 'Morris', 'Morales', 'Murphy', 'Cook', 'Rogers', 'Gutierrez', 'Ortiz', 'Morgan', 'Cooper', 'Peterson', 'Bailey', 'Reed', 'Kelly', 'Howard', 'Ramos', 'Kim', 'Cox', 'Ward', 'Richardson', 'Watson', 'Brooks', 'Chavez', 'Wood', 'James', 'Bennett', 'Gray', 'Mendoza', 'Ruiz', 'Hughes', 'Price', 'Alvarez', 'Castillo', 'Sanders', 'Patel', 'Myers', 'Long', 'Ross', 'Foster', 'Jimenez'];
+            const companyPrefixes = ['Tech', 'Data', 'Cloud', 'Digital', 'Smart', 'Global', 'Innovative', 'Advanced', 'Premier', 'Elite', 'Pro', 'Next', 'Future', 'Modern', 'Dynamic', 'Strategic', 'Optimal', 'Peak', 'Prime', 'Core', 'Apex', 'Vertex', 'Matrix', 'Quantum', 'Synergy', 'Fusion', 'Nexus', 'Catalyst', 'Pinnacle', 'Summit'];
+            const companySuffixes = ['Solutions', 'Systems', 'Technologies', 'Innovations', 'Enterprises', 'Corporation', 'Inc', 'LLC', 'Group', 'Partners', 'Associates', 'Consulting', 'Services', 'Labs', 'Works', 'Hub', 'Studio', 'Agency', 'Dynamics', 'Analytics', 'Platforms', 'Networks', 'Interactive', 'Digital', 'Media', 'Creative', 'Design', 'Development', 'Engineering', 'Research'];
+            
+            if (businessType === 'checkout-ecommerce' || businessType === 'food-delivery-platform' || businessType === 'consumer-fitness-app' || businessType === 'donation-marketplace') {
+                // Consumer names
+                const firstName = firstNames[Math.abs(seed * 17) % firstNames.length];
+                const lastName = lastNames[Math.abs(seed * 23 + 7) % lastNames.length];
+                return `${firstName} ${lastName}`;
+            } else {
+                // Business names
+                const prefix = companyPrefixes[Math.abs(seed * 13) % companyPrefixes.length];
+                const suffix = companySuffixes[Math.abs(seed * 19 + 11) % companySuffixes.length];
+                return `${prefix} ${suffix}`;
+            }
         }
         
         function generateRealisticEmail(seed, businessType) {
-            const domains = {
-                'checkout-ecommerce': ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'],
-                'b2b-saas-subscriptions': ['techcorp.com', 'dataflow.io', 'cloudsync.co', 'innovatetech.net'],
-                'food-delivery-platform': ['gmail.com', 'yahoo.com', 'hotmail.com'],
-                'consumer-fitness-app': ['fitlife.com', 'gymbuddy.app', 'healthtracker.io'],
-                'b2b-invoicing': ['invoicepro.com', 'billmaster.co', 'payflow.biz'],
-                'property-management-platform': ['propertyowner.com', 'realestate.group', 'rentalmanager.co'],
-                'creator-platform': ['creatorpro.com', 'influencermax.io', 'creatorstudio.app'],
-                'donation-marketplace': ['charitysupporter.org', 'donorhero.com', 'givingheart.net']
-            };
-            const personaDomains = domains[businessType] || domains['b2b-saas-subscriptions'];
-            const domain = personaDomains[seed % personaDomains.length];
+            const consumerDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com', 'protonmail.com', 'mail.com', 'live.com', 'msn.com', 'comcast.net', 'verizon.net', 'att.net', 'cox.net', 'charter.net', 'earthlink.net', 'juno.com', 'netzero.net', 'sbcglobal.net', 'bellsouth.net'];
+            const businessDomains = ['company.com', 'corp.com', 'business.net', 'enterprise.org', 'solutions.io', 'tech.co', 'systems.biz', 'group.net', 'inc.com', 'llc.org', 'consulting.com', 'services.net', 'partners.co', 'associates.biz', 'innovations.io', 'technologies.com', 'digital.net', 'analytics.co', 'platforms.io', 'networks.com'];
+            
+            const domains = (businessType === 'checkout-ecommerce' || businessType === 'food-delivery-platform' || businessType === 'consumer-fitness-app' || businessType === 'donation-marketplace') 
+                ? consumerDomains 
+                : businessDomains;
+                
+            const domain = domains[Math.abs(seed * 31) % domains.length];
             const name = generateRealisticName(seed, businessType).toLowerCase().replace(/[^a-z]/g, '');
-            return `${name}${seed}@${domain}`;
+            const emailPrefix = name.length > 15 ? name.substring(0, 15) : name;
+            return `${emailPrefix}${Math.abs(seed) % 1000}@${domain}`;
         }
+        // Generate persona-specific amounts and patterns
+        function getPersonaPatterns(businessType) {
+            const patterns = {
+                'checkout-ecommerce': {
+                    chargeAmountMin: 1000, // $10
+                    chargeAmountMax: 20000, // $200
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.95,
+                    refundRate: 0.08
+                },
+                'b2b-saas-subscriptions': {
+                    chargeAmountMin: 10000, // $100
+                    chargeAmountMax: 200000, // $2000
+                    subscriptionAmountMin: 5000, // $50
+                    subscriptionAmountMax: 50000, // $500
+                    successRate: 0.98,
+                    refundRate: 0.02
+                },
+                'food-delivery-platform': {
+                    chargeAmountMin: 1500, // $15
+                    chargeAmountMax: 5000, // $50
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.92,
+                    refundRate: 0.12
+                },
+                'consumer-fitness-app': {
+                    chargeAmountMin: 999, // $9.99
+                    chargeAmountMax: 9999, // $99.99
+                    subscriptionAmountMin: 999, // $9.99
+                    subscriptionAmountMax: 4999, // $49.99
+                    successRate: 0.94,
+                    refundRate: 0.06
+                },
+                'b2b-invoicing': {
+                    chargeAmountMin: 5000, // $50
+                    chargeAmountMax: 100000, // $1000
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.96,
+                    refundRate: 0.03
+                },
+                'property-management-platform': {
+                    chargeAmountMin: 50000, // $500
+                    chargeAmountMax: 500000, // $5000
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.97,
+                    refundRate: 0.04
+                },
+                'creator-platform': {
+                    chargeAmountMin: 500, // $5
+                    chargeAmountMax: 10000, // $100
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.93,
+                    refundRate: 0.07
+                },
+                'donation-marketplace': {
+                    chargeAmountMin: 1000, // $10
+                    chargeAmountMax: 50000, // $500
+                    subscriptionAmountMin: 0,
+                    subscriptionAmountMax: 0,
+                    successRate: 0.96,
+                    refundRate: 0.05
+                }
+            };
+            return patterns[businessType] || patterns['b2b-saas-subscriptions'];
+        }
+
         // Update dataset structure display (EXACT SAME AS ORIGINAL NEXT-APP)
         function updateDatasetStructure(businessType, stage) {
             const counts = getRealisticCounts(businessType, stage);
+            const patterns = getPersonaPatterns(businessType);
             const container = document.getElementById('dataset-structure-section');
             
             // Generate realistic Stripe data structure (sample only for display)
@@ -910,22 +1025,27 @@
                 }),
                 charges: Array.from({length: Math.min(sampleSize, counts.charges)}, (_, i) => {
                     const seed = i * 2000;
+                    const amountRange = patterns.chargeAmountMax - patterns.chargeAmountMin;
                     return {
                         id: generateStripeId('ch_', seed),
-                        amount: Math.floor(seededRandom(seed) * 10000) + 1000,
+                        amount: Math.floor(seededRandom(seed) * amountRange) + patterns.chargeAmountMin,
                         currency: 'usd',
-                        status: seededRandom(seed + 1) < 0.9 ? 'succeeded' : 'failed',
+                        status: seededRandom(seed + 1) < patterns.successRate ? 'succeeded' : 'failed',
                         created: generateRealisticTimestamp(seed + 2, 90),
                         customer: generateStripeId('cus_', Math.floor(seededRandom(seed + 3) * counts.customers))
                     };
                 }),
                 subscriptions: Array.from({length: Math.min(sampleSize, counts.subscriptions)}, (_, i) => {
                     const seed = i * 3000;
+                    const subAmountRange = patterns.subscriptionAmountMax - patterns.subscriptionAmountMin;
+                    const amount = patterns.subscriptionAmountMax > 0 
+                        ? Math.floor(seededRandom(seed + 2) * subAmountRange) + patterns.subscriptionAmountMin
+                        : Math.floor(seededRandom(seed + 2) * 5000) + 1000;
                     return {
                         id: generateStripeId('sub_', seed),
                         customer: generateStripeId('cus_', Math.floor(seededRandom(seed) * counts.customers)),
                         status: seededRandom(seed + 1) < 0.8 ? 'active' : 'canceled',
-                        amount: Math.floor(seededRandom(seed + 2) * 5000) + 1000,
+                        amount: amount,
                         interval: 'month',
                         created: generateRealisticTimestamp(seed + 3, 180)
                     };
@@ -951,6 +1071,139 @@
                         interval: seededRandom(seed + 1) < 0.8 ? 'month' : 'year',
                         currency: 'usd',
                         created: generateRealisticTimestamp(seed + 2, 365)
+                    };
+                }),
+                payment_methods: Array.from({length: Math.min(sampleSize, Math.floor(counts.customers * 1.2))}, (_, i) => {
+                    const seed = i * 6000;
+                    const cardBrands = ['visa', 'mastercard', 'amex', 'discover'];
+                    return {
+                        id: generateStripeId('pm_', seed),
+                        type: 'card',
+                        card: {
+                            brand: cardBrands[Math.abs(seed) % cardBrands.length],
+                            last4: String(Math.abs(seed) % 10000).padStart(4, '0'),
+                            exp_month: (Math.abs(seed) % 12) + 1,
+                            exp_year: 2025 + (Math.abs(seed) % 5)
+                        },
+                        customer: generateStripeId('cus_', Math.floor(seededRandom(seed) * counts.customers)),
+                        created: generateRealisticTimestamp(seed + 1, 365)
+                    };
+                }),
+                payment_intents: Array.from({length: Math.min(sampleSize, counts.charges)}, (_, i) => {
+                    const seed = i * 7000;
+                    const statuses = ['succeeded', 'requires_payment_method', 'requires_confirmation', 'canceled'];
+                    return {
+                        id: generateStripeId('pi_', seed),
+                        amount: Math.floor(seededRandom(seed) * 10000) + 1000,
+                        currency: 'usd',
+                        status: statuses[Math.abs(seed) % statuses.length],
+                        customer: generateStripeId('cus_', Math.floor(seededRandom(seed + 1) * counts.customers)),
+                        created: generateRealisticTimestamp(seed + 2, 90)
+                    };
+                }),
+                refunds: Array.from({length: Math.min(sampleSize, Math.floor(counts.charges * 0.1))}, (_, i) => {
+                    const seed = i * 8000;
+                    return {
+                        id: generateStripeId('re_', seed),
+                        amount: Math.floor(seededRandom(seed) * 5000) + 500,
+                        currency: 'usd',
+                        charge: generateStripeId('ch_', Math.floor(seededRandom(seed + 1) * counts.charges)),
+                        reason: ['duplicate', 'fraudulent', 'requested_by_customer'][Math.abs(seed) % 3],
+                        status: 'succeeded',
+                        created: generateRealisticTimestamp(seed + 2, 60)
+                    };
+                }),
+                disputes: Array.from({length: Math.min(sampleSize, Math.floor(counts.charges * 0.05))}, (_, i) => {
+                    const seed = i * 9000;
+                    const reasons = ['credit_not_processed', 'duplicate', 'fraudulent', 'general', 'incorrect_account_details'];
+                    return {
+                        id: generateStripeId('dp_', seed),
+                        amount: Math.floor(seededRandom(seed) * 8000) + 1000,
+                        currency: 'usd',
+                        charge: generateStripeId('ch_', Math.floor(seededRandom(seed + 1) * counts.charges)),
+                        reason: reasons[Math.abs(seed) % reasons.length],
+                        status: ['warning_needs_response', 'warning_under_review', 'warning_closed', 'needs_response'][Math.abs(seed + 1) % 4],
+                        created: generateRealisticTimestamp(seed + 2, 30)
+                    };
+                }),
+                products: Array.from({length: Math.min(sampleSize, counts.plans)}, (_, i) => {
+                    const seed = i * 10000;
+                    const persona = PREDEFINED_PERSONAS[businessType];
+                    return {
+                        id: generateStripeId('prod_', seed),
+                        name: `${persona.name} ${['Basic', 'Pro', 'Enterprise'][i % 3]} Plan`,
+                        description: `${persona.description} - ${['Basic', 'Professional', 'Enterprise'][i % 3]} tier`,
+                        active: true,
+                        type: 'service',
+                        created: generateRealisticTimestamp(seed + 1, 365)
+                    };
+                }),
+                prices: Array.from({length: Math.min(sampleSize, counts.plans)}, (_, i) => {
+                    const seed = i * 11000;
+                    return {
+                        id: generateStripeId('price_', seed),
+                        product: generateStripeId('prod_', seed),
+                        unit_amount: Math.floor(seededRandom(seed) * 5000) + 1000,
+                        currency: 'usd',
+                        recurring: {
+                            interval: ['month', 'year'][Math.abs(seed) % 2],
+                            interval_count: 1
+                        },
+                        active: true,
+                        created: generateRealisticTimestamp(seed + 1, 365)
+                    };
+                }),
+                coupons: Array.from({length: Math.min(sampleSize, Math.floor(counts.plans * 0.5))}, (_, i) => {
+                    const seed = i * 12000;
+                    return {
+                        id: generateStripeId('coupon_', seed),
+                        name: ['WELCOME10', 'SAVE20', 'NEWUSER', 'HOLIDAY25', 'UPGRADE15'][i % 5],
+                        percent_off: [10, 15, 20, 25, 30][Math.abs(seed) % 5],
+                        duration: ['once', 'repeating', 'forever'][Math.abs(seed) % 3],
+                        valid: true,
+                        created: generateRealisticTimestamp(seed + 1, 180)
+                    };
+                }),
+                balance_transactions: Array.from({length: Math.min(sampleSize, Math.floor(counts.charges * 1.1))}, (_, i) => {
+                    const seed = i * 13000;
+                    const types = ['charge', 'refund', 'adjustment', 'application_fee', 'stripe_fee'];
+                    return {
+                        id: generateStripeId('txn_', seed),
+                        amount: Math.floor(seededRandom(seed) * 10000) + 100,
+                        currency: 'usd',
+                        description: `${types[Math.abs(seed) % types.length]} transaction`,
+                        fee: Math.floor(seededRandom(seed + 1) * 300) + 30,
+                        net: Math.floor(seededRandom(seed + 2) * 9700) + 70,
+                        status: 'available',
+                        type: types[Math.abs(seed) % types.length],
+                        created: generateRealisticTimestamp(seed + 3, 90)
+                    };
+                }),
+                events: Array.from({length: Math.min(sampleSize, Math.floor(counts.charges * 0.8))}, (_, i) => {
+                    const seed = i * 14000;
+                    const eventTypes = ['charge.succeeded', 'payment_intent.succeeded', 'invoice.paid', 'customer.created', 'subscription.created'];
+                    return {
+                        id: generateStripeId('evt_', seed),
+                        type: eventTypes[Math.abs(seed) % eventTypes.length],
+                        data: {
+                            object: {
+                                id: generateStripeId('ch_', seed + 1),
+                                amount: Math.floor(seededRandom(seed) * 10000) + 1000
+                            }
+                        },
+                        created: generateRealisticTimestamp(seed + 2, 30),
+                        livemode: false,
+                        pending_webhooks: 1
+                    };
+                }),
+                setup_intents: Array.from({length: Math.min(sampleSize, Math.floor(counts.customers * 0.3))}, (_, i) => {
+                    const seed = i * 15000;
+                    return {
+                        id: generateStripeId('seti_', seed),
+                        customer: generateStripeId('cus_', Math.floor(seededRandom(seed) * counts.customers)),
+                        status: ['succeeded', 'requires_payment_method', 'requires_confirmation'][Math.abs(seed) % 3],
+                        usage: 'off_session',
+                        created: generateRealisticTimestamp(seed + 1, 60)
                     };
                 }),
                 _metadata: {
