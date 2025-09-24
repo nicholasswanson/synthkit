@@ -1568,6 +1568,11 @@
             updateDatasetStructure(businessType, stage);
             console.log('Calling updateIncludedMetrics');
             updateIncludedMetrics(businessType, stage);
+            
+            // Update integration prompts with new scenario data
+            console.log('Updating integration prompts');
+            updateIntegrationPromptsForScenario(businessType, stage);
+            
             console.log('updateConfiguration completed');
         }
 
@@ -1577,6 +1582,27 @@
         
         let currentDatasetUrl = null;
         let currentDatasetInfo = null;
+        
+        // Update integration prompts when scenario changes
+        function updateIntegrationPromptsForScenario(businessType, stage) {
+            // Generate new counts and metrics for the current scenario
+            const counts = getRealisticCounts(businessType, stage);
+            const patterns = getPersonaPatterns(businessType);
+            const comprehensiveDataset = generateComprehensiveDataset(businessType, stage, counts, patterns);
+            const includedMetrics = getIncludedMetrics(comprehensiveDataset, businessType, stage);
+            
+            // Update currentDatasetInfo with new scenario data
+            currentDatasetInfo = {
+                recordCounts: counts,
+                includedMetrics: includedMetrics,
+                businessType: businessType,
+                stage: stage,
+                filename: currentDatasetInfo ? currentDatasetInfo.filename : 'dataset.json'
+            };
+            
+            // Update the integration content with the new data
+            updateIntegrationContent('cursor');
+        }
         
         // Tab switching
         const tabs = ['cursor', 'v0', 'claude', 'codex', 'javascript'];
