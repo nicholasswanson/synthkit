@@ -15,3 +15,4 @@ export default defineConfig({
   target: 'es2020',
   external: ['react', 'vue'],
 });
+

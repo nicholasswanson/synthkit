@@ -66,3 +66,4 @@ function App() {
 console.log('React components created successfully!');
 console.log('useSynthkit:', typeof useSynthkit);
 console.log('useSynthkitData:', typeof useSynthkitData);
+

@@ -1,0 +1,46 @@
+
+---
+description: maintain dynamic and realistic architecture
+globs:
+alwaysApply: true
+---
+
+# CORE ARCHITECTURE RULES
+
+## Data Generation & Metrics System
+- NEVER modify realistic data volumes or structure
+- Base counts are sacred: checkout-ecommerce (25k customers, 150k charges), b2b-saas-subscriptions (5k customers, 12k subscriptions), etc.
+- Stage multipliers are fixed: early (0.1x), growth (1.0x), enterprise (20.0x)
+- 47 unique metrics total: 19 calculated + 28 synthesized with persona-aware filtering via METRIC_AVAILABILITY
+- SEASONALITY_PATTERNS provide realistic time series data (daily/weekly/monthly)
+- getIncludedMetrics() filters metrics based on business type availability
+- Amount ranges are business-specific and must match original patterns
+- Description patterns must be persona-specific and realistic
+
+## Stripe Products & Personas
+- 10 total products: 3 essential, 3 recommended, 4 optional with persona-specific recommendations
+- analyzeStripeProducts() determines product recommendations per persona
+- Product availability drives data object generation (charges, subscriptions, etc.)
+- PREDEFINED_PERSONAS define business context, entities, key features, user roles
+- ENHANCED_PERSONAS add Stripe analysis and data generation
+- Persona name maps to business type for data generation
+
+## Data Interconnection & Metadata
+- Generated data must be interconnected: customers→subscriptions→charges→invoices with referential integrity
+- _metadata.counts: realistic record counts per entity type
+- _metadata.includedMetrics: filtered metrics based on business type
+- _metadata.businessType: maps to persona for data generation
+- _metadata.stage: drives scaling multipliers
+
+## Integration & Performance
+- Integration prompts must reference actual generated data, not hardcoded values
+- Dataset URLs must be real GitHub Pages URLs, not local API endpoints
+- Use memoization for expensive calculations, generate data in chunks for large datasets
+- Maintain realistic counts, not optimized small counts
+- Keep clear separation of concerns: data generation in lib/, UI orchestration in page.tsx
+
+## ANTI-PATTERNS TO AVOID
+❌ Hardcode data volumes, skip persona-based filtering, use static metric lists, ignore stage scaling, break data relationships, use local API URLs in integration prompts, generate small datasets for performance, skip time series generation, ignore business-specific patterns, mix data generation with UI logic
+
+## VALIDATION CHECKLIST
+Before any changes, verify: data volumes match original realistic counts, stage multipliers applied correctly, metrics filtered by business type availability, Stripe products match persona recommendations, data relationships maintained, integration prompts reference actual data, metadata includes all required fields, performance optimizations don't reduce data quality, file structure maintains separation of concerns, persona logic drives all generation decisions

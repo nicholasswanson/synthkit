@@ -101,3 +101,4 @@ export interface SynthkitResult {
   status?: SynthkitStatus;
   debug?: SynthkitDebug;
 }
+

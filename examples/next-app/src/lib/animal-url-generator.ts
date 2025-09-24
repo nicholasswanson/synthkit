@@ -30,3 +30,4 @@ export function clearStoredDatasetUrl(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('synthkit-dataset-url');
 }
+

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <div id="test-output"></div>
+    
+    <script>
+        console.log('Script starting...');
+        
+        // Test basic function
+        function testFunction() {
+            console.log('testFunction called');
+            return 'Hello World';
+        }
+        
+        // Test DOM manipulation
+        function updateDisplay() {
+            console.log('updateDisplay called');
+            const container = document.getElementById('test-output');
+            if (container) {
+                container.innerHTML = '<p>Dynamic content loaded!</p>';
+                console.log('Content updated');
+            } else {
+                console.log('Container not found');
+            }
+        }
+        
+        // Test initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            updateDisplay();
+        });
+        
+        console.log('Script loaded');
+    </script>
+</body>
+</html>
