@@ -676,8 +676,8 @@
             if (counts.customers > 0) {
                 data.customers = Array.from({length: Math.min(3, counts.customers)}, (_, i) => ({
                     id: generateStripeId('cus_', i),
-                    name: generateRealisticName(seed, businessType),
-                    email: generateRealisticEmail(seed, businessType),
+                    name: generateRealisticName(i, businessType),
+                    email: generateRealisticEmail(i, businessType),
                     created: generateRealisticTimestamp(i, 365),
                     status: 'active'
                 }));
