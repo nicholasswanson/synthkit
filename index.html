@@ -188,7 +188,7 @@
 
             <!-- Integration Examples -->
             <div class="mb-6">
-                <h3 class="font-semibold text-gray-900 mb-3">Add this React Hook to your project root directory</h3>
+                <h3 class="font-semibold text-gray-900 mb-3">Download Dataset for Integration</h3>
                 <div class="flex flex-wrap gap-3">
                     <button id="download-hook" disabled class="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium btn-orange">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -196,7 +196,7 @@
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <path d="m7 10 5 5 5-5"></path>
                         </svg>
-                        useSynthkitDataset.ts
+                        Download Dataset JSON
                     </button>
                 </div>
             </div>
@@ -1679,61 +1679,66 @@
                                 <h4 class="font-semibold text-gray-900 mb-3">Cursor Integration Rules</h4>
                                 <pre class="text-sm text-gray-800 overflow-x-auto"><code>// Add this to your .cursorrules file
 When working with Synthkit data:
-- Use @synthkit/enhanced for data access
-- Import: import { getData } from '@synthkit/enhanced'
-- Access data: const result = await getData()
-- Data structure: result.data.customers, result.data.charges, etc.
-- Always handle loading states and errors
-- Use realistic data volumes (thousands of records)
-- Dataset URL: ${currentDatasetUrl}
+- Download the dataset JSON file from the site
+- Import the dataset directly into your project
+- Use the data without any external dependencies
+- Dataset includes: ${recordSummary}
 - Business Metrics: ${includedMetricsText}
-- Data Objects: ${recordSummary}
 - Stripe Data: Includes realistic Stripe objects (charges, subscriptions, invoices) with proper schema
-- Smart Caching: Automatic data caching with invalidation
 
 **Technical Integration:**
-1. **Install Enhanced** - \`npm install @synthkit/enhanced\`
-2. **Simple data access** - Use \`const result = await getData();\` for instant data
-3. **React integration** - Use \`const { data, loading, error, customers, charges } = useSynthkit();\`
-4. **Replace mock data** - Update components to use data from Enhanced instead of hardcoded values
-5. **Preserve existing UI** - Keep all current components and styling, only change the data source
-6. **Zero configuration** - No setup, no URLs, no environment variables needed
+1. **Download Dataset** - Click "Download Dataset JSON" to get the file
+2. **Import Dataset** - Add the JSON file to your project (e.g., \`data/dataset.json\`)
+3. **Use Data Directly** - Import and use without any hooks or API calls
+4. **Replace Mock Data** - Update components to use imported dataset instead of hardcoded values
+5. **Preserve Existing UI** - Keep all current components and styling, only change the data source
+6. **No Dependencies** - No npm packages, no URLs, no environment variables needed
 
 **Data Structure to Use:**
-\`\`\`javascript
-// Simple one-line data fetching
-const result = await getData();
-const { customers, charges, subscriptions, invoices, plans } = result.data;
+\`\`\javascript
+// Import the downloaded dataset
+import dataset from './data/dataset.json';
 
-// Or use React hook
-const { data, loading, error, customers, charges, subscriptions, invoices, plans } = useSynthkit();
-// Available: data.${Object.keys(recordCounts).join(', data.')}, data.businessMetrics
-// Stripe data: customers, charges, subscriptions, invoices, plans
+// Access data directly (no loading states needed)
+const { customers, charges, subscriptions, invoices, plans, metrics } = dataset;
+
+// Use in components
+function MyComponent() {
+  const recentCustomers = customers.slice(0, 10);
+  const mrr = metrics.find(m => m.name === 'Monthly Recurring Revenue')?.value;
+  
+  return (
+    <div>
+      <h1>Recent Customers: {recentCustomers.length}</h1>
+      <p>MRR: \${(mrr / 100).toFixed(0)}</p>
+    </div>
+  );
+}
 \`\`\`
 
 **Integration Steps:**
-1. Install Enhanced: \`npm install @synthkit/enhanced\`
-2. Import and use: \`import { getData } from '@synthkit/enhanced'\`
-3. Get data: \`const result = await getData();\`
-4. Access data: \`const { customers, charges, subscriptions, invoices, plans } = result.data;\`
-5. For React: \`import { useSynthkit } from '@synthkit/enhanced/react'\`
-6. Use hook: \`const { data, loading, error, customers, charges } = useSynthkit();\`
-7. Handle states: Show loading/error UI as needed
+1. Download dataset: Click "Download Dataset JSON" button
+2. Save file: Add to your project (e.g., \`src/data/dataset.json\`)
+3. Import data: \`import dataset from './data/dataset.json'\`
+4. Access data: \`const { customers, charges, subscriptions, invoices, plans, metrics } = dataset;\`
+5. Use in components: Replace mock data with dataset properties
+6. Handle formatting: Convert cents to dollars (\`amount / 100\`)
 
 **Stripe Integration Examples:**
-- Display customers: \`customers.slice(0, 10).map(customer => ...)\`
-- Show recent charges: \`charges.slice(0, 10).map(charge => ...)\`
-- List active subscriptions: \`subscriptions.filter(sub => sub.status === 'active')\`
-- Display recent invoices: \`invoices.slice(0, 5).map(invoice => ...)\`
-- Show subscription plans: \`plans.map(plan => ...)\`
+- Display customers: \`dataset.customers.slice(0, 10).map(customer => ...)\`
+- Show recent charges: \`dataset.charges.slice(0, 10).map(charge => ...)\`
+- List active subscriptions: \`dataset.subscriptions.filter(sub => sub.status === 'active')\`
+- Display recent invoices: \`dataset.invoices.slice(0, 5).map(invoice => ...)\`
+- Show subscription plans: \`dataset.plans.map(plan => ...)\`
+- Access metrics: \`dataset.metrics.find(m => m.name === 'Gross Payment Volume')\`
 - Format amounts: \`\${(charge.amount / 100).toFixed(0)}\` (round numbers)
 
-**Enhanced Features:**
-- Zero dependencies - works everywhere
-- Smart caching - automatic data caching
-- Environment detection - works in browser, Node, Deno, Bun
-- Always returns data - never breaks
-- Universal compatibility - any JavaScript environment
+**Benefits:**
+- Zero dependencies - no npm packages needed
+- Immediate data - no loading states or API calls
+- Complete dataset - includes all Stripe objects + calculated metrics
+- Realistic data - persona-specific with proper relationships
+- Offline ready - works without internet connection
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.</code></pre>
                             </div>
