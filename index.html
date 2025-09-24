@@ -1621,17 +1621,7 @@
             alert('URL copied to clipboard!');
         });
         
-        // Download dataset
-        document.getElementById('download-hook').addEventListener('click', () => {
-            if (currentDatasetUrl && currentDatasetInfo) {
-                const link = document.createElement('a');
-                link.href = currentDatasetUrl;
-                link.download = currentDatasetInfo.filename || 'dataset.json';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        });
+        // Download dataset functionality removed - no longer needed
         
         // Update integration content with COMPREHENSIVE PROMPTS (RESTORED FROM ORIGINAL)
         function updateIntegrationContent(tab) {
@@ -1933,10 +1923,13 @@ async function loadData() {
         }
         
         // Enable custom scenario generation
-        document.getElementById('custom-scenario').addEventListener('input', (e) => {
-            const generateBtn = document.getElementById('generate-custom');
-            generateBtn.disabled = !e.target.value.trim();
-        });
+        const customScenarioInput = document.getElementById('custom-scenario');
+        const generateCustomBtn = document.getElementById('generate-custom');
+        if (customScenarioInput && generateCustomBtn) {
+            customScenarioInput.addEventListener('input', (e) => {
+                generateCustomBtn.disabled = !e.target.value.trim();
+            });
+        }
         
         // Update configuration when settings change
         document.getElementById('scenario-select').addEventListener('change', updateConfiguration);
@@ -1979,8 +1972,12 @@ async function loadData() {
                 filename: filename
             };
             
-            // Update integration content
+            // Update integration content to show Cursor tab by default
             updateIntegrationContent('cursor');
+            
+            // Activate Cursor tab (it's already active by default with bg-white class)
+            // The tab switching is handled by the existing event listeners
+            
             console.log('Default dataset generated and integration content updated');
             
         } catch (error) {
