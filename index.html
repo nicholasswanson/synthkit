@@ -163,7 +163,7 @@
                     <div class="p-3 bg-gray-100 rounded-xl">
                         <div class="flex items-center gap-3">
                             <input type="text" id="url-input" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-white" readonly>
-                            <button id="copy-url" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200">Copy URL</button>
+                            <button id="copy-url" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-orange-100 text-orange-700 hover:bg-orange-200">Copy URL</button>
                         </div>
                     </div>
                 </div>
@@ -1646,12 +1646,12 @@
                 
                 // Show inline confirmation
                 button.textContent = '✓ Copied!';
-                button.className = button.className.replace('bg-blue-100 text-blue-700 hover:bg-blue-200', 'bg-green-100 text-green-700');
+                button.className = button.className.replace('bg-orange-100 text-orange-700 hover:bg-orange-200', 'bg-green-100 text-green-700');
                 
                 // Reset after 2 seconds
                 setTimeout(() => {
                     button.textContent = originalText;
-                    button.className = button.className.replace('bg-green-100 text-green-700', 'bg-blue-100 text-blue-700 hover:bg-blue-200');
+                    button.className = button.className.replace('bg-green-100 text-green-700', 'bg-orange-100 text-orange-700 hover:bg-orange-200');
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy: ', err);
