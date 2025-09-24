@@ -907,14 +907,14 @@
             const companySuffixes = ['Solutions', 'Systems', 'Technologies', 'Innovations', 'Enterprises', 'Corporation', 'Inc', 'LLC', 'Group', 'Partners', 'Associates', 'Consulting', 'Services', 'Labs', 'Works', 'Hub', 'Studio', 'Agency', 'Dynamics', 'Analytics', 'Platforms', 'Networks', 'Interactive', 'Digital', 'Media', 'Creative', 'Design', 'Development', 'Engineering', 'Research'];
             
             if (businessType === 'checkout-ecommerce' || businessType === 'food-delivery-platform' || businessType === 'consumer-fitness-app' || businessType === 'donation-marketplace') {
-                // Consumer names
-                const firstName = firstNames[Math.abs(seed * 17) % firstNames.length];
-                const lastName = lastNames[Math.abs(seed * 23 + 7) % lastNames.length];
+                // Consumer names - improved randomization
+                const firstName = firstNames[Math.abs(seed * 17 + 31) % firstNames.length];
+                const lastName = lastNames[Math.abs(seed * 23 + 47 + seed * 7) % lastNames.length];
                 return `${firstName} ${lastName}`;
             } else {
-                // Business names
-                const prefix = companyPrefixes[Math.abs(seed * 13) % companyPrefixes.length];
-                const suffix = companySuffixes[Math.abs(seed * 19 + 11) % companySuffixes.length];
+                // Business names - improved randomization
+                const prefix = companyPrefixes[Math.abs(seed * 13 + 29) % companyPrefixes.length];
+                const suffix = companySuffixes[Math.abs(seed * 19 + 43 + seed * 11) % companySuffixes.length];
                 return `${prefix} ${suffix}`;
             }
         }
