@@ -1560,6 +1560,7 @@
         }
 
         
+        
         // Update display when configuration changes
         function updateConfiguration() {
             console.log('updateConfiguration called');
@@ -1571,49 +1572,72 @@
                 hideAnalysisReasoning();
             }
             
-            // Handle custom scenarios
+            // Handle custom scenarios with analysis data
             let businessType = selectedScenario;
+            let customAnalysis = null;
+            
             if (selectedScenario.startsWith('custom-')) {
-                // For custom scenarios, we need to determine the business type
-                // This would be stored when the custom scenario was created
-                // For now, we'll use a default mapping or try to extract from the option text
-                const customOption = document.querySelector(`option[value="${selectedScenario}"]`);
-                if (customOption) {
-                    const optionText = customOption.textContent.toLowerCase();
-                    if (optionText.includes('saas') || optionText.includes('software') || optionText.includes('b2b')) {
-                        businessType = 'b2b-saas-subscriptions';
-                    } else if (optionText.includes('food') || optionText.includes('delivery') || optionText.includes('restaurant')) {
-                        businessType = 'food-delivery-platform';
-                    } else if (optionText.includes('fitness') || optionText.includes('workout') || optionText.includes('health')) {
-                        businessType = 'consumer-fitness-app';
-                    } else if (optionText.includes('invoice') || optionText.includes('billing') || optionText.includes('payment')) {
-                        businessType = 'b2b-invoicing';
-                    } else if (optionText.includes('property') || optionText.includes('rental') || optionText.includes('real estate')) {
-                        businessType = 'property-management-platform';
-                    } else if (optionText.includes('creator') || optionText.includes('content') || optionText.includes('influencer')) {
-                        businessType = 'creator-platform';
-                    } else if (optionText.includes('donation') || optionText.includes('charity') || optionText.includes('nonprofit')) {
-                        businessType = 'donation-marketplace';
-                    } else {
-                        businessType = 'checkout-ecommerce'; // default
-                    }
+                // Use stored custom analysis if available
+                customAnalysis = window.currentCustomAnalysis;
+                
+                if (customAnalysis) {
+                    // Extract business type from analysis
+                    businessType = customAnalysis.businessContext.type.toLowerCase()
+                        .replace(/s+/g, '-')
+                        .replace('b2b-saas-subscriptions', 'b2b-saas-subscriptions')
+                        .replace('checkout-e-commerce', 'checkout-ecommerce')
+                        .replace('food-delivery-platform', 'food-delivery-platform')
+                        .replace('consumer-fitness-app', 'consumer-fitness-app')
+                        .replace('b2b-invoicing', 'b2b-invoicing')
+                        .replace('property-management-platform', 'property-management-platform')
+                        .replace('creator-platform', 'creator-platform')
+                        .replace('donation-marketplace', 'donation-marketplace');
+                    
+                    console.log('Using custom analysis:', customAnalysis);
+                    console.log('Detected business type from analysis:', businessType);
                 } else {
-                    businessType = 'checkout-ecommerce'; // fallback
+                    // Fallback to keyword detection
+                    const customOption = document.querySelector(`option[value="${selectedScenario}"]`);
+                    if (customOption) {
+                        const optionText = customOption.textContent.toLowerCase();
+                        if (optionText.includes('saas') || optionText.includes('software') || optionText.includes('b2b')) {
+                            businessType = 'b2b-saas-subscriptions';
+                        } else if (optionText.includes('food') || optionText.includes('delivery') || optionText.includes('restaurant')) {
+                            businessType = 'food-delivery-platform';
+                        } else if (optionText.includes('fitness') || optionText.includes('workout') || optionText.includes('health')) {
+                            businessType = 'consumer-fitness-app';
+                        } else if (optionText.includes('invoice') || optionText.includes('billing') || optionText.includes('payment')) {
+                            businessType = 'b2b-invoicing';
+                        } else if (optionText.includes('property') || optionText.includes('rental') || optionText.includes('real estate')) {
+                            businessType = 'property-management-platform';
+                        } else if (optionText.includes('creator') || optionText.includes('content') || optionText.includes('influencer')) {
+                            businessType = 'creator-platform';
+                        } else if (optionText.includes('donation') || optionText.includes('charity') || optionText.includes('nonprofit')) {
+                            businessType = 'donation-marketplace';
+                        } else {
+                            businessType = 'checkout-ecommerce'; // default
+                        }
+                    } else {
+                        businessType = 'checkout-ecommerce'; // fallback
+                    }
                 }
             }
             
             console.log('Business type:', businessType, 'Stage:', stage);
             
+            // Store custom analysis for use in other functions
+            window.currentCustomAnalysis = customAnalysis;
+            
             console.log('Calling updateStripeProducts');
-            updateStripeProducts(businessType, stage);
+            updateStripeProducts(businessType, stage, customAnalysis);
             console.log('Calling updateDatasetStructure');
-            updateDatasetStructure(businessType, stage);
+            updateDatasetStructure(businessType, stage, customAnalysis);
             console.log('Calling updateIncludedMetrics');
-            updateIncludedMetrics(businessType, stage);
+            updateIncludedMetrics(businessType, stage, customAnalysis);
             
             // Update integration prompts with new scenario data
             console.log('Updating integration prompts');
-            updateIntegrationPromptsForScenario(businessType, stage);
+            updateIntegrationPromptsForScenario(businessType, stage, customAnalysis);
             
 
             
@@ -1627,8 +1651,9 @@
         let currentDatasetUrl = null;
         let currentDatasetInfo = null;
         
+        
         // Update integration prompts when scenario changes
-        function updateIntegrationPromptsForScenario(businessType, stage) {
+        function updateIntegrationPromptsForScenario(businessType, stage, customAnalysis = null) {
             // Generate new counts and metrics for the current scenario
             const counts = getRealisticCounts(businessType, stage);
             const patterns = getPersonaPatterns(businessType);
@@ -1654,7 +1679,8 @@
                 includedMetrics: includedMetrics,
                 businessType: businessType,
                 stage: stage,
-                filename: filename
+                filename: filename,
+                customAnalysis: customAnalysis // Include custom analysis in dataset info
             };
             
             // Update the URL input field
