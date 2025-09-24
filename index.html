@@ -163,7 +163,7 @@
                     <div class="p-3 bg-gray-100 rounded-xl">
                         <div class="flex items-center gap-3">
                             <input type="text" id="url-input" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-white" readonly>
-                            <button id="update-dataset" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:opacity-50" disabled>Update Dataset</button>
+                            <button id="copy-url" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200">Copy URL</button>
                         </div>
                     </div>
                 </div>
@@ -1567,13 +1567,7 @@
             console.log('Updating integration prompts');
             updateIntegrationPromptsForScenario(businessType, stage);
             
-            // Check if changes have been made and enable/disable Update Dataset button
-            const updateButton = document.getElementById('update-dataset');
-            if (updateButton) {
-                const hasChanges = (initialScenario !== null && initialStage !== null) && 
-                                 (businessType !== initialScenario || stage !== initialStage);
-                updateButton.disabled = !hasChanges;
-            }
+
             
             console.log('updateConfiguration completed');
         }
@@ -1584,8 +1578,6 @@
         
         let currentDatasetUrl = null;
         let currentDatasetInfo = null;
-        let initialScenario = null;
-        let initialStage = null;
         
         // Update integration prompts when scenario changes
         function updateIntegrationPromptsForScenario(businessType, stage) {
@@ -1645,57 +1637,31 @@
             });
         });
         
-        // Update Dataset button
-        document.getElementById('update-dataset').addEventListener('click', () => {
-            const scenario = document.getElementById('scenario-select').value;
-            const stage = document.getElementById('stage-select').value;
-            
-            // Generate new dataset with current settings
-            const counts = getRealisticCounts(scenario, stage);
-            const patterns = getPersonaPatterns(scenario);
-            const comprehensiveDataset = generateComprehensiveDataset(scenario, stage, counts, patterns);
-            const includedMetrics = getIncludedMetrics(comprehensiveDataset, scenario, stage);
-            
-            // Generate new filename
-            const scenarioId = document.getElementById('scenario-id').value;
-            const animals = ['cheetah', 'lion', 'eagle', 'tiger', 'wolf', 'bear', 'shark', 'dolphin', 'panther', 'leopard', 'jaguar', 'lynx', 'bobcat', 'cougar', 'puma', 'falcon', 'hawk', 'owl', 'raven', 'crow', 'swan', 'heron', 'egret', 'fox', 'coyote', 'jackal', 'hyena', 'mongoose', 'weasel', 'otter', 'seal', 'walrus', 'whale', 'orca', 'narwhal', 'beluga', 'elephant', 'rhino', 'hippo', 'giraffe', 'zebra', 'antelope', 'gazelle', 'buffalo', 'bison', 'yak', 'camel', 'llama', 'alpaca', 'deer'];
-            const timestamp = Date.now().toString().slice(-6);
-            const animal1 = animals[scenarioId % animals.length];
-            const animal2 = animals[(scenarioId * 7) % animals.length];
-            const filename = `${animal1}-${animal2}-${scenarioId}-${timestamp}.json`;
-            
-            // Create new dataset URL
-            const datasetJson = JSON.stringify(comprehensiveDataset, null, 2);
-            const blob = new Blob([datasetJson], { type: 'application/json' });
-            currentDatasetUrl = URL.createObjectURL(blob);
-            
-            // Update dataset info
-            currentDatasetInfo = {
-                recordCounts: counts,
-                includedMetrics: includedMetrics,
-                businessType: scenario,
-                stage: stage,
-                filename: filename
-            };
-            
-            // Update URL input field
-            const urlInput = document.getElementById('url-input');
-            if (urlInput) {
-                urlInput.value = currentDatasetUrl;
-            }
-            
-            // Update initial values to current values (no more changes)
-            initialScenario = scenario;
-            initialStage = stage;
-            
-            // Disable the button again
-            const updateButton = document.getElementById('update-dataset');
-            if (updateButton) {
-                updateButton.disabled = true;
-            }
-            
-            // Update integration content
-            updateIntegrationContent('cursor');
+        
+        // Copy URL with inline confirmation
+        document.getElementById('copy-url').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentDatasetUrl).then(() => {
+                const button = document.getElementById('copy-url');
+                const originalText = button.textContent;
+                
+                // Show inline confirmation
+                button.textContent = '✓ Copied!';
+                button.className = button.className.replace('bg-blue-100 text-blue-700 hover:bg-blue-200', 'bg-green-100 text-green-700');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.className = button.className.replace('bg-green-100 text-green-700', 'bg-blue-100 text-blue-700 hover:bg-blue-200');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const button = document.getElementById('copy-url');
+                button.textContent = '✗ Failed';
+                setTimeout(() => {
+                    button.textContent = 'Copy URL';
+                }, 2000);
+            });
         });
         
         // Download dataset functionality removed - no longer needed
@@ -2049,9 +2015,7 @@ async function loadData() {
                 filename: filename
             };
             
-            // Set initial scenario and stage for change tracking
-            initialScenario = defaultScenario;
-            initialStage = defaultStage;
+
             
             // Populate the dataset URL input field
             const urlInput = document.getElementById('url-input');
