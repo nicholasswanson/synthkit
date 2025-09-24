@@ -1083,8 +1083,8 @@
                     return charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0);
                 case 'Payment Success Rate':
                     const totalCharges = charges.length;
-                    const successfulCharges = charges.filter(c => c.status === 'succeeded').length;
-                    return totalCharges > 0 ? (successfulCharges / totalCharges * 100).toFixed(2) : 0;
+                    const successfulChargesCount = charges.filter(c => c.status === 'succeeded').length;
+                    return totalCharges > 0 ? (successfulChargesCount / totalCharges * 100).toFixed(2) : 0;
                 case 'Monthly Recurring Revenue':
                     return subscriptions.filter(s => s.status === 'active').reduce((sum, s) => sum + s.amount, 0);
                 case 'Customer Lifetime Value':
