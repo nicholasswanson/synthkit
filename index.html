@@ -2321,6 +2321,7 @@ async function loadData() {
             
             
             
+            
             generateCustomBtn.addEventListener('click', async () => {
                 const customPrompt = customScenarioInput.value.trim();
                 if (!customPrompt) return;
@@ -2339,6 +2340,12 @@ async function loadData() {
                     // Store the custom scenario data globally for later use
                     window.currentCustomScenario = customScenario;
                     
+                    // Store the custom scenario analysis for later use FIRST
+                    window.currentCustomAnalysis = customScenario.analysis;
+                    
+                    console.log('Stored custom analysis:', window.currentCustomAnalysis);
+                    console.log('Stored custom scenario:', window.currentCustomScenario);
+                    
                     // Display the analysis reasoning
                     displayAnalysisReasoning(customScenario.analysis, customPrompt);
                     
@@ -2347,9 +2354,6 @@ async function loadData() {
                     
                     // Update the configuration with the custom scenario
                     updateConfigurationWithCustom(customScenario);
-                    
-                    // Store the custom scenario analysis for later use
-                    window.currentCustomAnalysis = customScenario.analysis;
                     
                     // Clear the input
                     customScenarioInput.value = '';
