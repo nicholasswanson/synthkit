@@ -56,7 +56,7 @@
                 <!-- Header -->
                 <div class="text-center mb-8">
                     <div class="flex items-center justify-center mb-4">
-                        <img src="/synthkitlogo.png" alt="Synthkit" class="w-16 h-16" onerror="this.style.display='none'">
+                        <div class="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">S</div>
                     </div>
                     <p class="text-lg text-gray-600">Prototype with realistic, synthetic datasets</p>
                 </div>
@@ -186,27 +186,13 @@
                 </div>
             </div>
 
-            <!-- Integration Examples -->
-            <div class="mb-6">
-                <h3 class="font-semibold text-gray-900 mb-3">Download Dataset for Integration</h3>
-                <div class="flex flex-wrap gap-3">
-                    <button id="download-hook" disabled class="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-medium btn-orange">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                            <path d="M12 15V3"></path>
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <path d="m7 10 5 5 5-5"></path>
-                        </svg>
-                        Download Dataset JSON
-                    </button>
-                </div>
-            </div>
 
             <!-- Integration Content -->
             <div id="integration-content">
                 <div class="space-y-4">
-                    <div class="p-4 bg-yellow-100 rounded-xl">
-                        <p class="text-sm text-yellow-700">
-                            ⚠️ Please generate a dataset URL first by clicking "Generate Dataset URL" above to get integration code with the actual dataset.
+                    <div class="p-4 bg-blue-100 rounded-xl">
+                        <p class="text-sm text-blue-700">
+                            ✅ Dataset ready! Integration prompts are available below with your current configuration.
                         </p>
                     </div>
                 </div>
@@ -1738,7 +1724,6 @@ function MyComponent() {
 - Immediate data - no loading states or API calls
 - Complete dataset - includes all Stripe objects + calculated metrics
 - Realistic data - persona-specific with proper relationships
-- Offline ready - works without internet connection
 
 Focus on **direct implementation** - show me exactly how to modify my existing components to use this dataset.</code></pre>
                             </div>
@@ -1962,6 +1947,42 @@ async function loadData() {
         try {
             updateConfiguration();
             console.log('updateConfiguration called successfully');
+            
+            // Auto-generate dataset for default scenario
+            const defaultScenario = document.getElementById('scenario-select').value;
+            const defaultStage = document.getElementById('stage-select').value;
+            const defaultId = document.getElementById('scenario-id').value;
+            
+            // Generate filename
+            const animals = ['cheetah', 'lion', 'eagle', 'tiger', 'wolf', 'bear', 'shark', 'dolphin', 'panther', 'leopard', 'jaguar', 'lynx', 'bobcat', 'cougar', 'puma', 'falcon', 'hawk', 'owl', 'raven', 'crow', 'swan', 'heron', 'egret', 'fox', 'coyote', 'jackal', 'hyena', 'mongoose', 'weasel', 'otter', 'seal', 'walrus', 'whale', 'orca', 'narwhal', 'beluga', 'elephant', 'rhino', 'hippo', 'giraffe', 'zebra', 'antelope', 'gazelle', 'buffalo', 'bison', 'yak', 'camel', 'llama', 'alpaca', 'deer'];
+            const timestamp = Date.now().toString().slice(-6);
+            const animal1 = animals[defaultId % animals.length];
+            const animal2 = animals[(defaultId * 7) % animals.length];
+            const filename = `${animal1}-${animal2}-${defaultId}-${timestamp}.json`;
+            
+            // Generate comprehensive dataset data
+            const counts = getRealisticCounts(defaultScenario, defaultStage);
+            const patterns = getPersonaPatterns(defaultScenario);
+            const comprehensiveDataset = generateComprehensiveDataset(defaultScenario, defaultStage, counts, patterns);
+            const includedMetrics = getIncludedMetrics(comprehensiveDataset, defaultScenario, defaultStage);
+            
+            // Create data URL for immediate download
+            const datasetJson = JSON.stringify(comprehensiveDataset, null, 2);
+            const blob = new Blob([datasetJson], { type: 'application/json' });
+            currentDatasetUrl = URL.createObjectURL(blob);
+            
+            currentDatasetInfo = {
+                recordCounts: counts,
+                includedMetrics: includedMetrics,
+                businessType: defaultScenario,
+                stage: defaultStage,
+                filename: filename
+            };
+            
+            // Update integration content
+            updateIntegrationContent('cursor');
+            console.log('Default dataset generated and integration content updated');
+            
         } catch (error) {
             console.error('Error in updateConfiguration:', error);
         }
