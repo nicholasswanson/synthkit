@@ -615,8 +615,15 @@
             return now - secondsBack;
         }
 
+        // Store counts globally to ensure consistency across all surfaces
+        let globalCounts = null;
+        
         // Get realistic counts based on business type and stage (EXACT SAME LOGIC AS NEXT-APP)
         function getRealisticCounts(businessType, stage) {
+            // If we already have counts for this business type and stage, return them
+            if (globalCounts && globalCounts.businessType === businessType && globalCounts.stage === stage) {
+                return globalCounts.counts;
+            }
             const baseCounts = {
                 'checkout-ecommerce': { customers: 25000, subscriptions: 0, charges: 150000, invoices: 25000 },
                 'b2b-saas-subscriptions': { customers: 5000, subscriptions: 12000, charges: 25000, invoices: 5000 },
@@ -637,15 +644,32 @@
             };
             
             const stageMultiplier = stageMultipliers[stage] || 1.0;
-            const enterpriseVariation = stage === 'enterprise' ? (0.7 + Math.random() * 0.6) : 1.0;
             
-            return {
-                customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
-                invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + Math.random() * 0.4) * enterpriseVariation),
+            // Use seeded random for deterministic results
+            const seed = businessType.charCodeAt(0) + stage.charCodeAt(0);
+            const seededRandom = (offset) => {
+                const x = Math.sin(seed + offset) * 10000;
+                return x - Math.floor(x);
+            };
+            
+            const enterpriseVariation = stage === 'enterprise' ? (0.7 + seededRandom(1) * 0.6) : 1.0;
+            
+            const counts = {
+                customers: Math.floor(businessCounts.customers * stageMultiplier * (0.8 + seededRandom(2) * 0.4) * enterpriseVariation),
+                subscriptions: Math.floor(businessCounts.subscriptions * stageMultiplier * (0.8 + seededRandom(3) * 0.4) * enterpriseVariation),
+                charges: Math.floor(businessCounts.charges * stageMultiplier * (0.8 + seededRandom(4) * 0.4) * enterpriseVariation),
+                invoices: Math.floor(businessCounts.invoices * stageMultiplier * (0.8 + seededRandom(5) * 0.4) * enterpriseVariation),
                 plans: 5
             };
+            
+            // Store the counts globally
+            globalCounts = {
+                businessType: businessType,
+                stage: stage,
+                counts: counts
+            };
+            
+            return counts;
         }
 
         // Generate sample data objects (like the original next-app)
