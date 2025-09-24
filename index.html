@@ -1062,7 +1062,84 @@
             // Generate other Stripe objects...
             // (Similar pattern for payment_intents, refunds, disputes, products, prices, coupons, balance_transactions, events, setup_intents)
 
+            // Generate comprehensive metrics
+            const metrics = generateComprehensiveMetrics(dataset, businessType, stage);
+            dataset.metrics = metrics.map(metricName => ({
+                name: metricName,
+                value: calculateMetricValue(metricName, dataset, businessType, stage),
+                unit: getMetricUnit(metricName),
+                description: getMetricDescription(metricName)
+            }));
+
             return dataset;
+        }
+
+        // Calculate metric values based on dataset
+        function calculateMetricValue(metricName, dataset, businessType, stage) {
+            const { customers, charges, subscriptions, invoices } = dataset;
+            
+            switch (metricName) {
+                case 'Gross Payment Volume':
+                    return charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0);
+                case 'Payment Success Rate':
+                    const totalCharges = charges.length;
+                    const successfulCharges = charges.filter(c => c.status === 'succeeded').length;
+                    return totalCharges > 0 ? (successfulCharges / totalCharges * 100).toFixed(2) : 0;
+                case 'Monthly Recurring Revenue':
+                    return subscriptions.filter(s => s.status === 'active').reduce((sum, s) => sum + s.amount, 0);
+                case 'Customer Lifetime Value':
+                    const avgChargeValue = charges.filter(c => c.status === 'succeeded').reduce((sum, c) => sum + c.amount, 0) / Math.max(charges.length, 1);
+                    return Math.floor(avgChargeValue * 12); // Annual estimate
+                case 'Average Order Value':
+                    const successfulCharges = charges.filter(c => c.status === 'succeeded');
+                    return successfulCharges.length > 0 ? Math.floor(successfulCharges.reduce((sum, c) => sum + c.amount, 0) / successfulCharges.length) : 0;
+                case 'Active Subscribers':
+                    return subscriptions.filter(s => s.status === 'active').length;
+                case 'Refund Rate':
+                    const refunds = dataset.refunds || [];
+                    return charges.length > 0 ? ((refunds.length / charges.length) * 100).toFixed(2) : 0;
+                case 'Dispute Rate':
+                    const disputes = dataset.disputes || [];
+                    return charges.length > 0 ? ((disputes.length / charges.length) * 100).toFixed(2) : 0;
+                default:
+                    return Math.floor(Math.random() * 10000) + 1000; // Default realistic value
+            }
+        }
+
+        // Get metric unit
+        function getMetricUnit(metricName) {
+            const units = {
+                'Gross Payment Volume': 'cents',
+                'Payment Success Rate': '%',
+                'Monthly Recurring Revenue': 'cents',
+                'Customer Lifetime Value': 'cents',
+                'Average Order Value': 'cents',
+                'Active Subscribers': 'count',
+                'Refund Rate': '%',
+                'Dispute Rate': '%',
+                'Conversion Rate': '%',
+                'Churn Rate': '%',
+                'Customer Acquisition Cost': 'cents'
+            };
+            return units[metricName] || 'count';
+        }
+
+        // Get metric description
+        function getMetricDescription(metricName) {
+            const descriptions = {
+                'Gross Payment Volume': 'Total value of all successful payments',
+                'Payment Success Rate': 'Percentage of payments that succeeded',
+                'Monthly Recurring Revenue': 'Recurring revenue from active subscriptions',
+                'Customer Lifetime Value': 'Estimated total value of a customer over their lifetime',
+                'Average Order Value': 'Average amount per successful transaction',
+                'Active Subscribers': 'Number of customers with active subscriptions',
+                'Refund Rate': 'Percentage of transactions that were refunded',
+                'Dispute Rate': 'Percentage of transactions that resulted in disputes',
+                'Conversion Rate': 'Percentage of visitors who completed a purchase',
+                'Churn Rate': 'Percentage of subscribers who canceled their subscription',
+                'Customer Acquisition Cost': 'Average cost to acquire a new customer'
+            };
+            return descriptions[metricName] || 'Business metric';
         }
 
         // Generate persona-specific amounts and patterns
