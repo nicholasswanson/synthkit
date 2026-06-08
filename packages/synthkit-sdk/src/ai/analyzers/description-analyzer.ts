@@ -1,11 +1,11 @@
-import { ClaudeClient } from './claude-client';
+import { OpenAIClient } from './openai-client';
 import type { DescriptionAnalysis, AnalysisRequest, AnalysisResult } from '../types/analysis';
 
 export class DescriptionAnalyzer {
-  private claudeClient: ClaudeClient;
+  private openAIClient: OpenAIClient;
 
-  constructor(apiKey?: string) {
-    this.claudeClient = new ClaudeClient(apiKey);
+  constructor(apiKey?: string, model?: string) {
+    this.openAIClient = new OpenAIClient(apiKey, model);
   }
 
   async analyze(description: string, context?: AnalysisRequest['context']): Promise<AnalysisResult> {
@@ -27,8 +27,8 @@ export class DescriptionAnalyzer {
         context
       };
 
-      // Analyze with Claude
-      const analysis = await this.claudeClient.analyzeDescription(request);
+      // Analyze with OpenAI
+      const analysis = await this.openAIClient.analyzeDescription(request);
 
       // Post-process and validate
       const validatedAnalysis = this.validateAnalysis(analysis);

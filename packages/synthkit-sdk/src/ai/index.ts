@@ -1,6 +1,7 @@
 // Main exports
 export { DescriptionAnalyzer } from './analyzers/description-analyzer';
 export { ClaudeClient } from './analyzers/claude-client';
+export { OpenAIClient } from './analyzers/openai-client';
 export { ScenarioMatcher } from './analyzers/scenario-matcher';
 export { ScenarioGenerator } from './analyzers/scenario-generator';
 

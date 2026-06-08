@@ -13,7 +13,7 @@ pnpm dev
 
 - Node.js 20.11.0+ (see `.nvmrc` in root)
 - pnpm 9.0.0+
-- Anthropic API key (for AI features)
+- OpenAI API key (for AI features)
 
 ## Environment Setup
 
@@ -22,16 +22,17 @@ Copy the example environment file:
 cp .env.example .env.local
 ```
 
-Then edit `.env.local` and add your Anthropic API key:
+Then edit `.env.local` and add your OpenAI API key:
 ```bash
-ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
+OPENAI_API_KEY=sk-YOUR_KEY_HERE
 ```
 
 ### Environment Variables
 
 | Variable | Required | Description | Default |
 |----------|----------|-------------|---------|
-| `ANTHROPIC_API_KEY` | Yes (for AI features) | Your Anthropic API key for AI-powered features | - |
+| `OPENAI_API_KEY` | Yes (for AI features) | Your OpenAI API key for AI-powered features | - |
+| `OPENAI_MODEL` | No | OpenAI model used for scenario analysis | `gpt-4.1-mini` |
 | `NEXT_PUBLIC_API_URL` | No | Override the API URL | `http://localhost:3001` |
 | `NEXT_PUBLIC_DEBUG` | No | Enable debug logging | `false` |
 | `NEXT_PUBLIC_MSW_ENABLED` | No | Enable/disable MSW | `true` |
@@ -80,9 +81,9 @@ pnpm dev -- --port 3002
 ```
 
 ### API Key Issues
-Ensure your `.env.local` file contains a valid Anthropic API key:
+Ensure your `.env.local` file contains a valid OpenAI API key:
 ```bash
-ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE
+OPENAI_API_KEY=sk-YOUR_KEY_HERE
 ```
 
 ## Project Structure

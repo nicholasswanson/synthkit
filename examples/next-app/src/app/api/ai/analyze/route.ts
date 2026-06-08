@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const description = typeof body.description === 'string' ? body.description : '';
 
-    const analyzer = new DescriptionAnalyzer(process.env.ANTHROPIC_API_KEY);
+    const analyzer = new DescriptionAnalyzer(process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL);
     const result = await analyzer.analyze(description);
 
     return NextResponse.json(result, { status: result.success ? 200 : 400 });
