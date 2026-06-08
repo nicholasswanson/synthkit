@@ -67,7 +67,7 @@ jobs:
         with:
           commit_message: "Add generated dataset for ${{ github.event.client_payload.businessType || github.event.inputs.businessType || 'b2b-saas-subscriptions' }} (${{ github.event.client_payload.stage || github.event.inputs.stage || 'growth' }})"
           branch: main
-          file_pattern: 'datasets/*.json examples/next-app/public/datasets/*.json'
+          file_pattern: 'datasets/*.json'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
