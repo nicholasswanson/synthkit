@@ -34,6 +34,9 @@ on:
         default: '12345'
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   generate:
     runs-on: ubuntu-22.04
