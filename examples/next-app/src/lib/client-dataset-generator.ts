@@ -96,12 +96,13 @@ async function waitForPublishedDataset(url: string): Promise<boolean> {
 
   while (Date.now() - startedAt < DATASET_PUBLISH_TIMEOUT_MS) {
     try {
-      const response = await fetch(url, {
-        method: 'HEAD',
+      const response = await fetch(`/api/dataset/status?url=${encodeURIComponent(url)}`, {
         cache: 'no-store',
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.ready) {
         return true;
       }
     } catch (error) {
