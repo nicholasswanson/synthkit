@@ -13,6 +13,13 @@ import { generateRealisticStripeData } from '../examples/next-app/src/lib/realis
 import { generateMetrics } from '../examples/next-app/src/lib/metrics-generator.ts';
 import { calculateBusinessMetricsFromStripeData } from '../examples/next-app/src/lib/business-metrics-calculator.ts';
 
+const PUBLISH_RECORD_LIMITS = {
+  customers: 5000,
+  subscriptions: 5000,
+  charges: 25000,
+  invoices: 5000,
+};
+
 // Animal names for URL generation
 const ANIMALS = [
   'cheetah', 'lion', 'eagle', 'tiger', 'wolf', 'bear', 'shark', 'dolphin',
@@ -40,8 +47,9 @@ async function generateDataset(businessType, stage, scenarioId, requestedFilenam
   console.log(`Generating dataset for ${businessType} (${stage}) with ID ${scenarioId}`);
   
   try {
-    // Generate the full realistic dataset
-    const fullRealisticData = generateRealisticStripeData(businessType, stage);
+    // Keep published datasets below GitHub's 100 MB file limit while preserving
+    // realistic relationships between Stripe objects.
+    const fullRealisticData = generateRealisticStripeData(businessType, stage, PUBLISH_RECORD_LIMITS);
     
     // Add business metrics and comprehensive metrics
     const comprehensiveMetrics = generateMetrics(fullRealisticData, businessType, stage);
@@ -50,7 +58,11 @@ async function generateDataset(businessType, stage, scenarioId, requestedFilenam
     const dataset = {
       ...fullRealisticData,
       businessMetrics,
-      metrics: comprehensiveMetrics
+      metrics: comprehensiveMetrics,
+      _metadata: {
+        ...fullRealisticData._metadata,
+        publishLimits: PUBLISH_RECORD_LIMITS,
+      },
     };
     
     // Generate URL
