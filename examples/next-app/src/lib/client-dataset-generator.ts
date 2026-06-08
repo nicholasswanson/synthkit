@@ -14,6 +14,9 @@ export interface DatasetGenerationResult {
   error?: string;
 }
 
+const DATASET_PUBLISH_TIMEOUT_MS = 8 * 60 * 1000;
+const DATASET_PUBLISH_POLL_MS = 10 * 1000;
+
 // GitHub API configuration
 const GITHUB_OWNER = 'nicholasswanson';
 const GITHUB_REPO = 'synthkit';
@@ -84,6 +87,33 @@ async function uploadToGitHub(dataset: any, filename: string): Promise<boolean> 
   }
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForPublishedDataset(url: string): Promise<boolean> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < DATASET_PUBLISH_TIMEOUT_MS) {
+    try {
+      const response = await fetch(url, {
+        method: 'HEAD',
+        cache: 'no-store',
+      });
+
+      if (response.ok) {
+        return true;
+      }
+    } catch (error) {
+      console.warn('Dataset URL is not published yet:', error);
+    }
+
+    await delay(DATASET_PUBLISH_POLL_MS);
+  }
+
+  return false;
+}
+
 export async function generateAndPublishDataset(params: DatasetGenerationParams): Promise<DatasetGenerationResult> {
   try {
     console.log('Triggering dataset generation with params:', params);
@@ -99,6 +129,16 @@ export async function generateAndPublishDataset(params: DatasetGenerationParams)
     const data = await response.json();
     
     if (response.ok && data.success && data.url) {
+      const isPublished = await waitForPublishedDataset(data.url);
+
+      if (!isPublished) {
+        return {
+          success: false,
+          url: data.url,
+          error: `Dataset generation started, but GitHub Pages has not published it yet. Try again shortly: ${data.url}`,
+        };
+      }
+
       return {
         success: true,
         url: data.url,

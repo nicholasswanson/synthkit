@@ -27,11 +27,16 @@ jobs:
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p page-artifact
+          cp -R datasets page-artifact/datasets
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./
+          path: ./page-artifact
           
       - name: Deploy to GitHub Pages
         id: deployment
