@@ -3,9 +3,6 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@synthkit/client', '@synthkit/sdk'],
   
-  // Static export configuration for GitHub Pages
-  output: 'export',
-  trailingSlash: true,
   images: {
     unoptimized: true
   },

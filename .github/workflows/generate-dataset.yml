@@ -46,18 +46,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
           
       - name: Generate dataset
         id: generate
         run: |
-          node scripts/generate-dataset.js ${{ github.event.inputs.businessType || 'b2b-saas-subscriptions' }} ${{ github.event.inputs.stage || 'growth' }} ${{ github.event.inputs.scenarioId || '12345' }}
+          pnpm exec tsx scripts/generate-dataset.js \
+            "${{ github.event.client_payload.businessType || github.event.inputs.businessType || 'b2b-saas-subscriptions' }}" \
+            "${{ github.event.client_payload.stage || github.event.inputs.stage || 'growth' }}" \
+            "${{ github.event.client_payload.scenarioId || github.event.inputs.scenarioId || '12345' }}" \
+            "${{ github.event.client_payload.filename || '' }}"
           
       - name: Commit and push dataset
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Add generated dataset for ${{ github.event.inputs.businessType || 'b2b-saas-subscriptions' }} (${{ github.event.inputs.stage || 'growth' }})"
+          commit_message: "Add generated dataset for ${{ github.event.client_payload.businessType || github.event.inputs.businessType || 'b2b-saas-subscriptions' }} (${{ github.event.client_payload.stage || github.event.inputs.stage || 'growth' }})"
           branch: main
-          file_pattern: 'datasets/*.json'
+          file_pattern: 'datasets/*.json examples/next-app/public/datasets/*.json'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

@@ -86,41 +86,28 @@ async function uploadToGitHub(dataset: any, filename: string): Promise<boolean> 
 
 export async function generateAndPublishDataset(params: DatasetGenerationParams): Promise<DatasetGenerationResult> {
   try {
-    console.log('Triggering GitHub Actions dataset generation with params:', params);
-    
-    // Trigger GitHub Actions workflow
-    const response = await fetch('https://api.github.com/repos/nicholasswanson/synthkit/dispatches', {
+    console.log('Triggering dataset generation with params:', params);
+
+    const response = await fetch('/api/dataset/generate', {
       method: 'POST',
       headers: {
-        'Authorization': `token ${process.env.NEXT_PUBLIC_SYNTHKIT_TOKEN}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'Synthkit-Dataset-Generator'
       },
-      body: JSON.stringify({
-        event_type: 'generate-dataset',
-        client_payload: {
-          businessType: params.businessType,
-          stage: params.stage,
-          scenarioId: params.scenarioId
-        }
-      })
+      body: JSON.stringify(params)
     });
+
+    const data = await response.json();
     
-    if (response.ok) {
-      // Generate expected URL (same logic as before)
-      const url = generateDatasetUrl(params.scenarioId);
-      
+    if (response.ok && data.success && data.url) {
       return {
         success: true,
-        url,
-        message: 'Dataset generation started. It will be available shortly at the URL above.'
+        url: data.url,
       };
     } else {
-      const errorData = await response.json();
-      console.error('GitHub Actions trigger failed:', errorData);
+      console.error('Dataset generation trigger failed:', data);
       return {
         success: false,
-        error: `Failed to trigger dataset generation: ${response.status} ${response.statusText}`
+        error: data.error || `Failed to trigger dataset generation: ${response.status} ${response.statusText}`
       };
     }
   } catch (error) {

@@ -1096,11 +1096,11 @@ export default function Home() {
         storeDatasetUrl(result.url);
         setGenerationProgress('Dataset generation started! It will be available shortly at the URL above.');
       } else {
-        setGenerationProgress('Failed to start dataset generation.');
+        setGenerationProgress(result.error || 'Failed to start dataset generation.');
       }
     } catch (error) {
       console.error('Failed to publish dataset:', error);
-      setGenerationProgress('Error during dataset generation.');
+      setGenerationProgress(error instanceof Error ? error.message : 'Error during dataset generation.');
     } finally {
       setIsPublishing(false);
       setIsGeneratingDataset(false);

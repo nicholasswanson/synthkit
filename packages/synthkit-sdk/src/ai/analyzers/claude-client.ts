@@ -16,6 +16,11 @@ export class ClaudeClient {
 
   private async initializeClient(): Promise<void> {
     if (!this.client) {
+      if (!this.apiKey) {
+        this.client = this.createMockClient();
+        return;
+      }
+
       try {
         // Try to dynamically import Anthropic SDK
         const anthropicModule = await eval('import("@anthropic-ai/sdk")');

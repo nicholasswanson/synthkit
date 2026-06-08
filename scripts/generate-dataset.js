@@ -9,9 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Import the generation functions (we'll need to adapt these for Node.js)
-import { generateRealisticStripeData } from '../examples/next-app/src/lib/realistic-stripe-generator.js';
-import { generateMetrics } from '../examples/next-app/src/lib/metrics-generator.js';
-import { calculateBusinessMetricsFromStripeData } from '../examples/next-app/src/lib/business-metrics-calculator.js';
+import { generateRealisticStripeData } from '../examples/next-app/src/lib/realistic-stripe-generator.ts';
+import { generateMetrics } from '../examples/next-app/src/lib/metrics-generator.ts';
+import { calculateBusinessMetricsFromStripeData } from '../examples/next-app/src/lib/business-metrics-calculator.ts';
 
 // Animal names for URL generation
 const ANIMALS = [
@@ -24,15 +24,19 @@ const ANIMALS = [
   'buffalo', 'bison', 'yak', 'camel', 'llama', 'alpaca', 'deer'
 ];
 
-function generateDatasetUrl(scenarioId) {
+function generateDatasetUrl(scenarioId, requestedFilename) {
+  if (requestedFilename) {
+    return `https://nicholasswanson.github.io/synthkit/datasets/${requestedFilename}`;
+  }
+
   const timestamp = Date.now().toString().slice(-6);
   const animal1 = ANIMALS[scenarioId % ANIMALS.length];
   const animal2 = ANIMALS[(scenarioId * 7) % ANIMALS.length];
   const filename = `${animal1}-${animal2}-${scenarioId}-${timestamp}.json`;
-  return `https://raw.githubusercontent.com/nicholasswanson/synthkit/main/datasets/${filename}`;
+  return `https://nicholasswanson.github.io/synthkit/datasets/${filename}`;
 }
 
-async function generateDataset(businessType, stage, scenarioId) {
+async function generateDataset(businessType, stage, scenarioId, requestedFilename) {
   console.log(`Generating dataset for ${businessType} (${stage}) with ID ${scenarioId}`);
   
   try {
@@ -50,17 +54,23 @@ async function generateDataset(businessType, stage, scenarioId) {
     };
     
     // Generate URL
-    const url = generateDatasetUrl(scenarioId);
+    const url = generateDatasetUrl(scenarioId, requestedFilename);
     const filename = url.split('/').pop();
     
     // Save dataset to file
-    const datasetsDir = path.join(__dirname, '../examples/next-app/public/datasets');
+    const datasetsDir = path.join(__dirname, '../datasets');
     if (!fs.existsSync(datasetsDir)) {
       fs.mkdirSync(datasetsDir, { recursive: true });
     }
     
     const filePath = path.join(datasetsDir, filename);
     fs.writeFileSync(filePath, JSON.stringify(dataset, null, 2));
+
+    const publicDatasetsDir = path.join(__dirname, '../examples/next-app/public/datasets');
+    if (!fs.existsSync(publicDatasetsDir)) {
+      fs.mkdirSync(publicDatasetsDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(publicDatasetsDir, filename), JSON.stringify(dataset, null, 2));
     
     console.log(`Dataset saved to: ${filePath}`);
     console.log(`Dataset URL: ${url}`);
@@ -85,12 +95,12 @@ async function main() {
   const args = process.argv.slice(2);
   
   if (args.length < 3) {
-    console.error('Usage: node generate-dataset.js <businessType> <stage> <scenarioId>');
+    console.error('Usage: tsx scripts/generate-dataset.js <businessType> <stage> <scenarioId> [filename]');
     process.exit(1);
   }
   
-  const [businessType, stage, scenarioId] = args;
-  const result = await generateDataset(businessType, stage, parseInt(scenarioId));
+  const [businessType, stage, scenarioId, filename] = args;
+  const result = await generateDataset(businessType, stage, parseInt(scenarioId), filename);
   
   if (result.success) {
     console.log('✅ Dataset generation completed successfully');
