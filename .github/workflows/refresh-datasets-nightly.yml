@@ -1,0 +1,84 @@
+name: Refresh Pre-Built Datasets Nightly
+
+on:
+  schedule:
+    # 07:00 UTC daily — gives "yesterday" data for users loading throughout the day.
+    - cron: '0 7 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refresh-datasets-nightly
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-22.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Refresh all pre-built scenario datasets
+        run: pnpm exec tsx scripts/refresh-pre-built-datasets.js
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p page-artifact
+          cp -R datasets page-artifact/datasets
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./page-artifact
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Publish snapshot to orphan datasets-nightly branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SNAPSHOT_DIR="$(mktemp -d)"
+          cp datasets/scenario-*-12345.json "$SNAPSHOT_DIR/"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git checkout --orphan datasets-nightly
+          git rm -rf --cached . >/dev/null
+          # Wipe the working tree so only the snapshot lands on the orphan branch.
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name 'datasets' \
+            -exec rm -rf {} +
+          rm -rf datasets
+          mkdir -p datasets
+          cp "$SNAPSHOT_DIR"/*.json datasets/
+
+          git add datasets
+          git commit -m "Nightly refresh $(date -u +%Y-%m-%d)"
+          git push --force origin datasets-nightly
