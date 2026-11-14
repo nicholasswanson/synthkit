@@ -1,0 +1,17 @@
+{
+  "id": "scenario-test-admin-growth-12345",
+  "type": "scenario",
+  "data": {
+    "test": "data"
+  },
+  "metadata": {
+    "createdAt": "2025-09-18T23:19:50.288Z",
+    "checksum": "98266f5431b9dc60860610c5122743b3",
+    "scenario": {
+      "category": "test",
+      "role": "admin",
+      "stage": "growth",
+      "id": 12345
+    }
+  }
+}
